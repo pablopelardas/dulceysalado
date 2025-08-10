@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet new:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(find:*)",
+      "Bash(dotnet build)",
+      "Bash(ls:*)",
+      "Bash(csc:*)",
+      "Bash(./TestPrices.exe)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet:*)",
+      "Bash(grep:*)",
+      "Bash(export ASPNETCORE_ENVIRONMENT=Development)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": []
+  }
+}

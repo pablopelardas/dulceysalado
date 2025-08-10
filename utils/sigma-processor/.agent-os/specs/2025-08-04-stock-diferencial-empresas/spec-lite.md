@@ -1,0 +1,3 @@
+# Spec Summary (Lite)
+
+Extender el procesador Gecom para incluir un tercer archivo CSV con stock diferencial por empresa, donde cada columna mapea a IDs específicos de empresa en DistriCatalogo. El procesador manejará tres archivos simultáneamente (productos, precios, stocks) y enviará un DTO extendido con array de stocks por empresa a la API, reutilizando la lógica existente de limpieza de decimales.
