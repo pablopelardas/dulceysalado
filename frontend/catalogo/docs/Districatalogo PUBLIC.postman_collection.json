@@ -1,0 +1,317 @@
+{
+	"info": {
+		"_postman_id": "4fffca10-ec0b-484c-9e96-dd0e6d4b273e",
+		"name": "Districatalogo PUBLIC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19676769",
+		"_collection_link": "https://interstellar-capsule-686999.postman.co/workspace/DistriCatalogo~395f09fa-f32c-44ae-bf8a-a7df616dc173/collection/19676769-4fffca10-ec0b-484c-9e96-dd0e6d4b273e?action=share&source=collection_link&creator=19676769"
+	},
+	"item": [
+		{
+			"name": "api",
+			"item": [
+				{
+					"name": "catalog",
+					"item": [
+						{
+							"name": "categorias",
+							"item": [
+								{
+									"name": "/api/catalog/categorias",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "text/plain"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/catalog/categorias?empresaId=1",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"catalog",
+												"categorias"
+											],
+											"query": [
+												{
+													"key": "empresaId",
+													"value": "1"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "text/plain"
+													},
+													{
+														"key": "Authorization",
+														"value": "<API Key>",
+														"description": "Added as a part of security scheme: apikey"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/catalog/categorias?empresaId=-54772849",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"catalog",
+														"categorias"
+													],
+													"query": [
+														{
+															"key": "empresaId",
+															"value": "-54772849"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"categorias\": [\n    {\n      \"id\": -93170828,\n      \"codigo_rubro\": 10394871,\n      \"nombre\": \"consequat do laboris\",\n      \"descripcion\": \"sint exercitation incididunt\",\n      \"icono\": \"pariatur labore i\",\n      \"color\": \"ex commodo\",\n      \"orden\": 59841175,\n      \"product_count\": 22574201\n    },\n    {\n      \"id\": 95193878,\n      \"codigo_rubro\": -6075889,\n      \"nombre\": \"velit esse Excepteur\",\n      \"descripcion\": \"Duis eu quis\",\n      \"icono\": \"exercitation eiusmod irure consequat\",\n      \"color\": \"qui est ea\",\n      \"orden\": -81541999,\n      \"product_count\": -51125602\n    }\n  ]\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "empresa",
+							"item": [
+								{
+									"name": "/api/catalog/empresa",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "text/plain"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/catalog/empresa?empresaId=38678449",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"catalog",
+												"empresa"
+											],
+											"query": [
+												{
+													"key": "empresaId",
+													"value": "38678449"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "text/plain"
+													},
+													{
+														"key": "Authorization",
+														"value": "<API Key>",
+														"description": "Added as a part of security scheme: apikey"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/api/catalog/empresa?empresaId=38678449",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"catalog",
+														"empresa"
+													],
+													"query": [
+														{
+															"key": "empresaId",
+															"value": "38678449"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"id\": -37632597,\n  \"codigo\": \"Lorem\",\n  \"nombre\": \"ex anim ea\",\n  \"razon_social\": \"sunt\",\n  \"telefono\": \"pari\",\n  \"email\": \"dolore Ut\",\n  \"direccion\": \"Ut Duis Lor\",\n  \"logo_url\": \"tempor\",\n  \"colores_tema\": \"dolor nisi reprehenderit deserunt\",\n  \"favicon_url\": \"offi\",\n  \"dominio_personalizado\": \"dolore reprehenderi\",\n  \"url_whatsapp\": \"commodo\",\n  \"url_facebook\": \"irure ipsum dolore\",\n  \"url_instagram\": \"fugiat ipsum\",\n  \"mostrar_precios\": true,\n  \"mostrar_stock\": false,\n  \"permitir_pedidos\": true,\n  \"productos_por_pagina\": -70443091,\n  \"plan\": \"moll\",\n  \"activa\": false\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "/api/catalog",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "text/plain"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/catalog?empresaId=1&listaPrecioId=1&page=1&pageSize=20",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"catalog"
+									],
+									"query": [
+										{
+											"key": "empresaId",
+											"value": "1"
+										},
+										{
+											"key": "listaPrecioId",
+											"value": "1"
+										},
+										{
+											"key": "categoria",
+											"value": "in in exercitation quis esse",
+											"disabled": true
+										},
+										{
+											"key": "busqueda",
+											"value": "in in exercitation quis esse",
+											"disabled": true
+										},
+										{
+											"key": "destacados",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "codigoRubro",
+											"value": "-54772849",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "pageSize",
+											"value": "20"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "text/plain"
+											},
+											{
+												"key": "Authorization",
+												"value": "<API Key>",
+												"description": "Added as a part of security scheme: apikey"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/api/catalog?empresaId=-54772849&listaPrecioId=-54772849&categoria=in in exercitation quis esse&busqueda=in in exercitation quis esse&destacados=true&codigoRubro=-54772849&page=1&pageSize=20",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"catalog"
+											],
+											"query": [
+												{
+													"key": "empresaId",
+													"value": "-54772849"
+												},
+												{
+													"key": "listaPrecioId",
+													"value": "-54772849"
+												},
+												{
+													"key": "categoria",
+													"value": "in in exercitation quis esse"
+												},
+												{
+													"key": "busqueda",
+													"value": "in in exercitation quis esse"
+												},
+												{
+													"key": "destacados",
+													"value": "true"
+												},
+												{
+													"key": "codigoRubro",
+													"value": "-54772849"
+												},
+												{
+													"key": "page",
+													"value": "1"
+												},
+												{
+													"key": "pageSize",
+													"value": "20"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"productos\": [\n    {\n      \"codigo\": \"aliqua\",\n      \"nombre\": \"ad\",\n      \"descripcion\": \"fugiat cupidatat\",\n      \"descripcion_corta\": \"cons\",\n      \"precio\": -86595368.25674982,\n      \"destacado\": true,\n      \"imagen_urls\": [\n        \"occaecat\",\n        \"aute\"\n      ],\n      \"stock\": 84409595,\n      \"tags\": [\n        \"ex magna sed in\",\n        \"sint ullamco proide\"\n      ],\n      \"marca\": \"pariatur tempor\",\n      \"unidad\": \"ut quis irure\",\n      \"codigo_barras\": \"nulla ad\",\n      \"codigo_rubro\": 26435099,\n      \"imagen_alt\": \"sint velit\",\n      \"tipo_producto\": \"adipisicing proident nulla sit\"\n    },\n    {\n      \"codigo\": \"enim aliqua\",\n      \"nombre\": \"ipsum quis dolore\",\n      \"descripcion\": \"nisi pariatur consectetur aliquip magna\",\n      \"descripcion_corta\": \"incididunt in et sit\",\n      \"precio\": 49287421.74903965,\n      \"destacado\": false,\n      \"imagen_urls\": [\n        \"ea dolore laboris in\",\n        \"nulla in cupidatat consequat\"\n      ],\n      \"stock\": 42410503,\n      \"tags\": [\n        \"irure proident sint commodo\",\n        \"sit eiusmod adipisicing culpa sint\"\n      ],\n      \"marca\": \"Excepteur\",\n      \"unidad\": \"magna eu dolor\",\n      \"codigo_barras\": \"proident tempor\",\n      \"codigo_rubro\": 30477809,\n      \"imagen_alt\": \"sed ipsum\",\n      \"tipo_producto\": \"fugiat elit culpa\"\n    }\n  ],\n  \"total_count\": 54248309,\n  \"page\": -94831725,\n  \"page_size\": -64161723,\n  \"total_pages\": 80225530,\n  \"categorias\": [\n    {\n      \"id\": -25497875,\n      \"codigo_rubro\": -90431715,\n      \"nombre\": \"consectetur pariatur ad non proident\",\n      \"descripcion\": \"nostrud elit laborum ut\",\n      \"icono\": \"Duis cillum in tempor aute\",\n      \"color\": \"occaecat nostrud\",\n      \"orden\": 84596461,\n      \"product_count\": 35453903\n    },\n    {\n      \"id\": -35449596,\n      \"codigo_rubro\": 69680723,\n      \"nombre\": \"do culpa\",\n      \"descripcion\": \"commodo minim adipisicing et\",\n      \"icono\": \"Excepteur aute id\",\n      \"color\": \"aute\",\n      \"orden\": -76432994,\n      \"product_count\": 77167052\n    }\n  ]\n}"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

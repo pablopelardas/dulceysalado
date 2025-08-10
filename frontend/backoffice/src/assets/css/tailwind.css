@@ -1,0 +1,90 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+:root {
+  --ui-primary: var(--ui-color-primary-700);
+  
+  /* Variables CSS personalizadas para modo claro */
+  --ui-bg-primary: theme('colors.white');
+  --ui-bg-secondary: theme('colors.gray.50');
+  --ui-bg-tertiary: theme('colors.gray.100');
+  --ui-text-primary: theme('colors.gray.900');
+  --ui-text-secondary: theme('colors.gray.600');
+  --ui-text-tertiary: theme('colors.gray.500');
+  --ui-border: theme('colors.gray.200');
+  --ui-border-hover: theme('colors.gray.300');
+  --ui-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.dark {
+  --ui-primary: var(--ui-color-primary-200);
+  
+  /* Variables CSS personalizadas para modo oscuro */
+  --ui-bg-primary: theme('colors.gray.800');
+  --ui-bg-secondary: theme('colors.gray.900');
+  --ui-bg-tertiary: theme('colors.gray.700');
+  --ui-text-primary: theme('colors.gray.100');
+  --ui-text-secondary: theme('colors.gray.300');
+  --ui-text-tertiary: theme('colors.gray.400');
+  --ui-border: theme('colors.gray.700');
+  --ui-border-hover: theme('colors.gray.600');
+  --ui-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+}
+
+/* Utilidades adicionales para transiciones suaves */
+.theme-transition {
+  transition: background-color 0.2s ease-in-out, 
+              border-color 0.2s ease-in-out, 
+              color 0.2s ease-in-out;
+}
+
+/* Clases utilitarias que usan las variables CSS */
+.bg-ui-primary {
+  background-color: var(--ui-bg-primary);
+}
+
+.bg-ui-secondary {
+  background-color: var(--ui-bg-secondary);
+}
+
+.bg-ui-tertiary {
+  background-color: var(--ui-bg-tertiary);
+}
+
+.text-ui-primary {
+  color: var(--ui-text-primary);
+}
+
+.text-ui-secondary {
+  color: var(--ui-text-secondary);
+}
+
+.text-ui-tertiary {
+  color: var(--ui-text-tertiary);
+}
+
+.border-ui {
+  border-color: var(--ui-border);
+}
+
+.border-ui-hover:hover {
+  border-color: var(--ui-border-hover);
+}
+
+.shadow-ui {
+  box-shadow: var(--ui-shadow);
+}
+
+/*
+Set the default cursor for buttons.
+*/
+button,
+[role="button"] {
+  cursor: pointer;
+}
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+:disabled {
+  cursor: default;
+}

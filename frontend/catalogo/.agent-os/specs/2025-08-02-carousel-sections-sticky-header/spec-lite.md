@@ -1,0 +1,3 @@
+# Spec Summary (Lite)
+
+Implementar secciones de carrusel automático para "Novedades" y "Ofertas" que consuman endpoints específicos de API, posicionadas entre la búsqueda y las categorías. Incluir header sticky que se reduce a 80px al hacer scroll manteniendo logo, búsqueda y carrito. Carruseles muestran 4 productos en desktop y 1 en mobile, con rotación automática de 3 segundos, controles manuales y pausa en hover/interacción.
