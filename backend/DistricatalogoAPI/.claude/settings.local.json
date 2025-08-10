@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(dotnet build)",
+      "Bash(dotnet clean:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(mv:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(touch:*)",
+      "Bash(sudo rm:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(awk:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet --version)",
+      "Bash(ls:*)",
+      "Bash(dotnet test:*)",
+      "Bash(timeout 30 dotnet test /mnt/d/working/distri/DistriCatalogoAPI/DistriCatalogoAPI.sln --verbosity normal)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(timeout:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "WebFetch(domain:guides.scalar.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(dotnet remove src/DistriCatalogoAPI.Api/DistriCatalogoAPI.Api.csproj package Scalar.AspNetCore)"
+    ],
+    "deny": []
+  }
+}

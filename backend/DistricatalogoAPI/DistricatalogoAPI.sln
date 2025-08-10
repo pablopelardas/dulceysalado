@@ -1,0 +1,71 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36212.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistriCatalogoAPI.Api", "src\DistriCatalogoAPI.Api\DistriCatalogoAPI.Api.csproj", "{F370C2E7-FC39-4136-AF82-378A8372B91A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3852EEEA-BB4F-40F0-9D12-9B72B644A790} = {3852EEEA-BB4F-40F0-9D12-9B72B644A790}
+		{504BE472-9E41-48B6-81E7-E702CAB2A0CD} = {504BE472-9E41-48B6-81E7-E702CAB2A0CD}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistriCatalogoAPI.Domain", "src\DistriCatalogoAPI.Domain\DistriCatalogoAPI.Domain.csproj", "{EB7B80CF-0DF9-4755-98D0-AA5FE81B09E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistriCatalogoAPI.Application", "src\DistriCatalogoAPI.Application\DistriCatalogoAPI.Application.csproj", "{3852EEEA-BB4F-40F0-9D12-9B72B644A790}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistriCatalogoAPI.Infrastructure", "src\DistriCatalogoAPI.Infrastructure\DistriCatalogoAPI.Infrastructure.csproj", "{504BE472-9E41-48B6-81E7-E702CAB2A0CD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{932A5064-9EC3-4C65-852A-8581831E9A5A}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		CLAUDE.md = CLAUDE.md
+		esquema.sql = esquema.sql
+		tasks\module-01-completion.md = tasks\module-01-completion.md
+		tasks\module-01-progress.md = tasks\module-01-progress.md
+		tasks\module-01-user-management.md = tasks\module-01-user-management.md
+		tasks\modulo-empresas.md = tasks\modulo-empresas.md
+		tasks\project-architecture.md = tasks\project-architecture.md
+		project.md = project.md
+		sync-info.md = sync-info.md
+		tasks\todo.md = tasks\todo.md
+		tasks\user-model-analysis.md = tasks\user-model-analysis.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F370C2E7-FC39-4136-AF82-378A8372B91A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F370C2E7-FC39-4136-AF82-378A8372B91A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F370C2E7-FC39-4136-AF82-378A8372B91A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F370C2E7-FC39-4136-AF82-378A8372B91A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB7B80CF-0DF9-4755-98D0-AA5FE81B09E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB7B80CF-0DF9-4755-98D0-AA5FE81B09E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB7B80CF-0DF9-4755-98D0-AA5FE81B09E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB7B80CF-0DF9-4755-98D0-AA5FE81B09E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3852EEEA-BB4F-40F0-9D12-9B72B644A790}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3852EEEA-BB4F-40F0-9D12-9B72B644A790}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3852EEEA-BB4F-40F0-9D12-9B72B644A790}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3852EEEA-BB4F-40F0-9D12-9B72B644A790}.Release|Any CPU.Build.0 = Release|Any CPU
+		{504BE472-9E41-48B6-81E7-E702CAB2A0CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{504BE472-9E41-48B6-81E7-E702CAB2A0CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{504BE472-9E41-48B6-81E7-E702CAB2A0CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{504BE472-9E41-48B6-81E7-E702CAB2A0CD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F370C2E7-FC39-4136-AF82-378A8372B91A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{EB7B80CF-0DF9-4755-98D0-AA5FE81B09E0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{3852EEEA-BB4F-40F0-9D12-9B72B644A790} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{504BE472-9E41-48B6-81E7-E702CAB2A0CD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6974F469-E69D-423F-9952-1389F06A4047}
+	EndGlobalSection
+EndGlobal

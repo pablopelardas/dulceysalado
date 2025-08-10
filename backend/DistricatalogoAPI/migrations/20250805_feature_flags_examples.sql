@@ -1,0 +1,110 @@
+-- Ejemplos de configuración de Feature Flags
+-- Fecha: 2025-08-05
+-- Descripción: Scripts de ejemplo para configurar features por empresa
+
+-- IMPORTANTE: Este archivo contiene ejemplos, NO ejecutar en producción sin revisar
+
+-- Ejemplo 1: Configurar WhatsApp para una empresa específica
+-- INSERT INTO empresa_features (empresa_id, feature_id, habilitado, valor, metadata, created_by)
+-- SELECT 1, fd.id, true, '+5491123456789', 
+--     JSON_OBJECT(
+--         'mensaje_template', 'Hola, quiero hacer el siguiente pedido:\n{{items}}\nTotal: ${{total}}',
+--         'incluir_direccion', true,
+--         'incluir_nombre_empresa', true
+--     ),
+--     'sistema'
+-- FROM feature_definitions fd 
+-- WHERE fd.codigo = 'pedido_whatsapp';
+
+-- Ejemplo 2: Configurar campos requeridos para pedidos
+-- INSERT INTO empresa_features (empresa_id, feature_id, habilitado, valor, metadata, created_by)
+-- SELECT 2, fd.id, true, 
+--     JSON_ARRAY('nombre', 'numero_cliente', 'telefono', 'direccion_entrega'),
+--     JSON_OBJECT(
+--         'validaciones', JSON_OBJECT(
+--             'numero_cliente', JSON_OBJECT(
+--                 'regex', '^[0-9]{6}$',
+--                 'mensaje', 'El número de cliente debe tener 6 dígitos'
+--             ),
+--             'telefono', JSON_OBJECT(
+--                 'regex', '^\\+?[0-9]{10,}$',
+--                 'requerido', true
+--             )
+--         )
+--     ),
+--     'admin@empresa2.com'
+-- FROM feature_definitions fd 
+-- WHERE fd.codigo = 'pedido_campos_requeridos';
+
+-- Ejemplo 3: Habilitar autenticación obligatoria
+-- INSERT INTO empresa_features (empresa_id, feature_id, habilitado, valor, created_by)
+-- SELECT 3, fd.id, true, 'true', 'admin@empresa3.com'
+-- FROM feature_definitions fd 
+-- WHERE fd.codigo = 'cliente_autenticacion';
+
+-- Ejemplo 4: Ocultar precios hasta autenticación
+-- INSERT INTO empresa_features (empresa_id, feature_id, habilitado, valor, metadata, created_by)
+-- SELECT 4, fd.id, true, 'true',
+--     JSON_OBJECT(
+--         'mensaje', 'Contacte para consultar precios',
+--         'mostrar_boton_contacto', true
+--     ),
+--     'admin@empresa4.com'
+-- FROM feature_definitions fd 
+-- WHERE fd.codigo = 'catalogo_precios_ocultos';
+
+-- Consultas útiles para administración
+
+-- Ver todas las features disponibles
+-- SELECT 
+--     codigo,
+--     nombre,
+--     descripcion,
+--     tipo_valor,
+--     categoria,
+--     valor_defecto
+-- FROM feature_definitions 
+-- WHERE activo = true
+-- ORDER BY categoria, nombre;
+
+-- Ver configuración de features para una empresa específica
+-- SELECT 
+--     e.nombre as empresa,
+--     fd.codigo,
+--     fd.nombre as feature_nombre,
+--     ef.habilitado,
+--     ef.valor,
+--     ef.metadata,
+--     ef.updated_at,
+--     ef.updated_by
+-- FROM empresas e
+-- JOIN empresa_features ef ON e.id = ef.empresa_id
+-- JOIN feature_definitions fd ON ef.feature_id = fd.id
+-- WHERE e.id = 1  -- Cambiar por ID de empresa deseada
+-- ORDER BY fd.categoria, fd.nombre;
+
+-- Ver features más utilizadas
+-- SELECT 
+--     fd.codigo,
+--     fd.nombre,
+--     fd.categoria,
+--     COUNT(DISTINCT ef.empresa_id) as empresas_usando,
+--     COUNT(DISTINCT CASE WHEN ef.habilitado = true THEN ef.empresa_id END) as empresas_activas
+-- FROM feature_definitions fd
+-- LEFT JOIN empresa_features ef ON fd.id = ef.feature_id
+-- GROUP BY fd.id, fd.codigo, fd.nombre, fd.categoria
+-- ORDER BY empresas_activas DESC, empresas_usando DESC;
+
+-- Auditoría de cambios recientes (últimos 7 días)
+-- SELECT 
+--     e.nombre as empresa,
+--     fd.codigo as feature,
+--     ef.habilitado,
+--     ef.valor,
+--     ef.updated_at,
+--     ef.updated_by
+-- FROM empresa_features ef
+-- JOIN empresas e ON ef.empresa_id = e.id
+-- JOIN feature_definitions fd ON ef.feature_id = fd.id
+-- WHERE ef.updated_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
+-- ORDER BY ef.updated_at DESC;

@@ -1,0 +1,69 @@
+# Build results
+bin/
+obj/
+TestResults/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code and JetBrains Rider
+.vscode/
+.idea/
+
+# Visual Studio
+.vs/
+
+# Logs
+*.log
+
+# Database
+*.dbmdl
+*.db
+
+# Debug
+*.pdb
+
+# Cache
+*.cache
+
+# NCrunch
+*.ncrunch*
+
+# Local history
+*.localhistory/
+
+# macOS
+.DS_Store
+
+# Vim
+*.swp
+
+# Backup and temp files
+*.bak
+*.orig
+*.rej
+*.tmp
+
+# Solution IDE
+*.sln.ide
+
+# NuGet
+.nuget/
+packages/
+
+# Env
+.env
+
+# Docker
+.dockerignore
+
+# EditorConfig
+.editorconfig
+
+# Git attributes
+.gitattributes
+/publish
+/src/DistriCatalogoAPI.Api/appsettings.Development.json
