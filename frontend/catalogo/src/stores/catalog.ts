@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiService, type Product, type Category, type CatalogFilters } from '@/services/api'
-import { useCompanyStore } from './company'
+import EMPRESA_CONFIG from '@/config/empresa.config'
 
 export const useCatalogStore = defineStore('catalog', () => {
   // State
@@ -15,7 +15,7 @@ export const useCatalogStore = defineStore('catalog', () => {
   
   // Pagination
   const currentPage = ref(1)
-  const pageSize = ref(20)
+  const pageSize = ref(EMPRESA_CONFIG.productosPorPagina)
   const totalCount = ref(0)
   const totalPages = ref(0)
   const originalTotalCount = ref(0) // Total original sin filtros
@@ -451,10 +451,8 @@ export const useCatalogStore = defineStore('catalog', () => {
 
   // Initialize with company's default page size
   const initWithCompany = () => {
-    const companyStore = useCompanyStore()
-    if (companyStore.productsPerPage) {
-      pageSize.value = companyStore.productsPerPage
-    }
+    // Ya se inicializa con el valor de EMPRESA_CONFIG
+    pageSize.value = EMPRESA_CONFIG.productosPorPagina
   }
 
   return {

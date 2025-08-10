@@ -55,7 +55,7 @@
 import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { RouterLink } from 'vue-router'
-import { useCompanyStore } from '@/stores/company'
+import { EMPRESA_CONFIG } from '@/config/empresa.config'
 import { useCatalogStore } from '@/stores/catalog'
 import { useSeo } from '@/composables/useSeo'
 import { ChevronRightIcon } from '@heroicons/vue/24/outline'
@@ -65,7 +65,6 @@ import ProductCard from '@/components/catalog/ProductCard.vue'
 
 // Composables
 const route = useRoute()
-const companyStore = useCompanyStore()
 const catalogStore = useCatalogStore()
 const { setProductSeo } = useSeo()
 
@@ -108,17 +107,20 @@ const loadRelatedProducts = async () => {
 
 // Watch for product changes to load related products and update SEO
 watch(product, async (newProduct) => {
-  if (newProduct && companyStore.company) {
+  if (newProduct) {
     await loadRelatedProducts()
     // Update SEO for product
-    setProductSeo(newProduct.nombre, companyStore.company, newProduct.imagen_urls[0])
+    // Convert EMPRESA_CONFIG to Company-like object for SEO
+    const companyForSeo = {
+      nombre: EMPRESA_CONFIG.nombre,
+      logo_url: EMPRESA_CONFIG.logoUrl
+    } as any
+    setProductSeo(newProduct.nombre, companyForSeo, newProduct.imagen_urls[0])
   }
 }, { immediate: true })
 
 // Initialize
 onMounted(async () => {
-  await companyStore.init()
-  
   // Load categories if not loaded
   if (!catalogStore.hasCategories) {
     await catalogStore.fetchCategories()

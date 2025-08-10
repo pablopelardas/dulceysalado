@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useCompanyStore } from '@/stores/company'
+import { EMPRESA_CONFIG } from '@/config/empresa.config'
 import { useCatalogStore } from '@/stores/catalog'
 import { useSeo } from '@/composables/useSeo'
 import { ChevronRightIcon } from '@heroicons/vue/24/outline'
@@ -71,7 +71,6 @@ import ProductGrid from '@/components/catalog/ProductGrid.vue'
 
 // Composables
 const route = useRoute()
-const companyStore = useCompanyStore()
 const catalogStore = useCatalogStore()
 const { setCategorySeo } = useSeo()
 
@@ -104,11 +103,16 @@ const loadCategory = async () => {
   
   // Update page title and SEO
   const categoryName = category.value?.nombre || 'Categoría'
-  companyStore.updateTitle(categoryName)
+  document.title = `${categoryName} - ${EMPRESA_CONFIG.nombre}`
   
   // Update SEO for category
-  if (category.value && companyStore.company) {
-    setCategorySeo(category.value.nombre, companyStore.company)
+  if (category.value) {
+    // Convert EMPRESA_CONFIG to Company-like object for SEO
+    const companyForSeo = {
+      nombre: EMPRESA_CONFIG.nombre,
+      logo_url: EMPRESA_CONFIG.logoUrl
+    } as any
+    setCategorySeo(category.value.nombre, companyForSeo)
   }
 }
 
@@ -119,7 +123,6 @@ watch(() => route.params.code, () => {
 
 // Initialize
 onMounted(async () => {
-  await companyStore.init()
   await loadCategory()
 })
 </script>

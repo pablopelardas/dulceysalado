@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useCompanyStore } from '@/stores/company'
+import { EMPRESA_CONFIG } from '@/config/empresa.config'
 import { useCatalogStore } from '@/stores/catalog'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import ProductGrid from '@/components/catalog/ProductGrid.vue'
@@ -20,7 +20,6 @@ interface Props {
 const props = defineProps<Props>()
 const route = useRoute()
 const router = useRouter()
-const companyStore = useCompanyStore()
 const catalogStore = useCatalogStore()
 
 // Function to update URL with current state
@@ -134,18 +133,15 @@ onMounted(async () => {
   // Add popstate listener for browser navigation
   window.addEventListener('popstate', handlePopState)
   
-  // Initialize company and catalog data in parallel
-  await Promise.all([
-    companyStore.init(),
-    catalogStore.initializeAll() // This will fetch categories, novedades, and ofertas
-  ])
+  // Initialize catalog data
+  await catalogStore.initializeAll() // This will fetch categories, novedades, and ofertas
   
   // Handle price list from route parameter (without fetching)
   if (props.listId) {
     catalogStore.selectedPriceList = props.listId
-    companyStore.updateTitle(`Catálogo - Lista ${props.listId}`)
+    document.title = `Catálogo - Lista ${props.listId} - ${EMPRESA_CONFIG.nombre}`
   } else {
-    companyStore.updateTitle('Catálogo')
+    document.title = `Catálogo - ${EMPRESA_CONFIG.nombre}`
   }
   
   // Restore state from URL query params

@@ -168,7 +168,10 @@ const prevSlide = () => {
 }
 
 const goToSlide = (index: number) => {
-  currentIndex.value = Math.min(index, maxIndex.value)
+  // Ensure index is within bounds
+  if (index >= 0 && index <= maxIndex.value) {
+    currentIndex.value = index
+  }
 }
 
 // Autoplay methods
@@ -332,6 +335,6 @@ onUnmounted(() => {
 
 .dot.active {
   @apply transform scale-125;
-  background: white;
+  background: var(--theme-accent);
 }
 </style>

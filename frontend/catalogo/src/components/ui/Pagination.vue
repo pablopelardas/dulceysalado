@@ -85,7 +85,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
-import { useTheme } from '@/composables/useTheme'
 
 // Props
 interface Props {
@@ -107,8 +106,6 @@ defineEmits<{
   goto: [page: number | string]
 }>()
 
-// Theme
-const { secondaryTextColor } = useTheme()
 
 // Methods
 const getPageButtonStyle = (isActive: boolean) => {

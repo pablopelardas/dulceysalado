@@ -1,29 +1,207 @@
 <!-- ProductGrid.vue - Grid de productos con mejor spacing -->
 <template>
   <div class="py-6">
-    <!-- Carousels Section -->
-    <div class="mb-8">
-      <!-- Show skeleton while initially loading -->
-      <template v-if="isInitialLoading">
-        <CarouselSkeleton />
-        <CarouselSkeleton />
-      </template>
-      
-      <!-- Show actual carousels when loaded -->
-      <template v-else>
-        <div class="mb-6">
-          <NovedadesCarousel 
-            @open-cart="openAddToCartModal" 
-            :modal-open="showAddToCartModal"
-          />
+    <!-- Novedades y Ofertas Section -->
+    <div class="mb-8 space-y-6">
+      <!-- Novedades Section -->
+      <section class="rounded-xl shadow-sm p-6" style="background-color: #1E1E1E;">
+        <!-- Novedades Carousel -->
+        <div class="carousel-container py-0 mb-6">
+          <!-- Title -->
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              🆕 Novedades
+            </h2>
+            
+            <!-- Desktop Controls -->
+            <div v-if="mockNovedades.length > 4" class="hidden lg:flex items-center gap-2">
+              <button
+                @click="prevNovedadesSlide"
+                :disabled="novedadesIndex === 0"
+                class="carousel-control-btn cursor-pointer"
+                :class="{ 'opacity-50 cursor-not-allowed': novedadesIndex === 0 }"
+                aria-label="Anterior"
+              >
+                <ChevronLeftIcon class="h-5 w-5" />
+              </button>
+              <button
+                @click="nextNovedadesSlide"
+                :disabled="novedadesIndex >= maxNovedadesIndex"
+                class="carousel-control-btn cursor-pointer"
+                :class="{ 'opacity-50 cursor-not-allowed': novedadesIndex >= maxNovedadesIndex }"
+                aria-label="Siguiente"
+              >
+                <ChevronRightIcon class="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          
+          <!-- Carousel -->
+          <div 
+            class="relative overflow-hidden rounded-xl"
+            @mouseenter="pauseNovedades"
+            @mouseleave="resumeNovedades"
+          >
+            <!-- Products Track -->
+            <div 
+              class="flex transition-transform duration-500 ease-in-out gap-4"
+              :style="{ transform: `translateX(-${(novedadesIndex * 100) / visibleItemsDesktop}%)` }"
+            >
+              <div
+                v-for="product in mockNovedades"
+                :key="product.codigo"
+                class="flex-shrink-0 w-1/2 sm:w-1/4 px-2"
+              >
+                <ProductCard 
+                  :product="product"
+                  :view-mode="'grid'"
+                  @open-cart="openAddToCartModal"
+                  @card-click="handleProductClick"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <!-- Mobile Navigation -->
+          <div v-if="isMobileView && mockNovedades.length > 1" class="flex justify-center items-center gap-3 mt-4 lg:hidden">
+            <button
+              @click="prevNovedadesSlide"
+              :disabled="novedadesIndex === 0"
+              class="carousel-control-btn cursor-pointer"
+              :class="{ 'opacity-50 cursor-not-allowed': novedadesIndex === 0 }"
+              aria-label="Anterior"
+            >
+              <ChevronLeftIcon class="h-4 w-4" />
+            </button>
+            
+            <div class="bg-gray-200 rounded-full px-4 py-2 text-gray-700 font-medium text-sm">
+              {{ novedadesIndex + 1 }} / {{ mockNovedades.length }}
+            </div>
+            
+            <button
+              @click="nextNovedadesSlide"
+              :disabled="novedadesIndex >= maxNovedadesIndex"
+              class="carousel-control-btn cursor-pointer"
+              :class="{ 'opacity-50 cursor-not-allowed': novedadesIndex >= maxNovedadesIndex }"
+              aria-label="Siguiente"
+            >
+              <ChevronRightIcon class="h-4 w-4" />
+            </button>
+          </div>
+          
+          <!-- Desktop Pagination Indicators -->
+          <div v-if="!isMobileView && mockNovedades.length > visibleItemsDesktop" class="flex justify-center mt-6 gap-2">
+            <button
+              v-for="(_, index) in Array(Math.ceil(mockNovedades.length / visibleItemsDesktop))"
+              :key="index"
+              @click="() => { const targetIndex = Math.min(index * visibleItemsDesktop, maxNovedadesIndex); console.log('Novedades dot clicked:', { index, targetIndex, currentIndex: novedadesIndex }); goToNovedadesSlide(targetIndex); console.log('After click, currentIndex:', novedadesIndex); }"
+              class="carousel-dot cursor-pointer"
+              :class="{ 'active': (novedadesIndex === index * visibleItemsDesktop || (index === 1 && novedadesIndex === maxNovedadesIndex)) }"
+              :aria-label="`Ir a la página ${index + 1}`"
+            ></button>
+          </div>
         </div>
-        <div>
-          <OfertasCarousel 
-            @open-cart="openAddToCartModal" 
-            :modal-open="showAddToCartModal"
-          />
+      </section>
+
+      <!-- Ofertas Section -->
+      <section class="rounded-xl shadow-sm p-6" style="background-color: #2A2A2A;">
+        <!-- Ofertas Carousel -->
+        <div class="carousel-container py-0 mb-6">
+          <!-- Title -->
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+              🔥 Ofertas Especiales
+            </h2>
+            
+            <!-- Desktop Controls -->
+            <div v-if="mockOfertas.length > 4" class="hidden lg:flex items-center gap-2">
+              <button
+                @click="prevOfertasSlide"
+                :disabled="ofertasIndex === 0"
+                class="carousel-control-btn cursor-pointer"
+                :class="{ 'opacity-50 cursor-not-allowed': ofertasIndex === 0 }"
+                aria-label="Anterior"
+              >
+                <ChevronLeftIcon class="h-5 w-5" />
+              </button>
+              <button
+                @click="nextOfertasSlide"
+                :disabled="ofertasIndex >= maxOfertasIndex"
+                class="carousel-control-btn cursor-pointer"
+                :class="{ 'opacity-50 cursor-not-allowed': ofertasIndex >= maxOfertasIndex }"
+                aria-label="Siguiente"
+              >
+                <ChevronRightIcon class="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          
+          <!-- Carousel -->
+          <div 
+            class="relative overflow-hidden rounded-xl"
+            @mouseenter="pauseOfertas"
+            @mouseleave="resumeOfertas"
+          >
+            <!-- Products Track -->
+            <div 
+              class="flex transition-transform duration-500 ease-in-out gap-4"
+              :style="{ transform: `translateX(-${(ofertasIndex * 100) / visibleItemsDesktop}%)` }"
+            >
+              <div
+                v-for="product in mockOfertas"
+                :key="product.codigo"
+                class="flex-shrink-0 w-1/2 sm:w-1/4 px-2"
+              >
+                <ProductCard 
+                  :product="product"
+                  :view-mode="'grid'"
+                  @open-cart="openAddToCartModal"
+                  @card-click="handleProductClick"
+                />
+              </div>
+            </div>
+          </div>
+          
+          <!-- Mobile Navigation -->
+          <div v-if="isMobileView && mockOfertas.length > 1" class="flex justify-center items-center gap-3 mt-4 lg:hidden">
+            <button
+              @click="prevOfertasSlide"
+              :disabled="ofertasIndex === 0"
+              class="carousel-control-btn cursor-pointer"
+              :class="{ 'opacity-50 cursor-not-allowed': ofertasIndex === 0 }"
+              aria-label="Anterior"
+            >
+              <ChevronLeftIcon class="h-4 w-4" />
+            </button>
+            
+            <div class="bg-gray-200 rounded-full px-4 py-2 text-gray-700 font-medium text-sm">
+              {{ ofertasIndex + 1 }} / {{ mockOfertas.length }}
+            </div>
+            
+            <button
+              @click="nextOfertasSlide"
+              :disabled="ofertasIndex >= maxOfertasIndex"
+              class="carousel-control-btn cursor-pointer"
+              :class="{ 'opacity-50 cursor-not-allowed': ofertasIndex >= maxOfertasIndex }"
+              aria-label="Siguiente"
+            >
+              <ChevronRightIcon class="h-4 w-4" />
+            </button>
+          </div>
+          
+          <!-- Desktop Pagination Indicators -->
+          <div v-if="!isMobileView && mockOfertas.length > visibleItemsDesktop" class="flex justify-center mt-6 gap-2">
+            <button
+              v-for="(_, index) in Array(Math.ceil(mockOfertas.length / visibleItemsDesktop))"
+              :key="index"
+              @click="goToOfertasSlide(index * visibleItemsDesktop)"
+              class="carousel-dot cursor-pointer"
+              :class="{ 'active': Math.floor(ofertasIndex / visibleItemsDesktop) === index }"
+              :aria-label="`Ir a la página ${index + 1}`"
+            ></button>
+          </div>
         </div>
-      </template>
+      </section>
     </div>
 
     <!-- Categories Section -->
@@ -42,8 +220,7 @@
               :class="{ active: selectedCategory === null }"
               @click="setCategory(null)"
             >
-              <ViewGridIcon class="h-4 w-4" />
-              <span>Todos</span>
+              <span class="text-gray-800 font-medium">Todos</span>
               <span class="count">({{ catalogStore.totalCount }})</span>
             </button>
             
@@ -54,15 +231,7 @@
               :class="{ active: selectedCategory === category.codigo_rubro }"
               @click="setCategory(category.codigo_rubro)"
             >
-              <!-- Category Icon -->
-              <span 
-                v-if="category.icono" 
-                class="category-icon-text"
-                :style="{ color: category.color || 'var(--theme-accent)' }"
-              >
-                {{ category.icono }}
-              </span>
-              <span>{{ category.nombre }}</span>
+              <span class="text-gray-800 font-medium">{{ category.nombre }}</span>
               <span class="count">({{ category.product_count || 0 }})</span>
             </button>
           </template>
@@ -241,31 +410,214 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import { useCatalogStore } from '@/stores/catalog'
 import { 
   XMarkIcon,
   Squares2X2Icon as ViewGridIcon,
   ListBulletIcon,
   ExclamationTriangleIcon,
-  ShoppingBagIcon
+  ShoppingBagIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/vue/24/outline'
 import ProductCard from './ProductCard.vue'
 import ProductSkeleton from '@/components/ui/ProductSkeleton.vue'
 import CategoryChipSkeleton from '@/components/ui/CategoryChipSkeleton.vue'
 import Pagination from '@/components/ui/Pagination.vue'
 import AddToCartModal from '@/components/cart/AddToCartModal.vue'
-import NovedadesCarousel from './NovedadesCarousel.vue'
-import OfertasCarousel from './OfertasCarousel.vue'
-import CarouselSkeleton from '@/components/ui/CarouselSkeleton.vue'
+import type { Product } from '@/services/api'
 
 // Stores
 const catalogStore = useCatalogStore()
+const router = useRouter()
+
+// Mock data para las secciones
+const mockNovedades = ref<Product[]>([
+  {
+    codigo: 'NOV001',
+    nombre: 'Alfajores de Maicena Premium',
+    precio: 1200,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Deliciosos alfajores artesanales de maicena con dulce de leche',
+    stock: 50,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Alfajores',
+    destacado: true,
+    novedad: true
+  },
+  {
+    codigo: 'NOV002',
+    nombre: 'Chocolates Artesanales Mix',
+    precio: 2800,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Variedad de chocolates artesanales premium',
+    stock: 25,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Chocolates',
+    destacado: true,
+    novedad: true
+  },
+  {
+    codigo: 'NOV003',
+    nombre: 'Galletitas Dulces Surtidas',
+    precio: 850,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Mezcla de galletitas dulces variadas',
+    stock: 40,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Galletitas',
+    destacado: true,
+    novedad: true
+  },
+  {
+    codigo: 'NOV004',
+    nombre: 'Snacks Salados Premium',
+    precio: 1500,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Selección de snacks salados gourmet',
+    stock: 35,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Snacks',
+    destacado: true,
+    novedad: true
+  },
+  {
+    codigo: 'NOV005',
+    nombre: 'Turrones Artesanales',
+    precio: 2200,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Turrones caseros de almendra y miel',
+    stock: 15,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Turrones',
+    destacado: true,
+    novedad: true
+  },
+  {
+    codigo: 'NOV006',
+    nombre: 'Bombones Premium',
+    precio: 3500,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Exquisitos bombones rellenos de licor',
+    stock: 20,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Bombones',
+    destacado: true,
+    novedad: true
+  }
+])
+
+const mockOfertas = ref<Product[]>([
+  {
+    codigo: 'OFF001',
+    nombre: 'Pack Golosinas x12',
+    precio: 1800,
+    precio_anterior: 2400,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Pack especial de 12 golosinas variadas - 25% OFF',
+    stock: 20,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Golosinas',
+    destacado: true,
+    oferta: true
+  },
+  {
+    codigo: 'OFF002',
+    nombre: 'Combo Dulce & Salado',
+    precio: 3200,
+    precio_anterior: 4000,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Combo especial mitad dulce, mitad salado - 20% OFF',
+    stock: 15,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Combos',
+    destacado: true,
+    oferta: true
+  },
+  {
+    codigo: 'OFF003',
+    nombre: 'Caramelos Premium x100',
+    precio: 950,
+    precio_anterior: 1200,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Bolsa de 100 caramelos premium surtidos',
+    stock: 60,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Caramelos',
+    destacado: true,
+    oferta: true
+  },
+  {
+    codigo: 'OFF004',
+    nombre: 'Frutos Secos Mix 500g',
+    precio: 2100,
+    precio_anterior: 2800,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Mezcla premium de frutos secos 500g - 25% OFF',
+    stock: 30,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Frutos Secos',
+    destacado: true,
+    oferta: true
+  },
+  {
+    codigo: 'OFF005',
+    nombre: 'Mega Pack Dulces x24',
+    precio: 2700,
+    precio_anterior: 3600,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Pack familiar de 24 dulces variados - 25% OFF',
+    stock: 12,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Packs',
+    destacado: true,
+    oferta: true
+  },
+  {
+    codigo: 'OFF006',
+    nombre: 'Chocolates Premium 1kg',
+    precio: 4500,
+    precio_anterior: 6000,
+    imagen_urls: ['/placeholder.png'],
+    descripcion: 'Caja de chocolates premium 1kg - 25% OFF',
+    stock: 8,
+    lista: 'minorista',
+    marca: 'Dulce & Salado MAX',
+    categoria: 'Chocolates',
+    destacado: true,
+    oferta: true
+  }
+])
+
 
 // State
 const searchQuery = ref('')
 const selectedCategory = ref<number | null>(null)
 const showFeaturedOnly = ref(false)
+
+// Carousel state
+const novedadesIndex = ref(0)
+const ofertasIndex = ref(0)
+const isMobileView = ref(false)
+const novedadesPaused = ref(false)
+const ofertasPaused = ref(false)
+const novedadesTimer = ref<number | null>(null)
+const ofertasTimer = ref<number | null>(null)
+const visibleItemsDesktop = 4
+const visibleItemsMobile = 2
 // Load view mode from localStorage or default to 'grid'
 const getStoredViewMode = (): 'grid' | 'list' => {
   try {
@@ -287,6 +639,7 @@ const isInitialMount = ref(true)
 
 // Computed
 const products = computed(() => catalogStore.filteredProducts)
+
 const loading = computed(() => catalogStore.loadingProducts)
 const error = computed(() => catalogStore.productsError)
 const hasProducts = computed(() => catalogStore.hasProducts)
@@ -317,6 +670,114 @@ const isInitialLoading = computed(() => catalogStore.initializing)
 
 // Update loading to include initial loading
 const isLoading = computed(() => loading.value || catalogStore.initializing)
+
+// Carousel computed
+const visibleItems = computed(() => isMobileView.value ? visibleItemsMobile : visibleItemsDesktop)
+const maxNovedadesIndex = computed(() => {
+  const maxIndex = Math.max(0, mockNovedades.value.length - visibleItemsDesktop)
+  console.log('maxNovedadesIndex calculated:', { productsLength: mockNovedades.value.length, visibleItems: visibleItemsDesktop, maxIndex })
+  return maxIndex
+})
+const maxOfertasIndex = computed(() => Math.max(0, mockOfertas.value.length - visibleItemsDesktop))
+
+// Carousel methods
+const nextNovedadesSlide = () => {
+  if (novedadesIndex.value < maxNovedadesIndex.value) {
+    novedadesIndex.value += isMobileView.value ? 1 : visibleItemsDesktop
+  } else {
+    novedadesIndex.value = 0 // Loop back to start
+  }
+}
+
+const prevNovedadesSlide = () => {
+  if (novedadesIndex.value > 0) {
+    novedadesIndex.value -= isMobileView.value ? 1 : visibleItemsDesktop
+  } else {
+    novedadesIndex.value = maxNovedadesIndex.value // Loop to end
+  }
+}
+
+const goToNovedadesSlide = (index: number) => {
+  console.log('goToNovedadesSlide called:', { index, maxIndex: maxNovedadesIndex.value, beforeIndex: novedadesIndex.value })
+  novedadesIndex.value = Math.min(index, maxNovedadesIndex.value)
+  console.log('goToNovedadesSlide result:', { newIndex: novedadesIndex.value })
+}
+
+const nextOfertasSlide = () => {
+  if (ofertasIndex.value < maxOfertasIndex.value) {
+    ofertasIndex.value += isMobileView.value ? 1 : visibleItemsDesktop
+  } else {
+    ofertasIndex.value = 0 // Loop back to start
+  }
+}
+
+const prevOfertasSlide = () => {
+  if (ofertasIndex.value > 0) {
+    ofertasIndex.value -= isMobileView.value ? 1 : visibleItemsDesktop
+  } else {
+    ofertasIndex.value = maxOfertasIndex.value // Loop to end
+  }
+}
+
+const goToOfertasSlide = (index: number) => {
+  ofertasIndex.value = Math.min(index, maxOfertasIndex.value)
+}
+
+// Autoplay methods
+const startNovedadesAutoplay = () => {
+  if (mockNovedades.value.length <= visibleItems.value || showAddToCartModal.value) return
+  
+  novedadesTimer.value = setInterval(() => {
+    if (!novedadesPaused.value && !showAddToCartModal.value) {
+      nextNovedadesSlide()
+    }
+  }, 5000)
+}
+
+const startOfertasAutoplay = () => {
+  if (mockOfertas.value.length <= visibleItems.value || showAddToCartModal.value) return
+  
+  ofertasTimer.value = setInterval(() => {
+    if (!ofertasPaused.value && !showAddToCartModal.value) {
+      nextOfertasSlide()
+    }
+  }, 5000)
+}
+
+const stopNovedadesAutoplay = () => {
+  if (novedadesTimer.value) {
+    clearInterval(novedadesTimer.value)
+    novedadesTimer.value = null
+  }
+}
+
+const stopOfertasAutoplay = () => {
+  if (ofertasTimer.value) {
+    clearInterval(ofertasTimer.value)
+    ofertasTimer.value = null
+  }
+}
+
+const pauseNovedades = () => {
+  novedadesPaused.value = true
+}
+
+const resumeNovedades = () => {
+  novedadesPaused.value = false
+}
+
+const pauseOfertas = () => {
+  ofertasPaused.value = true
+}
+
+const resumeOfertas = () => {
+  ofertasPaused.value = false
+}
+
+// Responsive check
+const checkMobile = () => {
+  isMobileView.value = window.innerWidth < 768
+}
 
 // Methods
 const setViewMode = (mode: 'grid' | 'list') => {
@@ -474,6 +935,10 @@ const onProductAdded = (product: any, quantity: number) => {
   // Could show a toast notification here
 }
 
+const handleProductClick = (product: Product) => {
+  router.push(`/product/${product.codigo}`)
+}
+
 const fetchProducts = async () => {
   await catalogStore.fetchProducts()
 }
@@ -535,12 +1000,52 @@ watch([
 
 // Products loading is now handled by the global initializing state
 
+// Watch for modal state changes
+watch(() => showAddToCartModal.value, (isOpen) => {
+  if (isOpen) {
+    // Modal opened - stop autoplay
+    stopNovedadesAutoplay()
+    stopOfertasAutoplay()
+  } else {
+    // Modal closed - restart autoplay
+    if (mockNovedades.value.length > visibleItems.value) {
+      startNovedadesAutoplay()
+    }
+    if (mockOfertas.value.length > visibleItems.value) {
+      startOfertasAutoplay()
+    }
+  }
+})
+
+// Debug watch for novedadesIndex
+watch(() => novedadesIndex.value, (newValue, oldValue) => {
+  console.log('novedadesIndex changed:', { oldValue, newValue, activePage: Math.floor(newValue / visibleItemsDesktop) })
+})
+
 // Initialize
 onMounted(async () => {
   // Company and categories are already initialized in App.vue
   // Force sync from store first
   syncFiltersFromStore()
   // Don't fetch products here - let Catalog.vue handle it
+  
+  // Setup carousel
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+  
+  // Start autoplay
+  if (mockNovedades.value.length > visibleItems.value) {
+    startNovedadesAutoplay()
+  }
+  if (mockOfertas.value.length > visibleItems.value) {
+    startOfertasAutoplay()
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+  stopNovedadesAutoplay()
+  stopOfertasAutoplay()
 })
 </script>
 
@@ -548,7 +1053,7 @@ onMounted(async () => {
 @reference "tailwindcss";
 
 .category-pill {
-  @apply flex items-center gap-2 px-3 py-2 rounded-full text-white text-sm font-medium transition-all justify-center min-h-[2.5rem] cursor-pointer;
+  @apply flex items-center gap-2 px-3 py-2 rounded-full text-gray-800 text-sm font-medium transition-all justify-center min-h-[2.5rem] cursor-pointer;
   background: var(--theme-secondary);
 }
 
@@ -566,7 +1071,35 @@ onMounted(async () => {
 }
 
 .category-icon-text {
-  @apply text-lg font-bold flex-shrink-0;
+  @apply text-lg font-bold flex-shrink-0 text-white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Carousel Styles */
+.carousel-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.carousel-control-btn {
+  @apply w-10 h-10 rounded-full flex items-center justify-center text-gray-700 transition-all duration-200 border;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.carousel-control-btn:hover {
+  @apply bg-white shadow-md transform scale-105;
+}
+
+.carousel-dot {
+  @apply w-3 h-3 rounded-full transition-all duration-200 bg-gray-300;
+}
+
+.carousel-dot:hover {
+  @apply bg-gray-400;
+}
+
+.carousel-dot.active {
+  @apply transform scale-125 bg-red-600;
 }
 </style>

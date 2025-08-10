@@ -9,6 +9,20 @@ public class FileLoggerService
     private readonly ProcessingConfig _processingConfig;
     private readonly ILogger<FileLoggerService> _logger;
     private readonly string _logDirectory;
+
+    public FileLoggerService(ProcessingConfig processingConfig, ILogger<FileLoggerService> logger)
+    {
+        _processingConfig = processingConfig;
+        _logger = logger;
+        _logDirectory = Path.Combine(processingConfig.TempPath, "logs");
+        
+        // Asegurar que el directorio de logs existe
+        if (!Directory.Exists(_logDirectory))
+        {
+            Directory.CreateDirectory(_logDirectory);
+        }
+    }
+
     public async Task LogProcessingCompletedAsync(string sessionId, BatchProcessingSummary summary)
     {
         var logEntry = new ProcessingCompletedLogEntry

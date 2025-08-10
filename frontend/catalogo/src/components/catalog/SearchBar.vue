@@ -10,7 +10,7 @@
       type="text"
       :placeholder="placeholder"
       :class="[
-        'w-full pl-11 pr-11 rounded-xl bg-white/90 backdrop-blur-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all',
+        'w-full pl-11 pr-11 rounded-lg bg-white border border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all shadow-sm',
         compact ? 'py-2 text-sm' : 'py-3'
       ]"
       @keyup.enter="handleSearch"

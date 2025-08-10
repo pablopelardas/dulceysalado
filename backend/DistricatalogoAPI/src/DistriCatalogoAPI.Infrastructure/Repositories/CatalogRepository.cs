@@ -818,10 +818,20 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
 
         public async Task<List<CategoryProductCount>> GetCategoriesFromFilteredProductsAsync(int empresaId, string? listaPrecioCodigo = null, bool? destacados = null, int? codigoRubro = null, string? busqueda = null)
         {
-            // Obtener TODAS las categorías de la empresa
-            var todasLasCategorias = await _context.VistaCategoriasEmpresas
-                .Where(c => c.EmpresaId == empresaId)
+            // Obtener TODAS las categorías base que tienen productos
+            var todasLasCategorias = await _context.CategoriasBases
+                .Where(c => c.Visible == true)
                 .OrderBy(c => c.Orden ?? 0)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.CodigoRubro,
+                    c.Nombre,
+                    c.Descripcion,
+                    c.Icono,
+                    c.Color,
+                    Orden = c.Orden ?? 0
+                })
                 .ToListAsync();
 
             // Si no hay búsqueda, devolver todas las categorías con conteo 0
@@ -835,7 +845,7 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
                     Descripcion = c.Descripcion,
                     Icono = c.Icono,
                     Color = c.Color,
-                    Orden = c.Orden ?? 0,
+                    Orden = c.Orden,
                     ProductCount = 0
                 }).ToList();
             }
@@ -871,7 +881,7 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
                     Descripcion = c.Descripcion,
                     Icono = c.Icono,
                     Color = c.Color,
-                    Orden = c.Orden ?? 0,
+                    Orden = c.Orden,
                     ProductCount = 0
                 }).ToList();
             }
@@ -938,7 +948,7 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
                     Descripcion = c.Descripcion,
                     Icono = c.Icono,
                     Color = c.Color,
-                    Orden = c.Orden ?? 0,
+                    Orden = c.Orden,
                     ProductCount = count
                 };
             }).ToList();

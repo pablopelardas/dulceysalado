@@ -170,7 +170,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCatalogStore } from '@/stores/catalog'
-import { useCompanyStore } from '@/stores/company'
+import { EMPRESA_CONFIG } from '@/config/empresa.config'
 import { PhotoIcon, StarIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/24/outline'
 import LoadingSpinner from '@/components/ui/Loading.vue'
 
@@ -178,7 +178,6 @@ import LoadingSpinner from '@/components/ui/Loading.vue'
 const router = useRouter()
 const route = useRoute()
 const catalogStore = useCatalogStore()
-const companyStore = useCompanyStore()
 
 // State
 const currentImageIndex = ref(0)
@@ -187,10 +186,10 @@ const currentImageIndex = ref(0)
 const product = computed(() => catalogStore.currentProduct)
 const loading = computed(() => catalogStore.loadingProduct)
 const error = computed(() => catalogStore.productError)
-const showPrices = computed(() => companyStore.showPrices)
-const showStock = computed(() => companyStore.showStock)
-const allowOrders = computed(() => companyStore.allowOrders)
-const whatsappUrl = computed(() => companyStore.whatsappUrl)
+const showPrices = computed(() => EMPRESA_CONFIG.mostrarPrecios)
+const showStock = computed(() => EMPRESA_CONFIG.mostrarStock)
+const allowOrders = computed(() => EMPRESA_CONFIG.permitirPedidos)
+const whatsappUrl = computed(() => EMPRESA_CONFIG.whatsapp ? `https://wa.me/${EMPRESA_CONFIG.whatsapp}` : null)
 
 const currentImage = computed(() => {
   if (!product.value?.imagen_urls || product.value.imagen_urls.length === 0) {
@@ -255,7 +254,7 @@ const loadProduct = async () => {
     await catalogStore.fetchProduct(codigo)
     // Update page title
     if (product.value) {
-      companyStore.updateTitle(product.value.nombre)
+      document.title = `${product.value.nombre} - ${EMPRESA_CONFIG.nombre}`
     }
   }
 }

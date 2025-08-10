@@ -25,7 +25,7 @@
             </div>
             <div>
               <h3 class="font-semibold text-white">{{ companyName }}</h3>
-              <p v-if="company?.razon_social" class="text-sm text-white/70">{{ company.razon_social }}</p>
+              <p v-if="company?.razonSocial" class="text-sm text-white/70">{{ company.razonSocial }}</p>
             </div>
           </div>
           
@@ -40,8 +40,8 @@
           <!-- Social links - Solo mostrar si existen -->
           <div v-if="hasSocialLinks" class="flex gap-2">
             <a 
-              v-if="company?.url_facebook"
-              :href="company.url_facebook" 
+              v-if="company?.facebook"
+              :href="company.facebook" 
               target="_blank"
               rel="noopener noreferrer"
               class="p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
@@ -52,8 +52,8 @@
               </svg>
             </a>
             <a 
-              v-if="company?.url_instagram"
-              :href="company.url_instagram"
+              v-if="company?.instagram"
+              :href="company.instagram"
               target="_blank"
               rel="noopener noreferrer"
               class="p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
@@ -108,25 +108,23 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useCompanyStore } from '@/stores/company'
+import { EMPRESA_CONFIG } from '@/config/empresa.config'
 import { 
   MapPinIcon,
   PhoneIcon,
   EnvelopeIcon
 } from '@heroicons/vue/24/outline'
 
-// Stores
-const companyStore = useCompanyStore()
 
 // Computed
-const company = computed(() => companyStore.company)
-const companyName = computed(() => companyStore.companyName)
-const companyLogo = computed(() => companyStore.companyLogo)
+const company = computed(() => EMPRESA_CONFIG)
+const companyName = computed(() => EMPRESA_CONFIG.nombre)
+const companyLogo = computed(() => EMPRESA_CONFIG.logoUrl)
 const currentYear = computed(() => new Date().getFullYear())
 
 // Check if we have social links
 const hasSocialLinks = computed(() => {
-  return company.value?.url_facebook || company.value?.url_instagram
+  return company.value?.facebook || company.value?.instagram
 })
 
 // Check if we have contact info

@@ -1,6 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import { defineStore } from 'pinia'
-import { useCompanyStore } from './company'
+import { EMPRESA_CONFIG } from '@/config/empresa.config'
 
 export interface CartItem {
   codigo: string
@@ -126,8 +126,7 @@ export const useCartStore = defineStore('cart', () => {
   const exportToText = () => {
     if (isEmpty.value) return ''
     
-    const companyStore = useCompanyStore()
-    const companyName = companyStore.companyName || 'Empresa'
+    const companyName = EMPRESA_CONFIG.nombre
     
     let text = `Lista de Compras - ${companyName}\n`
     text += '==========================================\n\n'
@@ -151,8 +150,7 @@ export const useCartStore = defineStore('cart', () => {
   const exportForWhatsApp = () => {
     if (isEmpty.value) return ''
     
-    const companyStore = useCompanyStore()
-    const companyName = companyStore.companyName || 'Empresa'
+    const companyName = EMPRESA_CONFIG.nombre
     
     let message = `*Lista de Compras - ${companyName}*\n\n`
     
@@ -175,8 +173,7 @@ export const useCartStore = defineStore('cart', () => {
   const exportForEmail = () => {
     if (isEmpty.value) return ''
     
-    const companyStore = useCompanyStore()
-    const companyName = companyStore.companyName || 'Empresa'
+    const companyName = EMPRESA_CONFIG.nombre
     
     let body = `Lista de Compras - ${companyName}\n\n`
     

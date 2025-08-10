@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "backend/DistricatalogoAPI"
+		},
+		{
+			"path": "frontend/backoffice"
+		},
+		{
+			"path": "frontend/catalogo"
+		},
+		{
+			"path": "utils/scripts"
+		},
+		{
+			"path": "utils/sigma-processor"
+		}
+	],
+	"settings": {}
+}

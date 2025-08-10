@@ -5,8 +5,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'Home',
-      component: () => import('../views/Catalog.vue'),
+      name: 'home',
+      component: () => import('../views/HomeView.vue'),
     },
     {
       path: '/catalog/lista/:listId',
@@ -15,9 +15,20 @@ const router = createRouter({
       props: true,
     },
     {
-      path: '/catalog',
-      name: 'Catalog',
+      path: '/catalogo',
+      name: 'catalogo',
       component: () => import('../views/Catalog.vue'),
+    },
+    {
+      path: '/ofertas',
+      name: 'ofertas',
+      component: () => import('../views/Catalog.vue'),
+      props: { showOnlyFeatured: true }
+    },
+    {
+      path: '/contacto',
+      name: 'contacto',
+      component: () => import('../views/ContactView.vue'),
     },
     {
       path: '/category/:code',
@@ -49,7 +60,7 @@ const router = createRouter({
     } else {
       return { top: 0 }
     }
-  },
+  }
 })
 
 export default router

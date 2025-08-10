@@ -108,42 +108,24 @@ interface CacheEntry {
 
 class ApiService {
   private baseUrl: string
-  private empresaId: number | null = null
+  private readonly EMPRESA_ID = 1 // Hardcoded para Dulce y Salado
   private cache: Map<string, CacheEntry> = new Map()
   private readonly CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
   constructor() {
-    // Detect if we're in development or production
-    const isDev = import.meta.env.DEV
-    
-    if (isDev) {
-      // Development: use localhost with empresaId parameter
-      this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000'
-      this.empresaId = parseInt(import.meta.env.VITE_EMPRESA_ID || '1')
-    } else {
-      // Production: use current subdomain
-      this.baseUrl = import.meta.env.VITE_API_URL || 'https://api.districatalogo.com'
-    }
+    // Siempre usar la API de dulceysaladomax
+    this.baseUrl = import.meta.env.VITE_API_URL || 'https://api.dulceysaladomax.com'
   }
 
-  // Resolve company ID from subdomain or use override
-  private getCompanyId(): number | null {
-    if (this.empresaId) {
-      return this.empresaId
-    }
-    
-    // In production, company is resolved automatically by subdomain
-    // so we don't need to pass empresaId
-    return null
+  // Siempre retorna el ID de Dulce y Salado
+  private getCompanyId(): number {
+    return this.EMPRESA_ID
   }
 
-  // Build query string with company ID if needed
+  // Build query string with company ID
   private buildQueryString(params: Record<string, any> = {}): string {
     const companyId = this.getCompanyId()
-    
-    if (companyId) {
-      params.empresaId = companyId
-    }
+    params.empresaId = companyId
     
     const queryString = Object.entries(params)
       .filter(([_, value]) => value !== undefined && value !== null)

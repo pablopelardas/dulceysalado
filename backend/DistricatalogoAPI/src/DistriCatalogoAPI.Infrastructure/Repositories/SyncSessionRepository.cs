@@ -465,14 +465,14 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
                 
                 if (metricsData?.ContainsKey("total_productos_procesados") == true)
                 {
-                    metrics.TotalProductosProcesados = Convert.ToInt32(metricsData["total_productos_procesados"]);
+                    metrics.TotalProductosProcesados = GetIntFromJsonElement(metricsData["total_productos_procesados"]);
                 }
                 
                 // Reconstruir tiempos de procesamiento si están disponibles
                 if (metricsData?.ContainsKey("tiempo_total_ms") == true && metricsData.ContainsKey("cantidad_lotes"))
                 {
-                    var tiempoTotal = Convert.ToInt32(metricsData["tiempo_total_ms"]);
-                    var cantidadLotes = Convert.ToInt32(metricsData["cantidad_lotes"]);
+                    var tiempoTotal = GetIntFromJsonElement(metricsData["tiempo_total_ms"]);
+                    var cantidadLotes = GetIntFromJsonElement(metricsData["cantidad_lotes"]);
                     
                     // Si tenemos lotes lentos, podemos reconstruir mejor
                     if (metricsData.ContainsKey("lotes_lentos") && metricsData["lotes_lentos"] is JsonElement lotesLentosElement && lotesLentosElement.ValueKind == JsonValueKind.Array)
@@ -514,6 +514,27 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
                 _logger.LogWarning(ex, "Error deserializando métricas: {Error}", ex.Message);
                 return new SyncMetrics();
             }
+        }
+
+        private static int GetIntFromJsonElement(object jsonValue)
+        {
+            if (jsonValue is JsonElement element)
+            {
+                return element.ValueKind switch
+                {
+                    JsonValueKind.Number => element.GetInt32(),
+                    JsonValueKind.String when int.TryParse(element.GetString(), out int result) => result,
+                    _ => 0
+                };
+            }
+            
+            if (jsonValue is int intValue)
+                return intValue;
+                
+            if (int.TryParse(jsonValue?.ToString(), out int parsedValue))
+                return parsedValue;
+                
+            return 0;
         }
     }
 }

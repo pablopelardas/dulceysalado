@@ -55,7 +55,7 @@
             
             <!-- WhatsApp to Company (if configured and feature enabled) -->
             <button 
-              v-if="companyStore.whatsappUrl && companyStore.hasWhatsAppOrders"
+              v-if="EMPRESA_CONFIG.whatsapp && EMPRESA_CONFIG.features.pedidosWhatsapp"
               @click="() => exportToCompanyWhatsApp()"
               class="w-full flex items-center gap-4 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors cursor-pointer group border-2 border-green-200"
             >
@@ -66,7 +66,7 @@
               </div>
               <div class="flex-1 text-left">
                 <div class="font-medium text-gray-900 group-hover:text-green-700 flex items-center gap-2">
-                  Enviar pedido a {{ companyStore.companyName }}
+                  Enviar pedido a {{ EMPRESA_CONFIG.nombre }}
                   <span class="px-2 py-1 text-xs bg-green-600 text-white rounded-full">Empresa</span>
                 </div>
                 <div class="text-sm text-gray-500">Enviar lista como pedido por WhatsApp</div>
@@ -136,7 +136,7 @@
   <!-- Customer Data Modal -->
   <CustomerDataModal
     :is-open="showCustomerDataModal"
-    :required-fields="companyStore.requiredOrderFields"
+    :required-fields="[]"
     @close="showCustomerDataModal = false"
     @submit="handleCustomerDataSubmit"
   />
@@ -145,7 +145,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useCartStore } from '@/stores/cart'
-import { useCompanyStore } from '@/stores/company'
+import { EMPRESA_CONFIG } from '@/config/empresa.config'
 import { useToast } from '@/composables/useToast'
 import jsPDF from 'jspdf'
 import CustomerDataModal from './CustomerDataModal.vue'
@@ -171,14 +171,15 @@ const emit = defineEmits<{
 
 // Stores
 const cartStore = useCartStore()
-const companyStore = useCompanyStore()
 
 // Composables
 const { success, error } = useToast()
 
 // State
 const showCustomerDataModal = ref(false)
-const pendingCustomerData = ref<CustomerData | null>(null)
+
+// Company data
+const companyName = EMPRESA_CONFIG.nombre
 
 // Methods
 const closeModal = () => {
@@ -197,56 +198,26 @@ const handleCustomerDataSubmit = (data: CustomerData) => {
 }
 
 const exportToCompanyWhatsApp = (customerData?: CustomerData) => {
-  // Check if we need to collect customer data first
-  if (companyStore.hasRequiredFields && companyStore.requiredOrderFields.length > 0 && !customerData) {
-    showCustomerDataModal.value = true
-    return
-  }
+  // Simplified - no required fields collection for now
   
-  // Get template from feature metadata
-  const whatsappFeature = companyStore.company?.features?.find(f => f.codigo === 'pedido_whatsapp' && f.habilitado)
-  let messageTemplate = whatsappFeature?.metadata?.mensaje_template
+  // Use default template
+  let messageTemplate: string | undefined
   
-  // Decode base64 if needed
-  if (messageTemplate && messageTemplate.startsWith('base64:')) {
-    try {
-      const base64Content = messageTemplate.replace('base64:type15:', '')
-      messageTemplate = atob(base64Content)
-    } catch (error) {
-      console.error('Error decoding base64 template:', error)
-      messageTemplate = undefined
-    }
-  }
-  
-  const message = cartStore.exportForWhatsAppPedido(companyStore.companyName, messageTemplate, customerData)
-  // Extract phone number from WhatsApp URL
-  const whatsappUrl = companyStore.whatsappUrl
-  let phoneNumber = ''
-  
-  if (whatsappUrl) {
-    // Try to extract phone number from different WhatsApp URL formats
-    const phoneMatch = whatsappUrl.match(/(?:wa\.me\/|whatsapp\.com\/send\?phone=)(\d+)/)
-    phoneNumber = phoneMatch ? phoneMatch[1] : ''
-  }
+  const message = cartStore.exportForWhatsAppPedido(companyName, messageTemplate, customerData)
   
   // Use the correct WhatsApp URL format for both mobile and desktop
+  const phoneNumber = EMPRESA_CONFIG.whatsapp
   let url = ''
-  if (phoneNumber) {
-    // Try WhatsApp Web first for desktop compatibility
-    if (navigator.userAgent.includes('Mobile') || navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone')) {
-      url = `https://wa.me/${phoneNumber}?text=${message}`
-    } else {
-      url = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${message}`
-    }
+  
+  if (navigator.userAgent.includes('Mobile') || navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone')) {
+    url = `https://wa.me/${phoneNumber}?text=${message}`
   } else {
-    // Fallback to original URL with proper parameter separator
-    const separator = whatsappUrl.includes('?') ? '&' : '?'
-    url = `${whatsappUrl}${separator}text=${message}`
+    url = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${message}`
   }
     
   window.open(url, '_blank')
   emit('exported', 'whatsapp-company')
-  success('Pedido enviado', `Se abrió WhatsApp para enviar el pedido a ${companyStore.companyName}`)
+  success('Pedido enviado', `Se abrió WhatsApp para enviar el pedido a ${companyName}`)
   closeModal()
   askToClearCart()
 }
@@ -273,7 +244,6 @@ const exportToEmail = () => {
 }
 
 const exportToPDF = () => {
-  const companyName = companyStore.companyName || 'Empresa'
   const doc = new jsPDF()
   
   // Title

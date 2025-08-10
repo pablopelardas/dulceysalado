@@ -38,12 +38,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useCompanyStore } from '@/stores/company'
+import { EMPRESA_CONFIG } from '@/config/empresa.config'
 
-const companyStore = useCompanyStore()
-
-const whatsappUrl = computed(() => companyStore.whatsappUrl)
-const companyName = computed(() => companyStore.companyName)
+const whatsappUrl = computed(() => 
+  EMPRESA_CONFIG.whatsapp ? `https://wa.me/${EMPRESA_CONFIG.whatsapp}` : null
+)
+const companyName = computed(() => EMPRESA_CONFIG.nombre)
 </script>
 
 <style scoped>

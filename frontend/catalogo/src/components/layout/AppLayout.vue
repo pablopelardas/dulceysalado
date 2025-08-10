@@ -1,6 +1,6 @@
 <!-- AppLayout.vue actualizado con mejor estructura -->
 <template>
-  <div class="min-h-screen flex flex-col" :style="{ background: `linear-gradient(135deg, var(--theme-primary), var(--theme-primary-dark))` }">
+  <div class="min-h-screen flex flex-col" :style="{ background: `linear-gradient(135deg, var(--theme-primary), var(--theme-gray-dark))` }">
     <!-- Header -->
     <AppHeader 
       @open-cart-summary="showCartSummary = true"
@@ -8,7 +8,7 @@
     />
     
     <!-- Header Spacer -->
-    <div style="height: 80px;"></div>
+    <div class="h-12 md:h-14 lg:h-16"></div>
     
     <!-- Main Content con container apropiado -->
     <main class="flex-1">

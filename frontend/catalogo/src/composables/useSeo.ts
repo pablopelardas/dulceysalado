@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+// Removed computed import as it's not used
 import type { Company } from '@/services/api'
 
 interface SeoData {
