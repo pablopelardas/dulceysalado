@@ -96,9 +96,9 @@
       <button
         v-for="(_, index) in Array(Math.ceil(products.length / visibleProducts))"
         :key="index"
-        @click="goToSlide(index * visibleProducts)"
+        @click="goToSlide(Math.min(index * visibleProducts, maxIndex))"
         class="dot cursor-pointer"
-        :class="{ 'active': Math.floor(currentIndex / visibleProducts) === index }"
+        :class="{ 'active': (currentIndex === index * visibleProducts || (index === 1 && currentIndex === maxIndex)) }"
         :aria-label="`Ir a la página ${index + 1}`"
       ></button>
     </div>

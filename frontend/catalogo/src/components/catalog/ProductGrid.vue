@@ -5,202 +5,42 @@
     <div class="mb-8 space-y-6">
       <!-- Novedades Section -->
       <section class="rounded-xl shadow-sm p-6" style="background-color: #1E1E1E;">
-        <!-- Novedades Carousel -->
-        <div class="carousel-container py-0 mb-6">
-          <!-- Title -->
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-              🆕 Novedades
-            </h2>
-            
-            <!-- Desktop Controls -->
-            <div v-if="mockNovedades.length > 4" class="hidden lg:flex items-center gap-2">
-              <button
-                @click="prevNovedadesSlide"
-                :disabled="novedadesIndex === 0"
-                class="carousel-control-btn cursor-pointer"
-                :class="{ 'opacity-50 cursor-not-allowed': novedadesIndex === 0 }"
-                aria-label="Anterior"
-              >
-                <ChevronLeftIcon class="h-5 w-5" />
-              </button>
-              <button
-                @click="nextNovedadesSlide"
-                :disabled="novedadesIndex >= maxNovedadesIndex"
-                class="carousel-control-btn cursor-pointer"
-                :class="{ 'opacity-50 cursor-not-allowed': novedadesIndex >= maxNovedadesIndex }"
-                aria-label="Siguiente"
-              >
-                <ChevronRightIcon class="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-          
-          <!-- Carousel -->
-          <div 
-            class="relative overflow-hidden rounded-xl"
-            @mouseenter="pauseNovedades"
-            @mouseleave="resumeNovedades"
-          >
-            <!-- Products Track -->
-            <div 
-              class="flex transition-transform duration-500 ease-in-out gap-4"
-              :style="{ transform: `translateX(-${(novedadesIndex * 100) / visibleItemsDesktop}%)` }"
-            >
-              <div
-                v-for="product in mockNovedades"
-                :key="product.codigo"
-                class="flex-shrink-0 w-1/2 sm:w-1/4 px-2"
-              >
-                <ProductCard 
-                  :product="product"
-                  :view-mode="'grid'"
-                  @open-cart="openAddToCartModal"
-                  @card-click="handleProductClick"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <!-- Mobile Navigation -->
-          <div v-if="isMobileView && mockNovedades.length > 1" class="flex justify-center items-center gap-3 mt-4 lg:hidden">
-            <button
-              @click="prevNovedadesSlide"
-              :disabled="novedadesIndex === 0"
-              class="carousel-control-btn cursor-pointer"
-              :class="{ 'opacity-50 cursor-not-allowed': novedadesIndex === 0 }"
-              aria-label="Anterior"
-            >
-              <ChevronLeftIcon class="h-4 w-4" />
-            </button>
-            
-            <div class="bg-gray-200 rounded-full px-4 py-2 text-gray-700 font-medium text-sm">
-              {{ novedadesIndex + 1 }} / {{ mockNovedades.length }}
-            </div>
-            
-            <button
-              @click="nextNovedadesSlide"
-              :disabled="novedadesIndex >= maxNovedadesIndex"
-              class="carousel-control-btn cursor-pointer"
-              :class="{ 'opacity-50 cursor-not-allowed': novedadesIndex >= maxNovedadesIndex }"
-              aria-label="Siguiente"
-            >
-              <ChevronRightIcon class="h-4 w-4" />
-            </button>
-          </div>
-          
-          <!-- Desktop Pagination Indicators -->
-          <div v-if="!isMobileView && mockNovedades.length > visibleItemsDesktop" class="flex justify-center mt-6 gap-2">
-            <button
-              v-for="(_, index) in Array(Math.ceil(mockNovedades.length / visibleItemsDesktop))"
-              :key="index"
-              @click="() => { const targetIndex = Math.min(index * visibleItemsDesktop, maxNovedadesIndex); console.log('Novedades dot clicked:', { index, targetIndex, currentIndex: novedadesIndex }); goToNovedadesSlide(targetIndex); console.log('After click, currentIndex:', novedadesIndex); }"
-              class="carousel-dot cursor-pointer"
-              :class="{ 'active': (novedadesIndex === index * visibleItemsDesktop || (index === 1 && novedadesIndex === maxNovedadesIndex)) }"
-              :aria-label="`Ir a la página ${index + 1}`"
-            ></button>
-          </div>
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+            🆕 Novedades
+          </h2>
+          <p class="text-lg text-gray-300">
+            Los productos más nuevos en nuestro catálogo
+          </p>
         </div>
+        
+        <ProductCarousel
+          title=""
+          :products="mockNovedades"
+          :icon="null"
+          :modal-open="showAddToCartModal"
+          @open-cart="openAddToCartModal"
+        />
       </section>
 
       <!-- Ofertas Section -->
       <section class="rounded-xl shadow-sm p-6" style="background-color: #2A2A2A;">
-        <!-- Ofertas Carousel -->
-        <div class="carousel-container py-0 mb-6">
-          <!-- Title -->
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-              🔥 Ofertas Especiales
-            </h2>
-            
-            <!-- Desktop Controls -->
-            <div v-if="mockOfertas.length > 4" class="hidden lg:flex items-center gap-2">
-              <button
-                @click="prevOfertasSlide"
-                :disabled="ofertasIndex === 0"
-                class="carousel-control-btn cursor-pointer"
-                :class="{ 'opacity-50 cursor-not-allowed': ofertasIndex === 0 }"
-                aria-label="Anterior"
-              >
-                <ChevronLeftIcon class="h-5 w-5" />
-              </button>
-              <button
-                @click="nextOfertasSlide"
-                :disabled="ofertasIndex >= maxOfertasIndex"
-                class="carousel-control-btn cursor-pointer"
-                :class="{ 'opacity-50 cursor-not-allowed': ofertasIndex >= maxOfertasIndex }"
-                aria-label="Siguiente"
-              >
-                <ChevronRightIcon class="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-          
-          <!-- Carousel -->
-          <div 
-            class="relative overflow-hidden rounded-xl"
-            @mouseenter="pauseOfertas"
-            @mouseleave="resumeOfertas"
-          >
-            <!-- Products Track -->
-            <div 
-              class="flex transition-transform duration-500 ease-in-out gap-4"
-              :style="{ transform: `translateX(-${(ofertasIndex * 100) / visibleItemsDesktop}%)` }"
-            >
-              <div
-                v-for="product in mockOfertas"
-                :key="product.codigo"
-                class="flex-shrink-0 w-1/2 sm:w-1/4 px-2"
-              >
-                <ProductCard 
-                  :product="product"
-                  :view-mode="'grid'"
-                  @open-cart="openAddToCartModal"
-                  @card-click="handleProductClick"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <!-- Mobile Navigation -->
-          <div v-if="isMobileView && mockOfertas.length > 1" class="flex justify-center items-center gap-3 mt-4 lg:hidden">
-            <button
-              @click="prevOfertasSlide"
-              :disabled="ofertasIndex === 0"
-              class="carousel-control-btn cursor-pointer"
-              :class="{ 'opacity-50 cursor-not-allowed': ofertasIndex === 0 }"
-              aria-label="Anterior"
-            >
-              <ChevronLeftIcon class="h-4 w-4" />
-            </button>
-            
-            <div class="bg-gray-200 rounded-full px-4 py-2 text-gray-700 font-medium text-sm">
-              {{ ofertasIndex + 1 }} / {{ mockOfertas.length }}
-            </div>
-            
-            <button
-              @click="nextOfertasSlide"
-              :disabled="ofertasIndex >= maxOfertasIndex"
-              class="carousel-control-btn cursor-pointer"
-              :class="{ 'opacity-50 cursor-not-allowed': ofertasIndex >= maxOfertasIndex }"
-              aria-label="Siguiente"
-            >
-              <ChevronRightIcon class="h-4 w-4" />
-            </button>
-          </div>
-          
-          <!-- Desktop Pagination Indicators -->
-          <div v-if="!isMobileView && mockOfertas.length > visibleItemsDesktop" class="flex justify-center mt-6 gap-2">
-            <button
-              v-for="(_, index) in Array(Math.ceil(mockOfertas.length / visibleItemsDesktop))"
-              :key="index"
-              @click="goToOfertasSlide(index * visibleItemsDesktop)"
-              class="carousel-dot cursor-pointer"
-              :class="{ 'active': Math.floor(ofertasIndex / visibleItemsDesktop) === index }"
-              :aria-label="`Ir a la página ${index + 1}`"
-            ></button>
-          </div>
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+            🔥 Ofertas Especiales
+          </h2>
+          <p class="text-lg text-gray-300">
+            Los mejores precios que no podés dejar pasar
+          </p>
         </div>
+        
+        <ProductCarousel
+          title=""
+          :products="mockOfertas"
+          :icon="null"
+          :modal-open="showAddToCartModal"
+          @open-cart="openAddToCartModal"
+        />
       </section>
     </div>
 
@@ -418,11 +258,10 @@ import {
   Squares2X2Icon as ViewGridIcon,
   ListBulletIcon,
   ExclamationTriangleIcon,
-  ShoppingBagIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon
+  ShoppingBagIcon
 } from '@heroicons/vue/24/outline'
 import ProductCard from './ProductCard.vue'
+import ProductCarousel from './ProductCarousel.vue'
 import ProductSkeleton from '@/components/ui/ProductSkeleton.vue'
 import CategoryChipSkeleton from '@/components/ui/CategoryChipSkeleton.vue'
 import Pagination from '@/components/ui/Pagination.vue'
@@ -608,16 +447,6 @@ const searchQuery = ref('')
 const selectedCategory = ref<number | null>(null)
 const showFeaturedOnly = ref(false)
 
-// Carousel state
-const novedadesIndex = ref(0)
-const ofertasIndex = ref(0)
-const isMobileView = ref(false)
-const novedadesPaused = ref(false)
-const ofertasPaused = ref(false)
-const novedadesTimer = ref<number | null>(null)
-const ofertasTimer = ref<number | null>(null)
-const visibleItemsDesktop = 4
-const visibleItemsMobile = 2
 // Load view mode from localStorage or default to 'grid'
 const getStoredViewMode = (): 'grid' | 'list' => {
   try {
@@ -671,113 +500,7 @@ const isInitialLoading = computed(() => catalogStore.initializing)
 // Update loading to include initial loading
 const isLoading = computed(() => loading.value || catalogStore.initializing)
 
-// Carousel computed
-const visibleItems = computed(() => isMobileView.value ? visibleItemsMobile : visibleItemsDesktop)
-const maxNovedadesIndex = computed(() => {
-  const maxIndex = Math.max(0, mockNovedades.value.length - visibleItemsDesktop)
-  console.log('maxNovedadesIndex calculated:', { productsLength: mockNovedades.value.length, visibleItems: visibleItemsDesktop, maxIndex })
-  return maxIndex
-})
-const maxOfertasIndex = computed(() => Math.max(0, mockOfertas.value.length - visibleItemsDesktop))
 
-// Carousel methods
-const nextNovedadesSlide = () => {
-  if (novedadesIndex.value < maxNovedadesIndex.value) {
-    novedadesIndex.value += isMobileView.value ? 1 : visibleItemsDesktop
-  } else {
-    novedadesIndex.value = 0 // Loop back to start
-  }
-}
-
-const prevNovedadesSlide = () => {
-  if (novedadesIndex.value > 0) {
-    novedadesIndex.value -= isMobileView.value ? 1 : visibleItemsDesktop
-  } else {
-    novedadesIndex.value = maxNovedadesIndex.value // Loop to end
-  }
-}
-
-const goToNovedadesSlide = (index: number) => {
-  console.log('goToNovedadesSlide called:', { index, maxIndex: maxNovedadesIndex.value, beforeIndex: novedadesIndex.value })
-  novedadesIndex.value = Math.min(index, maxNovedadesIndex.value)
-  console.log('goToNovedadesSlide result:', { newIndex: novedadesIndex.value })
-}
-
-const nextOfertasSlide = () => {
-  if (ofertasIndex.value < maxOfertasIndex.value) {
-    ofertasIndex.value += isMobileView.value ? 1 : visibleItemsDesktop
-  } else {
-    ofertasIndex.value = 0 // Loop back to start
-  }
-}
-
-const prevOfertasSlide = () => {
-  if (ofertasIndex.value > 0) {
-    ofertasIndex.value -= isMobileView.value ? 1 : visibleItemsDesktop
-  } else {
-    ofertasIndex.value = maxOfertasIndex.value // Loop to end
-  }
-}
-
-const goToOfertasSlide = (index: number) => {
-  ofertasIndex.value = Math.min(index, maxOfertasIndex.value)
-}
-
-// Autoplay methods
-const startNovedadesAutoplay = () => {
-  if (mockNovedades.value.length <= visibleItems.value || showAddToCartModal.value) return
-  
-  novedadesTimer.value = setInterval(() => {
-    if (!novedadesPaused.value && !showAddToCartModal.value) {
-      nextNovedadesSlide()
-    }
-  }, 5000)
-}
-
-const startOfertasAutoplay = () => {
-  if (mockOfertas.value.length <= visibleItems.value || showAddToCartModal.value) return
-  
-  ofertasTimer.value = setInterval(() => {
-    if (!ofertasPaused.value && !showAddToCartModal.value) {
-      nextOfertasSlide()
-    }
-  }, 5000)
-}
-
-const stopNovedadesAutoplay = () => {
-  if (novedadesTimer.value) {
-    clearInterval(novedadesTimer.value)
-    novedadesTimer.value = null
-  }
-}
-
-const stopOfertasAutoplay = () => {
-  if (ofertasTimer.value) {
-    clearInterval(ofertasTimer.value)
-    ofertasTimer.value = null
-  }
-}
-
-const pauseNovedades = () => {
-  novedadesPaused.value = true
-}
-
-const resumeNovedades = () => {
-  novedadesPaused.value = false
-}
-
-const pauseOfertas = () => {
-  ofertasPaused.value = true
-}
-
-const resumeOfertas = () => {
-  ofertasPaused.value = false
-}
-
-// Responsive check
-const checkMobile = () => {
-  isMobileView.value = window.innerWidth < 768
-}
 
 // Methods
 const setViewMode = (mode: 'grid' | 'list') => {
@@ -1000,27 +723,7 @@ watch([
 
 // Products loading is now handled by the global initializing state
 
-// Watch for modal state changes
-watch(() => showAddToCartModal.value, (isOpen) => {
-  if (isOpen) {
-    // Modal opened - stop autoplay
-    stopNovedadesAutoplay()
-    stopOfertasAutoplay()
-  } else {
-    // Modal closed - restart autoplay
-    if (mockNovedades.value.length > visibleItems.value) {
-      startNovedadesAutoplay()
-    }
-    if (mockOfertas.value.length > visibleItems.value) {
-      startOfertasAutoplay()
-    }
-  }
-})
 
-// Debug watch for novedadesIndex
-watch(() => novedadesIndex.value, (newValue, oldValue) => {
-  console.log('novedadesIndex changed:', { oldValue, newValue, activePage: Math.floor(newValue / visibleItemsDesktop) })
-})
 
 // Initialize
 onMounted(async () => {
@@ -1028,24 +731,10 @@ onMounted(async () => {
   // Force sync from store first
   syncFiltersFromStore()
   // Don't fetch products here - let Catalog.vue handle it
-  
-  // Setup carousel
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-  
-  // Start autoplay
-  if (mockNovedades.value.length > visibleItems.value) {
-    startNovedadesAutoplay()
-  }
-  if (mockOfertas.value.length > visibleItems.value) {
-    startOfertasAutoplay()
-  }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', checkMobile)
-  stopNovedadesAutoplay()
-  stopOfertasAutoplay()
+  // No cleanup needed for carousels since we use ProductCarousel component
 })
 </script>
 
@@ -1075,31 +764,4 @@ onUnmounted(() => {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Carousel Styles */
-.carousel-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.carousel-control-btn {
-  @apply w-10 h-10 rounded-full flex items-center justify-center text-gray-700 transition-all duration-200 border;
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(0, 0, 0, 0.1);
-}
-
-.carousel-control-btn:hover {
-  @apply bg-white shadow-md transform scale-105;
-}
-
-.carousel-dot {
-  @apply w-3 h-3 rounded-full transition-all duration-200 bg-gray-300;
-}
-
-.carousel-dot:hover {
-  @apply bg-gray-400;
-}
-
-.carousel-dot.active {
-  @apply transform scale-125 bg-red-600;
-}
 </style>

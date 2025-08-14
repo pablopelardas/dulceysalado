@@ -13,12 +13,19 @@ namespace DistriCatalogoAPI.Api.Extensions
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
                 {
                     var clientIP = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                    var path = context.Request.Path.Value ?? "";
+
+                    // Excluir imágenes del rate limiting
+                    if (path.StartsWith("/api/images/"))
+                    {
+                        return RateLimitPartition.GetNoLimiter(clientIP);
+                    }
 
                     return RateLimitPartition.GetFixedWindowLimiter(clientIP, _ =>
                         new FixedWindowRateLimiterOptions
                         {
                             Window = TimeSpan.FromMinutes(1),
-                            PermitLimit = 300, // 300 requests por minuto por IP (5 por segundo)
+                            PermitLimit = 600, // 600 requests por minuto por IP (10 por segundo)
                             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                             QueueLimit = 50
                         });

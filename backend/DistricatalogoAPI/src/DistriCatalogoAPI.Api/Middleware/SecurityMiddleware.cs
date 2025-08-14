@@ -116,8 +116,8 @@ namespace DistriCatalogoAPI.Api.Middleware
                 // 4. Tracking de actividad por IP
                 TrackIPActivity(clientIP, path);
 
-                // 5. Rate limiting check
-                if (IsRateLimitExceeded(clientIP))
+                // 5. Rate limiting check (excluir imágenes del rate limiting)
+                if (!path.StartsWith("/api/images/") && IsRateLimitExceeded(clientIP))
                 {
                     _logger.LogWarning("🚨 RATE LIMIT EXCEEDED: {IP} -> {Method} {Path}",
                         clientIP, method, path);

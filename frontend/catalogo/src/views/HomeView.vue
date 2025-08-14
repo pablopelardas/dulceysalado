@@ -128,8 +128,8 @@
                   target="_blank"
                   class="inline-flex items-center justify-center gap-2 px-4 py-2 text-white font-medium rounded-lg transition-colors duration-200"
                   :style="{ backgroundColor: 'var(--theme-accent)' }"
-                  @mouseenter="$event.target.style.backgroundColor = '#CC0000'"
-                  @mouseleave="$event.target.style.backgroundColor = 'var(--theme-accent)'"
+                  @mouseenter="handleButtonHover"
+                  @mouseleave="handleButtonLeave"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -462,6 +462,20 @@ const mockOfertas = ref<Product[]>([
 // Methods
 const handleAddToCart = (product: Product) => {
   cartStore.addItem(product, 1)
+}
+
+const handleButtonHover = (event: Event) => {
+  const target = event.target as HTMLElement
+  if (target) {
+    target.style.backgroundColor = '#CC0000'
+  }
+}
+
+const handleButtonLeave = (event: Event) => {
+  const target = event.target as HTMLElement
+  if (target) {
+    target.style.backgroundColor = 'var(--theme-accent)'
+  }
 }
 
 const handleProductClick = (product: Product) => {

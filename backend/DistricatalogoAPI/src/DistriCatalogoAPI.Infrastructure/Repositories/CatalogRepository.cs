@@ -890,11 +890,14 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
             var queryBusqueda = from pb in _context.ProductosBases
                                join pbp in _context.ProductosBasePrecios on pb.Id equals pbp.ProductoBaseId
                                join lp in _context.ListasPrecios on pbp.ListaPrecioId equals lp.Id
-                               where pb.AdministradoPorEmpresaId == empresaId &&
+                               join pbs in _context.ProductosBaseStocks on new { pb.Id, EmpresaId = empresaId } equals new { Id = pbs.ProductoBaseId, pbs.EmpresaId } into stockJoin
+                               from stock in stockJoin.DefaultIfEmpty()
+                                where pb.AdministradoPorEmpresaId == empresaId &&
                                      (pb.Visible ?? false) == true &&
                                      lp.Id == listaPrecioId.Value &&
-                                     lp.Activa == true
-                               select new 
+                                     lp.Activa == true &&
+                                    (stock == null || stock.Existencia > 0) // Solo productos con stock o sin registro de stock
+                                select new 
                                {
                                    ProductoId = pb.Id,
                                    Descripcion = pb.Descripcion ?? "",

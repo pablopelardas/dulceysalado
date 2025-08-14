@@ -7,21 +7,26 @@ interface Product {
   codigo: string
   nombre: string
   descripcion: string
-  descripcion_corta: string | null
+  descripcion_corta?: string | null
   precio: number | null
+  precio_anterior?: number | null
   destacado: boolean
   imagen_urls: string[]
   stock: number | null
-  tags: string[]
+  tags?: string[]
   marca: string
-  unidad: string
-  codigo_barras: string | null
-  codigo_rubro: number
-  imagen_alt: string | null
-  tipo_producto: string
-  lista_precio_id: number | null
-  lista_precio_nombre: string | null
-  lista_precio_codigo: string | null
+  unidad?: string
+  codigo_barras?: string | null
+  codigo_rubro?: number
+  imagen_alt?: string | null
+  tipo_producto?: string
+  lista_precio_id?: number | null
+  lista_precio_nombre?: string | null
+  lista_precio_codigo?: string | null
+  lista?: string
+  novedad?: boolean
+  oferta?: boolean
+  categoria?: string
 }
 
 interface Category {

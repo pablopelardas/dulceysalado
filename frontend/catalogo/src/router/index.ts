@@ -20,17 +20,6 @@ const router = createRouter({
       component: () => import('../views/Catalog.vue'),
     },
     {
-      path: '/ofertas',
-      name: 'ofertas',
-      component: () => import('../views/Catalog.vue'),
-      props: { showOnlyFeatured: true }
-    },
-    {
-      path: '/contacto',
-      name: 'contacto',
-      component: () => import('../views/ContactView.vue'),
-    },
-    {
       path: '/category/:code',
       name: 'Category',
       component: () => import('../views/Category.vue'),
