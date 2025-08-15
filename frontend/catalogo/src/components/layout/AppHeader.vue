@@ -2,26 +2,28 @@
 <template>
   <div>
     <!-- Main Header -->
-    <header class="fixed top-0 left-0 right-0 z-50 h-12 md:h-14 lg:h-16 bg-white shadow-md border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header class="fixed top-0 left-0 right-0 z-50 h-12 md:h-14 lg:h-16 bg-white shadow-md border-b border-gray-200 pointer-events-none">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-auto">
         <div class="flex items-start justify-between h-full gap-4 pt-2">
           <!-- Logo y nombre de empresa -->
-          <RouterLink to="/" class="flex items-start gap-4 text-decoration-none transition-transform duration-200 hover:-translate-y-px relative z-10">
-            <img 
-              :src="EMPRESA_CONFIG.logoUrl" 
-              :alt="EMPRESA_CONFIG.nombre"
-              class="h-16 md:h-20 lg:h-32 w-auto max-w-[200px] md:max-w-[260px] lg:max-w-[400px] object-contain drop-shadow-lg"
-            />
-            <div class="hidden sm:block text-gray-900 mt-1">
+          <div class="flex items-start gap-4 relative z-10">
+            <RouterLink to="/" class="text-decoration-none transition-transform duration-200 hover:-translate-y-px pointer-events-auto absolute top-0 left-4 z-20">
+              <img 
+                :src="EMPRESA_CONFIG.logoUrl" 
+                :alt="EMPRESA_CONFIG.nombre"
+                class="h-16 md:h-20 lg:h-32 w-auto max-w-[200px] md:max-w-[260px] lg:max-w-[400px] object-contain drop-shadow-lg"
+              />
+            </RouterLink>
+            <RouterLink to="/" class="hidden sm:block text-gray-900 mt-1 text-decoration-none transition-all duration-200 hover:text-red-600 pointer-events-auto ml-20 md:ml-24 lg:ml-40">
               <h1 class="font-bold text-xl md:text-2xl lg:text-3xl">
                 {{ EMPRESA_CONFIG.nombre }}
               </h1>
-            </div>
-          </RouterLink>
+            </RouterLink>
+          </div>
           
           <!-- Search Bar (centro del header) -->
           <div 
-            class="hidden md:block flex-1 max-w-lg mx-4 mt-1"
+            class="hidden md:block flex-1 max-w-lg mx-4 mt-1 pointer-events-auto"
           >
             <SearchBar 
               v-model="searchQuery"
@@ -33,7 +35,7 @@
           </div>
           
           <!-- Navegación desktop -->
-          <nav class="hidden lg:flex items-start gap-6 mt-1">
+          <nav class="hidden lg:flex items-start gap-6 mt-1 pointer-events-auto">
             <RouterLink 
               to="/" 
               class="relative font-semibold text-base text-gray-900 px-3 py-2 rounded transition-all duration-200 hover:text-red-600 hover:bg-gray-50"
@@ -61,7 +63,7 @@
           </nav>
           
           <!-- Cart Button (solo si está habilitado) -->
-          <div v-if="allowOrders" class="hidden lg:block">
+          <div v-if="allowOrders" class="hidden lg:block pointer-events-auto">
             <FloatingCart 
               :always-show="true" 
               :compact="true"
@@ -72,7 +74,7 @@
           
           <!-- Menú hamburguesa móvil -->
           <button 
-            class="lg:hidden flex flex-col justify-center items-center w-10 h-10 p-2 rounded hover:bg-gray-50 transition-colors duration-200 mt-1"
+            class="lg:hidden flex flex-col justify-center items-center w-10 h-10 p-2 rounded hover:bg-gray-50 transition-colors duration-200 mt-1 pointer-events-auto"
             @click="toggleMobileMenu"
             aria-label="Abrir menú"
           >
