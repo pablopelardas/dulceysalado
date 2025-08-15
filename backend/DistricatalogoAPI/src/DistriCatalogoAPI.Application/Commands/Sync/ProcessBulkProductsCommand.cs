@@ -18,6 +18,7 @@ namespace DistriCatalogoAPI.Application.Commands.Sync
         public string Codigo { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public int? CategoriaId { get; set; }
+        public string? CategoriaNombre { get; set; } // NUEVO: Nombre de la categoría para crear/actualizar
         public decimal? Precio { get; set; } // Precio para la lista actual de la sesión (opcional para compatibilidad)
         public List<ProductPriceDto>? ListasPrecios { get; set; } // NUEVO: Array de precios para múltiples listas
         public decimal Stock { get; set; } // Mantenido para compatibilidad de estructura - no se usa para stock

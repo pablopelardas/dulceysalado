@@ -83,23 +83,6 @@ namespace DistriCatalogoAPI.Api.Controllers
             try
             {
                 var empresaId = GetEmpresaIdFromToken();
-                
-                // DEBUG: Log para verificar que lleguen los stocks por empresa
-                _logger.LogInformation("🔍 DEBUG - Productos recibidos: {Count}", request.Productos.Length);
-                foreach (var producto in request.Productos.Take(3)) // Solo los primeros 3 para no saturar logs
-                {
-                    _logger.LogInformation("🔍 DEBUG - Producto {Codigo}: StocksPorEmpresa Count = {Count}", 
-                        producto.Codigo, producto.StocksPorEmpresa?.Count ?? 0);
-                    
-                    if (producto.StocksPorEmpresa?.Any() == true)
-                    {
-                        foreach (var stock in producto.StocksPorEmpresa)
-                        {
-                            _logger.LogInformation("🔍 DEBUG - Stock EmpresaId: {EmpresaId}, Stock: {Stock}", 
-                                stock.EmpresaId, stock.Stock);
-                        }
-                    }
-                }
 
                 var command = new ProcessBulkProductsCommand
                 {
@@ -111,6 +94,7 @@ namespace DistriCatalogoAPI.Api.Controllers
                         Codigo = p.Codigo,
                         Descripcion = p.Descripcion ?? "", // Descripción vacía si es null
                         CategoriaId = p.CategoriaId,
+                        CategoriaNombre = p.CategoriaNombre,
                         Precio = p.Precio,
                         ListasPrecios = p.ListasPrecios?.Select(lp => new ProductPriceDto
                         {
@@ -611,6 +595,7 @@ namespace DistriCatalogoAPI.Api.Controllers
             public string Codigo { get; set; }
             public string? Descripcion { get; set; } // Nullable para modo stock_only_mode
             public int? CategoriaId { get; set; }
+            public string? CategoriaNombre { get; set; } // NUEVO: Nombre de la categoría para crear/actualizar
             public decimal? Precio { get; set; } // Opcional para compatibilidad hacia atrás
             
             [JsonPropertyName("listas_precios")]

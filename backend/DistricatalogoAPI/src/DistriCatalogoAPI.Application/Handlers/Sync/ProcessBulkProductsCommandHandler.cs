@@ -236,6 +236,12 @@ namespace DistriCatalogoAPI.Application.Handlers.Sync
             _logger.LogInformation("Diagnóstico categorías: {TotalProductos} productos, {ConCategoria} con categoría, {SinCategoria} sin categoría", 
                 productos.Count, productosConCategoria, productosSinCategoria);
 
+            // Crear un mapeo de CategoriaId -> CategoriaNombre para las categorías que vienen con nombre
+            var categoriaNombresMap = productos
+                .Where(p => p.CategoriaId.HasValue && !string.IsNullOrWhiteSpace(p.CategoriaNombre))
+                .GroupBy(p => p.CategoriaId.Value)
+                .ToDictionary(g => g.Key, g => g.First().CategoriaNombre);
+
             var categoriaIds = productos
                 .Where(p => p.CategoriaId.HasValue)
                 .Select(p => p.CategoriaId.Value)
@@ -263,16 +269,42 @@ namespace DistriCatalogoAPI.Application.Handlers.Sync
 
             _logger.LogInformation("Categorías existentes: [{Existentes}]", string.Join(", ", categoriasExistentes));
 
+            // Actualizar nombres de categorías existentes si se proporcionaron
+            if (categoriasExistentes.Count > 0 && categoriaNombresMap.Count > 0)
+            {
+                var categoriasParaActualizar = await _categoryRepository.GetByCodigosRubroAsync(categoriasExistentes);
+                var actualizadas = 0;
+                
+                foreach (var categoria in categoriasParaActualizar)
+                {
+                    if (categoriaNombresMap.TryGetValue(categoria.CodigoRubro, out var nuevoNombre))
+                    {
+                        categoria.UpdateNombreFromSync(nuevoNombre);
+                        actualizadas++;
+                    }
+                }
+                
+                if (actualizadas > 0)
+                {
+                    await _categoryRepository.UpdateBulkAsync(categoriasParaActualizar);
+                    _logger.LogInformation("Actualizados nombres de {Count} categorías existentes", actualizadas);
+                }
+            }
+
             var categoriasCreadas = new List<int>();
 
-            // Crear categorías faltantes automáticamente
+            // Crear categorías faltantes automáticamente con nombres si se proporcionaron
             if (categoriasInexistentes.Count > 0)
             {
                 _logger.LogInformation("Creando automáticamente {Count} categorías faltantes: [{Categorias}]", 
                     categoriasInexistentes.Count, string.Join(", ", categoriasInexistentes));
 
                 var categoriasParaCrear = categoriasInexistentes
-                    .Select(codigoRubro => CategoryBase.CreateFromSync(codigoRubro, empresaId))
+                    .Select(codigoRubro => 
+                    {
+                        var nombre = categoriaNombresMap.TryGetValue(codigoRubro, out var n) ? n : null;
+                        return CategoryBase.CreateFromSync(codigoRubro, empresaId, nombre);
+                    })
                     .ToList();
 
                 try

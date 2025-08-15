@@ -88,12 +88,22 @@ namespace SigmaProcessor.Services.Sigma
 
         private SigmaProduct MapXmlRowToProduct(Dictionary<string, string> row)
         {
+            var fcodigo = SigmaEncodingHelper.CleanXmlValue(row.GetValueOrDefault("fcodigo", ""));
+            
+            // Debug raw values from XML before cleaning
+            var rawFgrupo = row.GetValueOrDefault("fgrupo", "");
+            var rawGrunom = row.GetValueOrDefault("grunom", "");
+            
+            var fgrupo = SigmaEncodingHelper.CleanXmlValue(rawFgrupo);
+            var grunom = SigmaEncodingHelper.CleanXmlValue(rawGrunom);
+            
+            
             return new SigmaProduct
             {
-                fcodigo = SigmaEncodingHelper.CleanXmlValue(row.GetValueOrDefault("fcodigo", "")),
+                fcodigo = fcodigo,
                 artnom = SigmaEncodingHelper.CleanXmlValue(row.GetValueOrDefault("artnom", "")),
-                fgrupo = SigmaEncodingHelper.CleanXmlValue(row.GetValueOrDefault("fgrupo", "")),
-                grunom = SigmaEncodingHelper.CleanXmlValue(row.GetValueOrDefault("grunom", "")),
+                fgrupo = fgrupo,
+                grunom = grunom,
                 frubro = SigmaEncodingHelper.CleanXmlValue(row.GetValueOrDefault("frubro", "")),
                 rubnom = SigmaEncodingHelper.CleanXmlValue(row.GetValueOrDefault("rubnom", "")),
                 codprov = SigmaEncodingHelper.CleanXmlValue(row.GetValueOrDefault("codprov", "")),

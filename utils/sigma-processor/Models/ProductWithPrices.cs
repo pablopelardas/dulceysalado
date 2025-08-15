@@ -13,6 +13,8 @@ public class ProductWithPrices
     public string Descripcion { get; set; } = string.Empty;
 
     public int? CodigoRubro { get; set; }
+    
+    public string? CategoriaNombre { get; set; }
 
     public decimal Existencia { get; set; }
 

@@ -176,20 +176,7 @@ public class ApiService
                 lote_numero = batchNumber,
                 productos = batch.Select(p => 
                 {
-                    _logger.LogInformation("API MAPPING - Producto {Codigo}: {Count} listas", p.Codigo, p.ListasPrecios.Count);
-                    _logger.LogInformation("API MAPPING - Producto {Codigo} Grupos: G1={Grupo1}, G2={Grupo2}, G3={Grupo3}", 
-                        p.Codigo, p.Grupo1, p.Grupo2, p.Grupo3);
                     
-                    // Log detallado para producto 92
-                    if (p.Codigo == "92")
-                    {
-                        _logger.LogInformation("API MAPPING DETALLE - Producto 92 antes de mapear:");
-                        for (int i = 0; i < p.ListasPrecios.Count; i++)
-                        {
-                            _logger.LogInformation("  Lista[{Index}]: ListaId={Id}, Precio={Precio}", 
-                                i, p.ListasPrecios[i].ListaId, p.ListasPrecios[i].Precio);
-                        }
-                    }
                     
                     var productoMapeado = new
                     {
@@ -197,6 +184,7 @@ public class ApiService
                         nombre = p.Descripcion,
                         descripcion = p.Descripcion,
                         categoria_id = p.CodigoRubro,
+                        categoria_nombre = p.CategoriaNombre,
                         precio = p.ListasPrecios.Any() ? (decimal?)null : p.PrecioDefault, // null si tiene listas_precios
                         stock = (int)p.Existencia,
                         activo = p.Disponible == "S",
@@ -218,11 +206,6 @@ public class ApiService
                                 Fecha = lp.Fecha?.ToString("yyyy-MM-dd")
                             };
                             
-                            if (p.Codigo == "92")
-                            {
-                                _logger.LogInformation("API MAPPING - Lista[{Index}] mapeada: ListaId={Id}, Precio={Precio}", 
-                                    idx, lista.ListaId, lista.Precio);
-                            }
                             
                             return lista;
                         }).ToArray(),
@@ -235,11 +218,6 @@ public class ApiService
                         }).ToArray() ?? new object[0]
                     };
                     
-                    if (p.Codigo == "92")
-                    {
-                        _logger.LogInformation("API MAPPING - Producto 92 después de mapear: {Count} listas", 
-                            productoMapeado.listas_precios.Length);
-                    }
                     
                     return productoMapeado;
                 }).ToArray()

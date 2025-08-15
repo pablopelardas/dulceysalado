@@ -43,7 +43,6 @@ namespace SigmaProcessor.Services.Sigma
                     }
                     else
                     {
-                        _logger.LogWarning("Stock inválido saltado: {Codigo}", row.GetValueOrDefault("codart", "N/A"));
                         errorCount++;
                     }
                 }
@@ -116,7 +115,6 @@ namespace SigmaProcessor.Services.Sigma
             // El stock puede ser 0 o positivo
             if (stock.fstock < 0)
             {
-                _logger.LogWarning("Stock {Codigo} tiene valor negativo: {Stock}", stock.codart, stock.fstock);
                 return false;
             }
 

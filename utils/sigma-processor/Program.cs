@@ -166,6 +166,7 @@ class Program
                     Codigo = p.Codigo,
                     Descripcion = p.Descripcion,
                     CodigoRubro = p.CodigoRubro,
+                    CategoriaNombre = p.CategoriaNombre,
                     Existencia = p.Existencia,
                     Grupo1 = p.Grupo1,
                     Grupo2 = p.Grupo2,

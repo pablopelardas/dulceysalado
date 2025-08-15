@@ -79,7 +79,10 @@ namespace SigmaProcessor.Utils.Sigma
         public static int? GetCategoryFromGroup(string fgrupo)
         {
             // fgrupo es la categoría según la corrección
-            return ParseIntSafely(fgrupo);
+            var result = ParseIntSafely(fgrupo);
+            
+            
+            return result;
         }
 
         public static int? GetGroup2FromRubro(string frubro)

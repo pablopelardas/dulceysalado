@@ -174,6 +174,40 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
             }
         }
 
+        public async Task UpdateBulkAsync(List<CategoryBase> categories)
+        {
+            if (!categories.Any()) return;
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            
+            try
+            {
+                foreach (var category in categories)
+                {
+                    var existingCategory = await _context.CategoriasBases
+                        .FirstOrDefaultAsync(c => c.Id == category.Id);
+
+                    if (existingCategory != null)
+                    {
+                        existingCategory.Nombre = category.Nombre;
+                        existingCategory.UpdatedAt = category.UpdatedAt;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("Bulk update de categorías completado: {Count} categorías actualizadas", 
+                    categories.Count);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error en bulk update de categorías");
+                throw;
+            }
+        }
+
         public async Task<bool> ExistsByCodigoRubroAsync(int codigoRubro)
         {
             try

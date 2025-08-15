@@ -13,6 +13,7 @@ namespace DistriCatalogoAPI.Domain.Interfaces
         Task<CategoryBase> CreateAsync(CategoryBase category);
         Task<CategoryBase> UpdateAsync(CategoryBase category);
         Task<List<CategoryBase>> BulkCreateAsync(List<CategoryBase> categories);
+        Task UpdateBulkAsync(List<CategoryBase> categories);
         Task<bool> ExistsByCodigoRubroAsync(int codigoRubro);
         Task<bool> ExistsByCodigoRubroInPrincipalCompanyAsync(int codigoRubro, int empresaPrincipalId);
         Task<bool> CategoryExistsInPrincipalCompanyAsync(int codigoRubro, int empresaPrincipalId);

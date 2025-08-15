@@ -71,6 +71,18 @@ namespace SigmaProcessor.Services.Sigma
                 return null;
             }
 
+            
+            var codigoRubro = SigmaFieldMapper.GetCategoryFromGroup(product.fgrupo);
+            var categoriaNombre = !string.IsNullOrWhiteSpace(product.grunom) ? product.grunom.Trim() : null;
+            
+            
+            // Solo log para productos con categoría
+            if (codigoRubro.HasValue || !string.IsNullOrWhiteSpace(categoriaNombre))
+            {
+                _logger.LogInformation("CATEGORIA: Producto {Codigo}: fgrupo='{Fgrupo}' → CodigoRubro={CodigoRubro}, grunom='{Grunom}' → CategoriaNombre='{CategoriaNombre}'",
+                    product.fcodigo, product.fgrupo, codigoRubro, product.grunom, categoriaNombre);
+            }
+
             var apiProduct = new ProductWithPricesAndStock
             {
                 // Campos básicos del producto - mantener código como string original
@@ -78,7 +90,8 @@ namespace SigmaProcessor.Services.Sigma
                 Descripcion = product.artnom,
                 
                 // Mapeo CORREGIDO: fgrupo → categoria_id (NO frubro)
-                CodigoRubro = SigmaFieldMapper.GetCategoryFromGroup(product.fgrupo),
+                CodigoRubro = codigoRubro,
+                CategoriaNombre = categoriaNombre,
                 
                 // Campos de agrupación
                 Grupo1 = null, // No usado según spec
@@ -103,10 +116,12 @@ namespace SigmaProcessor.Services.Sigma
                 StocksPorEmpresa = BuildStocksByCompany(product, stocksDict, config)
             };
 
+
             // Log de transformación para debugging
-            _logger.LogDebug("Transformado producto {Codigo}: Categoria={Categoria}, Grupo2={Grupo2}, Precios={PreciosCount}, Stock={Stock}",
+            _logger.LogDebug("Transformado producto {Codigo}: Categoria={Categoria} ({CategoriaNombre}), Grupo2={Grupo2}, Precios={PreciosCount}, Stock={Stock}",
                 apiProduct.Codigo, 
                 apiProduct.CodigoRubro, 
+                apiProduct.CategoriaNombre ?? "Sin nombre",
                 apiProduct.Grupo2,
                 apiProduct.ListasPrecios.Count,
                 apiProduct.StocksPorEmpresa.FirstOrDefault()?.Stock ?? 0);

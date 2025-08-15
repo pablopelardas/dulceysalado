@@ -26,14 +26,14 @@ namespace DistriCatalogoAPI.Domain.Entities
         }
 
         // Constructor para crear categoría automáticamente desde sync
-        public static CategoryBase CreateFromSync(int codigoRubro, int empresaId)
+        public static CategoryBase CreateFromSync(int codigoRubro, int empresaId, string? nombre = null)
         {
             // Validación removida - permite cualquier código de rubro
 
             return new CategoryBase
             {
                 CodigoRubro = codigoRubro,
-                Nombre = $"Categoría {codigoRubro}",
+                Nombre = !string.IsNullOrWhiteSpace(nombre) ? nombre : $"Categoría {codigoRubro}",
                 Icono = "📦",
                 Visible = true,
                 Orden = 999 + codigoRubro, // Orden alto para que aparezcan al final
@@ -110,6 +110,15 @@ namespace DistriCatalogoAPI.Domain.Entities
         {
             Visible = !Visible;
             UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void UpdateNombreFromSync(string nombre)
+        {
+            if (!string.IsNullOrWhiteSpace(nombre))
+            {
+                Nombre = nombre.Trim();
+                UpdatedAt = DateTime.UtcNow;
+            }
         }
 
         public bool CanBeDeleted()
