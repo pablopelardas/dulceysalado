@@ -23,6 +23,12 @@ namespace DistriCatalogoAPI.Domain.Entities
         public bool IsActive { get; set; } = false;
         public DateTime? LastLogin { get; set; }
         
+        // Campos para autenticación social
+        public string? GoogleId { get; set; }
+        public string? FotoUrl { get; set; }
+        public bool EmailVerificado { get; set; } = false;
+        public string? ProveedorAuth { get; set; }
+        
         // Lista de precios
         public int? ListaPrecioId { get; set; }
         
@@ -59,6 +65,12 @@ namespace DistriCatalogoAPI.Domain.Entities
         public void RecordLogin()
         {
             LastLogin = DateTime.UtcNow;
+        }
+        
+        public void UpdateLastLogin()
+        {
+            LastLogin = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
         }
         
         public void SoftDelete()

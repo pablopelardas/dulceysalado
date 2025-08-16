@@ -105,6 +105,10 @@ namespace DistriCatalogoAPI.Api.Extensions
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IStockCacheService, StockCacheService>();
             services.AddScoped<IClienteAuthService, ClienteAuthService>();
+            services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+            
+            // HTTP Client para servicios de Google
+            services.AddHttpClient<IGoogleAuthService, GoogleAuthService>();
 
             return services;
         }

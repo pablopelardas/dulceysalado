@@ -13,19 +13,10 @@
     <!-- Spacing after hero -->
     <div class="py-8"></div>
     
-    <!-- Categories Section -->
-    <div id="categorias">
-      <CategoryGrid 
-        :categories="catalogStore.categories" 
-        :loading="catalogStore.loadingCategories"
-        :max-categories="6"
-      />
-    </div>
-    
     <!-- Novedades Section -->
-    <section id="novedades" class="py-16 mx-4 rounded-xl shadow-lg mb-8" style="background-color: #1E1E1E;">
+    <section id="novedades" class="py-16 md:py-12" style="background-color: #1E1E1E;">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
+        <div class="text-center mb-12 md:mb-8">
           <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
             🆕 Novedades
           </h2>
@@ -45,9 +36,9 @@
     </section>
 
     <!-- Ofertas Section -->
-    <section id="ofertas" class="py-16 mx-4 rounded-xl shadow-lg mb-8" style="background-color: #2A2A2A;">
+    <section id="ofertas" class="py-16 md:py-12" style="background-color: #2A2A2A;">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
+        <div class="text-center mb-12 md:mb-8">
           <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
             🔥 Ofertas Especiales
           </h2>
@@ -65,9 +56,17 @@
         
       </div>
     </section>
+    
+    <!-- Categories Section -->
+    <div id="categorias">
+      <CategoryGrid 
+        :categories="catalogStore.categories" 
+        :loading="catalogStore.loadingCategories"
+      />
+    </div>
 
     <!-- Ubicación Section -->
-    <section id="ubicacion" class="py-16 mx-4 rounded-xl shadow-lg mb-8" style="background-color: #333333;">
+    <section id="ubicacion" class="py-16 md:py-12" style="background-color: #333333;">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">

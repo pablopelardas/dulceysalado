@@ -14,31 +14,39 @@
 
       <!-- Loading state -->
       <div v-if="loading" class="w-full">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-4">
           <div 
-            v-for="n in 6" 
+            v-for="n in 8" 
             :key="n" 
-            class="h-30 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 bg-[length:200px_100%] bg-no-repeat rounded-xl animate-pulse"
+            class="h-48 bg-gradient-to-r from-gray-600 via-gray-500 to-gray-600 bg-[length:200px_100%] bg-no-repeat rounded-xl animate-pulse"
             style="animation: shimmer 1.5s infinite; background-position: -200px 0;"
           ></div>
         </div>
       </div>
 
       <!-- Grid de categorías -->
-      <div v-else-if="categories.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-4">
+      <div v-else-if="categories.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-4">
         <div
           v-for="category in displayCategories"
           :key="category.id"
-          class="relative flex items-center gap-4 p-6 md:p-4 bg-gray-700 rounded-xl shadow-sm cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 group"
+          class="relative flex flex-col bg-gray-700 rounded-xl shadow-sm cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 group"
           @click="handleCategoryClick(category)"
         >
-          <!-- Ícono de la categoría -->
+          <!-- Imagen de la categoría -->
           <div 
-            class="w-15 h-15 md:w-12 md:h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-110"
-            :style="{ backgroundColor: category.color || getDefaultColor(displayCategories.indexOf(category)) }"
+            class="w-full h-32 flex items-center justify-center transition-transform duration-200 group-hover:scale-105 overflow-hidden"
+            :style="!category.imagen_url ? { backgroundColor: category.color || getDefaultColor(displayCategories.indexOf(category)) } : {}"
           >
+            <img 
+              v-if="category.imagen_url"
+              :src="category.imagen_url"
+              :alt="category.nombre"
+              class="w-full h-full object-cover"
+              @error="handleImageError"
+            />
             <span 
-              class="font-bold text-xl md:text-lg drop-shadow-lg"
+              v-else
+              class="font-bold text-3xl drop-shadow-lg"
               :class="getTextColor(category.color || getDefaultColor(displayCategories.indexOf(category)))"
             >
               {{ category.icono || getCategoryInitial(category.nombre) }}
@@ -46,29 +54,22 @@
           </div>
 
           <!-- Información de la categoría -->
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-xl md:text-lg text-white leading-tight mb-1">
+          <div class="text-center p-4 flex-1">
+            <h3 class="font-bold text-lg text-white leading-tight mb-2">
               {{ category.nombre }}
             </h3>
             
-            <p v-if="category.descripcion" class="text-sm text-gray-300 leading-normal mb-2 line-clamp-2">
-              {{ category.descripcion }}
-            </p>
-            
-            <div class="flex items-center gap-2">
+            <div class="flex items-center justify-center gap-2 mb-2">
               <span 
-                class="text-sm font-semibold px-2 py-1 bg-gray-600 text-white rounded"
+                class="text-xs font-semibold px-2 py-1 bg-gray-600 text-white rounded-full"
               >
                 {{ category.product_count }} productos
               </span>
             </div>
-          </div>
 
-          <!-- Flecha de navegación -->
-          <div class="w-6 h-6 text-gray-300 flex-shrink-0 transition-all duration-200 group-hover:translate-x-2">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
+            <p v-if="category.descripcion" class="text-xs text-gray-300 leading-normal line-clamp-2">
+              {{ category.descripcion }}
+            </p>
           </div>
 
           <!-- Hover effect overlay -->
@@ -120,17 +121,21 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  loading: false,
-  maxCategories: 6
+  loading: false
 })
 
 const router = useRouter()
 
 // Computed
 const displayCategories = computed(() => {
-  return props.categories
-    .filter(cat => cat.product_count > 0) // Solo mostrar categorías con productos
-    .slice(0, props.maxCategories)
+  const filteredCategories = props.categories.filter(cat => cat.product_count > 0) // Solo mostrar categorías con productos
+  
+  // Si maxCategories no se pasa explícitamente desde HomeView, mostrar todas
+  if (props.maxCategories === undefined) {
+    return filteredCategories
+  }
+  
+  return filteredCategories.slice(0, props.maxCategories)
 })
 
 // Methods
@@ -144,6 +149,14 @@ const handleCategoryClick = (category: Category) => {
     name: 'catalogo',
     query: { categoria: category.codigo_rubro.toString() }
   })
+}
+
+const handleImageError = (event: Event) => {
+  // Si falla la carga de la imagen, ocultar el elemento img para mostrar el fallback
+  const img = event.target as HTMLImageElement
+  if (img) {
+    img.style.display = 'none'
+  }
 }
 
 // Colores predefinidos para categorías sin color específico

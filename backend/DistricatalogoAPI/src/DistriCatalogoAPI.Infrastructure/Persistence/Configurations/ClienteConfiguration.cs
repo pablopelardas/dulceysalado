@@ -76,6 +76,22 @@ namespace DistriCatalogoAPI.Infrastructure.Persistence.Configurations
             builder.Property(c => c.LastLogin)
                 .HasColumnName("last_login");
                 
+            // Campos para autenticación social
+            builder.Property(c => c.GoogleId)
+                .HasColumnName("google_id")
+                .HasMaxLength(255);
+                
+            builder.Property(c => c.FotoUrl)
+                .HasColumnName("foto_url");
+                
+            builder.Property(c => c.EmailVerificado)
+                .HasColumnName("email_verificado")
+                .HasDefaultValue(false);
+                
+            builder.Property(c => c.ProveedorAuth)
+                .HasColumnName("proveedor_auth")
+                .HasMaxLength(50);
+                
             builder.Property(c => c.ListaPrecioId)
                 .HasColumnName("lista_precio_id");
                 
@@ -124,6 +140,16 @@ namespace DistriCatalogoAPI.Infrastructure.Persistence.Configurations
                 
             builder.HasIndex(c => c.IsActive)
                 .HasDatabaseName("idx_is_active");
+                
+            // Índices para autenticación social
+            builder.HasIndex(c => c.GoogleId)
+                .HasDatabaseName("idx_clientes_google_id");
+                
+            builder.HasIndex(c => new { c.Email, c.EmpresaId })
+                .HasDatabaseName("idx_clientes_email_empresa");
+                
+            builder.HasIndex(c => c.ProveedorAuth)
+                .HasDatabaseName("idx_clientes_proveedor_auth");
                 
             // Relaciones
             builder.HasOne<Infrastructure.Models.Empresa>()

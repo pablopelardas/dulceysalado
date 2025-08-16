@@ -281,5 +281,17 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
                 .Take(50) // Limit for performance
                 .ToListAsync();
         }
+
+        public async Task<Cliente?> GetByEmailAsync(string email, int empresaId)
+        {
+            return await _context.Clientes
+                .FirstOrDefaultAsync(c => c.Email == email && c.EmpresaId == empresaId && c.Activo);
+        }
+
+        public async Task<bool> ExistsByCodeAsync(string codigo, int empresaId)
+        {
+            return await _context.Clientes
+                .AnyAsync(c => c.Codigo == codigo && c.EmpresaId == empresaId);
+        }
     }
 }

@@ -5,6 +5,7 @@ using DistriCatalogoAPI.Application.Queries.Clientes;
 using DistriCatalogoAPI.Application.DTOs;
 using DistriCatalogoAPI.Domain.Interfaces;
 using System.Security.Claims;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DistriCatalogoAPI.Api.Controllers
 {
@@ -15,12 +16,21 @@ namespace DistriCatalogoAPI.Api.Controllers
         private readonly IMediator _mediator;
         private readonly IClienteAuthService _clienteAuthService;
         private readonly IClienteRepository _clienteRepository;
+        private readonly IGoogleAuthService _googleAuthService;
+        private readonly IMemoryCache _cache;
 
-        public ClienteAuthController(IMediator mediator, IClienteAuthService clienteAuthService, IClienteRepository clienteRepository)
+        public ClienteAuthController(
+            IMediator mediator, 
+            IClienteAuthService clienteAuthService, 
+            IClienteRepository clienteRepository,
+            IGoogleAuthService googleAuthService,
+            IMemoryCache cache)
         {
             _mediator = mediator;
             _clienteAuthService = clienteAuthService;
             _clienteRepository = clienteRepository;
+            _googleAuthService = googleAuthService;
+            _cache = cache;
         }
 
         /// <summary>
@@ -210,6 +220,182 @@ namespace DistriCatalogoAPI.Api.Controllers
                 return BadRequest(new { message = "Error al cambiar contraseña", error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Iniciar flujo de autenticación con Google
+        /// </summary>
+        [HttpGet("google")]
+        public ActionResult InitiateGoogleAuth([FromQuery] string? redirect_uri = null, [FromQuery] int empresa_id = 1)
+        {
+            try
+            {
+                var state = Guid.NewGuid().ToString();
+                
+                var googleAuthData = new GoogleAuthState
+                {
+                    State = state,
+                    RedirectUri = redirect_uri ?? "http://localhost:5173/auth/google/callback",
+                    EmpresaId = empresa_id,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _cache.Set($"google_auth_{state}", googleAuthData, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10),
+                    Size = 1
+                });
+
+                var authUrl = _googleAuthService.GenerateAuthorizationUrl(state);
+                
+                return Redirect(authUrl);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error iniciando autenticación con Google", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Callback de Google OAuth
+        /// </summary>
+        [HttpGet("google/callback")]
+        public async Task<ActionResult> GoogleCallback([FromQuery] string? code, [FromQuery] string? state, [FromQuery] string? error)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(error))
+                {
+                    return Redirect($"http://localhost:5173/auth/google/callback?error={Uri.EscapeDataString(error)}");
+                }
+
+                if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state))
+                {
+                    return Redirect("http://localhost:5173/auth/google/callback?error=missing_parameters");
+                }
+
+                if (!_cache.TryGetValue($"google_auth_{state}", out GoogleAuthState? authData) || authData == null)
+                {
+                    return Redirect("http://localhost:5173/auth/google/callback?error=invalid_state");
+                }
+
+                _cache.Remove($"google_auth_{state}");
+
+                var tokenResponse = await _googleAuthService.ExchangeCodeForTokensAsync(code);
+                if (tokenResponse == null)
+                {
+                    return Redirect("http://localhost:5173/auth/google/callback?error=token_exchange_failed");
+                }
+
+                var userInfo = await _googleAuthService.GetUserInfoAsync(tokenResponse.AccessToken);
+                if (userInfo == null)
+                {
+                    return Redirect("http://localhost:5173/auth/google/callback?error=user_info_failed");
+                }
+
+                if (!userInfo.VerifiedEmail)
+                {
+                    return Redirect("http://localhost:5173/auth/google/callback?error=email_not_verified");
+                }
+
+                var (cliente, esNuevo) = await _googleAuthService.CreateOrUpdateClienteFromGoogleAsync(userInfo, authData.EmpresaId);
+                if (cliente == null)
+                {
+                    return Redirect("http://localhost:5173/auth/google/callback?error=user_creation_failed");
+                }
+
+                var accessToken = await _clienteAuthService.GenerateAccessTokenAsync(cliente);
+                var refreshToken = await _clienteAuthService.GenerateRefreshTokenAsync(cliente);
+
+                var redirectUrl = $"{authData.RedirectUri}?token={Uri.EscapeDataString(accessToken)}&refresh_token={Uri.EscapeDataString(refreshToken)}&is_new={esNuevo.ToString().ToLower()}";
+                
+                return Redirect(redirectUrl);
+            }
+            catch (Exception ex)
+            {
+                return Redirect($"http://localhost:5173/auth/google/callback?error={Uri.EscapeDataString(ex.Message)}");
+            }
+        }
+
+        /// <summary>
+        /// Actualizar perfil del cliente autenticado
+        /// </summary>
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<ActionResult<ClienteDto>> UpdateProfile([FromBody] UpdateClienteProfileDto updateDto)
+        {
+            try
+            {
+                var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var empresaIdClaim = User.FindFirst("empresa_id")?.Value;
+
+                if (string.IsNullOrEmpty(clienteIdClaim) || string.IsNullOrEmpty(empresaIdClaim) ||
+                    !int.TryParse(clienteIdClaim, out var clienteId) || !int.TryParse(empresaIdClaim, out var empresaId))
+                {
+                    return Unauthorized(new { message = "Token inválido" });
+                }
+
+                // Buscar la entidad completa para actualización
+                var clienteEntity = await _clienteRepository.GetByIdAsync(clienteId);
+                if (clienteEntity == null)
+                {
+                    return NotFound(new { message = "Cliente no encontrado" });
+                }
+
+                // Verificar que el cliente pertenece a la empresa del token
+                if (clienteEntity.EmpresaId != empresaId)
+                {
+                    return Forbid("No tiene permisos para actualizar este perfil");
+                }
+
+                // Actualizar solo los campos proporcionados (no nulos)
+                if (!string.IsNullOrWhiteSpace(updateDto.Nombre))
+                    clienteEntity.Nombre = updateDto.Nombre.Trim();
+                
+                if (!string.IsNullOrWhiteSpace(updateDto.Direccion))
+                    clienteEntity.Direccion = updateDto.Direccion.Trim();
+                
+                if (!string.IsNullOrWhiteSpace(updateDto.Localidad))
+                    clienteEntity.Localidad = updateDto.Localidad.Trim();
+                
+                if (!string.IsNullOrWhiteSpace(updateDto.Telefono))
+                    clienteEntity.Telefono = updateDto.Telefono.Trim();
+                
+                if (!string.IsNullOrWhiteSpace(updateDto.Cuit))
+                    clienteEntity.Cuit = updateDto.Cuit.Trim();
+                
+                if (!string.IsNullOrWhiteSpace(updateDto.Altura))
+                    clienteEntity.Altura = updateDto.Altura.Trim();
+                
+                if (!string.IsNullOrWhiteSpace(updateDto.Provincia))
+                    clienteEntity.Provincia = updateDto.Provincia.Trim();
+                
+                if (!string.IsNullOrWhiteSpace(updateDto.TipoIva))
+                    clienteEntity.TipoIva = updateDto.TipoIva.Trim();
+
+                clienteEntity.UpdatedAt = DateTime.UtcNow;
+
+                await _clienteRepository.UpdateAsync(clienteEntity);
+
+                // Retornar el cliente actualizado usando el query existente
+                var query = new GetClienteByIdQuery
+                {
+                    ClienteId = clienteId,
+                    EmpresaId = empresaId,
+                    IncludeDeleted = false
+                };
+
+                var clienteActualizado = await _mediator.Send(query);
+                
+                return Ok(new { 
+                    message = "Perfil actualizado exitosamente", 
+                    cliente = clienteActualizado 
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error al actualizar perfil", error = ex.Message });
+            }
+        }
     }
 
     // DTOs específicos para autenticación de clientes
@@ -233,5 +419,25 @@ namespace DistriCatalogoAPI.Api.Controllers
     {
         public string CurrentPassword { get; set; } = string.Empty;
         public string NewPassword { get; set; } = string.Empty;
+    }
+
+    public class GoogleAuthState
+    {
+        public string State { get; set; } = string.Empty;
+        public string RedirectUri { get; set; } = string.Empty;
+        public int EmpresaId { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class UpdateClienteProfileDto
+    {
+        public string? Nombre { get; set; }
+        public string? Direccion { get; set; }
+        public string? Localidad { get; set; }
+        public string? Telefono { get; set; }
+        public string? Cuit { get; set; }
+        public string? Altura { get; set; }
+        public string? Provincia { get; set; }
+        public string? TipoIva { get; set; }
     }
 }

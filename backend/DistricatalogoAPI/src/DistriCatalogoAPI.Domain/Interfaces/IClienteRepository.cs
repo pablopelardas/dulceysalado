@@ -41,6 +41,8 @@ namespace DistriCatalogoAPI.Domain.Interfaces
         // Autenticación
         Task<Cliente?> GetActiveByUsernameAsync(int empresaId, string username);
         Task UpdateLastLoginAsync(int clienteId);
+        Task<Cliente?> GetByEmailAsync(string email, int empresaId);
+        Task<bool> ExistsByCodeAsync(string codigo, int empresaId);
         
         // Refresh Tokens
         Task<ClienteRefreshToken> AddRefreshTokenAsync(ClienteRefreshToken token);

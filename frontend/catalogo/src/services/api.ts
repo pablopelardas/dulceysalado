@@ -3,6 +3,68 @@ interface ApiResponse<T> {
   error?: string
 }
 
+// Auth interfaces
+interface LoginRequest {
+  empresa_id: number
+  username: string
+  password: string
+}
+
+interface LoginResponse {
+  access_token: string
+  refresh_token: string
+  expires_in: number
+  token_type: string
+  cliente: {
+    id: number
+    codigo: string
+    nombre?: string
+    apellido?: string
+    email?: string
+    telefono?: string
+    direccion?: string
+    empresa_id: number
+    lista_precio_id: number
+  }
+}
+
+interface RefreshRequest {
+  refresh_token: string
+}
+
+interface ChangePasswordRequest {
+  current_password: string
+  new_password: string
+}
+
+interface UpdateProfileRequest {
+  nombre?: string
+  direccion?: string
+  localidad?: string
+  telefono?: string
+  cuit?: string
+  altura?: string
+  provincia?: string
+  tipo_iva?: string
+}
+
+interface UpdateProfileResponse {
+  message: string
+  cliente: UserProfile
+}
+
+interface UserProfile {
+  id: number
+  codigo: string
+  nombre?: string
+  apellido?: string
+  email?: string
+  telefono?: string
+  direccion?: string
+  empresa_id: number
+  lista_precio_id: number
+}
+
 interface Product {
   codigo: string
   nombre: string
@@ -36,6 +98,7 @@ interface Category {
   descripcion: string
   icono: string
   color: string
+  imagen_url?: string
   orden: number
   product_count: number
 }
@@ -274,8 +337,134 @@ class ApiService {
   }
 }
 
-// Export singleton instance
+// Auth API Service
+class AuthApiService {
+  private baseUrl: string
+  private readonly EMPRESA_ID = 1 // Hardcoded para Dulce y Salado
+
+  constructor() {
+    this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000'
+  }
+
+  private async authFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const url = `${this.baseUrl}${endpoint}`
+    
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/plain',
+        ...options.headers,
+      },
+      ...options,
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+
+    const text = await response.text()
+    
+    // Si la respuesta está vacía, retornar un objeto vacío
+    if (!text) {
+      return {} as T
+    }
+
+    try {
+      return JSON.parse(text)
+    } catch {
+      // Si no es JSON válido, retornar el texto como string
+      return text as unknown as T
+    }
+  }
+
+  async login(username: string, password: string): Promise<LoginResponse> {
+    const loginData: LoginRequest = {
+      empresa_id: this.EMPRESA_ID,
+      username,
+      password
+    }
+
+    return this.authFetch<LoginResponse>('/api/cliente-auth/login', {
+      method: 'POST',
+      body: JSON.stringify(loginData)
+    })
+  }
+
+  async refreshToken(refreshToken: string): Promise<LoginResponse> {
+    const refreshData: RefreshRequest = {
+      refresh_token: refreshToken
+    }
+
+    return this.authFetch<LoginResponse>('/api/cliente-auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify(refreshData)
+    })
+  }
+
+  async logout(refreshToken: string, accessToken: string): Promise<void> {
+    const logoutData = {
+      refresh_token: refreshToken
+    }
+
+    return this.authFetch<void>('/api/cliente-auth/logout', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(logoutData)
+    })
+  }
+
+  async getProfile(accessToken: string): Promise<UserProfile> {
+    return this.authFetch<UserProfile>('/api/cliente-auth/me', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+  }
+
+  async changePassword(currentPassword: string, newPassword: string, accessToken: string): Promise<void> {
+    const passwordData: ChangePasswordRequest = {
+      current_password: currentPassword,
+      new_password: newPassword
+    }
+
+    return this.authFetch<void>('/api/cliente-auth/change-password', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(passwordData)
+    })
+  }
+
+  async updateProfile(profileData: UpdateProfileRequest, accessToken: string): Promise<UpdateProfileResponse> {
+    const url = `${this.baseUrl}/api/cliente-auth/profile`
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(profileData)
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+
+    return response.json()
+  }
+}
+
+// Export singleton instances
 export const apiService = new ApiService()
+export const authApiService = new AuthApiService()
 
 // Export types for use in components
 export type { 
@@ -285,5 +474,12 @@ export type {
   Feature,
   CatalogResponse, 
   CatalogFilters, 
-  ApiResponse 
+  ApiResponse,
+  LoginRequest,
+  LoginResponse,
+  RefreshRequest,
+  ChangePasswordRequest,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+  UserProfile
 }
