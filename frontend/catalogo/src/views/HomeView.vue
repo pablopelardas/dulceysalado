@@ -219,7 +219,7 @@
         </div>
         
         <button 
-          class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-gray-400 rounded transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900"
+          class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-gray-400 rounded transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
           @click="hideMessagePopup"
           aria-label="Cerrar mensaje"
         >

@@ -18,7 +18,7 @@
             :class="compact ? 'w-10 h-10' : 'w-14 h-14'"
             :style="{ background: 'var(--theme-accent)' }"
           >
-            <ClipboardDocumentListIcon 
+            <ShoppingCartIcon 
               class="text-white"
               :class="compact ? 'w-5 h-5' : 'w-7 h-7'"
             />
@@ -81,7 +81,7 @@
         <!-- Cart Items -->
         <div class="max-h-64 overflow-y-auto">
           <div v-if="cartStore.isEmpty" class="p-6 text-center">
-            <ClipboardDocumentListIcon class="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <ShoppingCartIcon class="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p class="text-gray-500">Tu lista está vacía</p>
           </div>
           
@@ -147,20 +147,25 @@
           </div>
           
           <!-- Actions -->
-          <div class="flex gap-2">
+          <div class="space-y-2">
+            <!-- Primary Action: Send Order -->
             <button 
               @click="openCartSummary"
-              class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
-            >
-              Ver lista completa
-            </button>
-            <button 
-              @click="openExportOptions"
-              class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg transition-colors cursor-pointer"
+              class="w-full px-4 py-3 text-sm font-medium text-white rounded-lg transition-colors cursor-pointer"
               :style="{ background: 'var(--theme-accent)' }"
             >
-              Exportar
+              🛒 Enviar Pedido
             </button>
+            
+            <!-- Secondary Actions (when expanded) -->
+            <div v-if="showDropdown" class="pt-2 border-t border-gray-100">
+              <button 
+                @click="openExportOptions"
+                class="w-full px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+              >
+                📋 Exportar Lista
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -179,7 +184,7 @@
 import { ref, watch } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { 
-  ClipboardDocumentListIcon,
+  ShoppingCartIcon,
   ShoppingBagIcon,
   XMarkIcon,
   PlusIcon,

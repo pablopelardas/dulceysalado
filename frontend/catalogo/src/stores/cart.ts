@@ -1,6 +1,7 @@
 import { ref, computed, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { EMPRESA_CONFIG } from '@/config/empresa.config'
+import { authApiService } from '@/services/api'
 
 export interface CartItem {
   codigo: string
@@ -9,6 +10,61 @@ export interface CartItem {
   cantidad: number
   imagen_urls?: string[]
   lista?: string
+}
+
+export interface OrderData {
+  observaciones?: string
+  direccion_entrega?: string
+  fecha_entrega?: string
+  horario_entrega?: string
+}
+
+export interface OrderItem {
+  codigo_producto: string
+  cantidad: number
+  precio_unitario: number
+  nombre_producto?: string
+  observaciones?: string | null
+}
+
+export interface CreateOrderRequest {
+  items: OrderItem[]
+  observaciones?: string
+  direccion_entrega?: string
+  fecha_entrega?: string
+  horario_entrega?: string
+}
+
+export interface OrderResponse {
+  id: number
+  cliente_id: number
+  empresa_id: number
+  numero: string
+  fecha_pedido: string
+  fecha_entrega?: string
+  horario_entrega?: string
+  direccion_entrega?: string
+  observaciones?: string
+  monto_total: number
+  estado: string
+  motivo_rechazo?: string | null
+  usuario_gestion_id?: number | null
+  fecha_gestion?: string | null
+  created_at: string
+  updated_at: string
+  cliente_nombre: string
+  cliente_email: string
+  cliente_telefono: string
+  items: {
+    id: number
+    pedido_id: number
+    codigo_producto: string
+    nombre_producto: string
+    cantidad: number
+    precio_unitario: number
+    subtotal: number
+    observaciones?: string | null
+  }[]
 }
 
 export const useCartStore = defineStore('cart', () => {
@@ -274,6 +330,52 @@ export const useCartStore = defineStore('cart', () => {
     
     return encodeURIComponent(message)
   }
+
+  // Order functions
+  const createOrder = async (orderData: OrderData, accessToken: string): Promise<OrderResponse> => {
+    if (isEmpty.value) {
+      throw new Error('El carrito está vacío')
+    }
+
+    // Convert cart items to order items with product names
+    const orderItems: OrderItem[] = items.value.map(item => ({
+      codigo_producto: item.codigo,
+      cantidad: item.cantidad,
+      precio_unitario: item.precio,
+      nombre_producto: item.nombre,
+      observaciones: null
+    }))
+
+    const orderRequest: CreateOrderRequest = {
+      items: orderItems,
+      observaciones: orderData.observaciones,
+      direccion_entrega: orderData.direccion_entrega,
+      fecha_entrega: orderData.fecha_entrega,
+      horario_entrega: orderData.horario_entrega
+    }
+
+    try {
+      const response = await authApiService.createOrder(orderRequest, accessToken)
+      
+      // Clear cart after successful order
+      clearCart()
+      
+      return response
+    } catch (error) {
+      console.error('Error creating order:', error)
+      throw error
+    }
+  }
+
+  const getOrderHistory = async (accessToken: string): Promise<OrderResponse[]> => {
+    try {
+      const paginatedResponse = await authApiService.getOrderHistory(accessToken)
+      return paginatedResponse.items
+    } catch (error) {
+      console.error('Error fetching order history:', error)
+      throw error
+    }
+  }
   
   // Initialize from storage
   loadFromStorage()
@@ -302,6 +404,10 @@ export const useCartStore = defineStore('cart', () => {
     exportForWhatsApp,
     exportForWhatsAppPedido,
     exportForEmail,
+    
+    // Order functions
+    createOrder,
+    getOrderHistory,
     
     // Utility
     loadFromStorage,

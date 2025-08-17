@@ -58,7 +58,7 @@
         
         <!-- Menú hamburguesa móvil -->
         <button 
-          class="lg:hidden flex flex-col justify-center items-center w-10 h-10 p-2 rounded hover:bg-gray-50 transition-colors duration-200 mt-1 pointer-events-auto"
+          class="lg:hidden flex flex-col justify-center items-center w-10 h-10 p-2 rounded hover:bg-gray-50 transition-colors duration-200 mt-1 pointer-events-auto cursor-pointer"
           @click="toggleMobileMenu"
           aria-label="Abrir menú"
         >
@@ -92,7 +92,7 @@
           class="h-8 w-auto object-contain"
         />
         <button 
-          class="flex items-center justify-center w-10 h-10 text-gray-900 rounded hover:bg-gray-100 transition-colors duration-200"
+          class="flex items-center justify-center w-10 h-10 text-gray-900 rounded hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
           @click="closeMobileMenu"
           aria-label="Cerrar menú"
         >

@@ -10,12 +10,6 @@ const router = createRouter({
       component: () => import('../views/HomeView.vue'),
     },
     {
-      path: '/catalog/lista/:listId',
-      name: 'CatalogWithPriceList',
-      component: () => import('../views/Catalog.vue'),
-      props: true,
-    },
-    {
       path: '/catalogo',
       name: 'catalogo',
       component: () => import('../views/Catalog.vue'),
@@ -65,6 +59,14 @@ const router = createRouter({
       path: '/perfil',
       name: 'perfil',
       component: () => import('../views/ProfileView.vue'),
+      meta: { 
+        requiresAuth: true // Solo accesible si está autenticado
+      }
+    },
+    {
+      path: '/pedidos',
+      name: 'pedidos',
+      component: () => import('../views/OrdersView.vue'),
       meta: { 
         requiresAuth: true // Solo accesible si está autenticado
       }

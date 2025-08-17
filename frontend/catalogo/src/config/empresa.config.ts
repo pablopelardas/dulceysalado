@@ -68,12 +68,12 @@ export const EMPRESA_CONFIG: EmpresaConfig = {
   // Configuración de catálogo
   mostrarPrecios: true,
   mostrarStock: false,
-  permitirPedidos: false, // Se activará en fase posterior
+  permitirPedidos: true, // Activado para sistema de carrito y pedidos
   productosPorPagina: 100,
   
   // Features activas (simplificado para esta implementación)
   features: {
-    autenticacion: false, // Se implementará en fase posterior
+    autenticacion: true, // Activado para sistema de pedidos
     pedidosWhatsapp: true, // Activo para mostrar botón flotante
     clientesMayoristas: false,
     catalogoListaPublico: false

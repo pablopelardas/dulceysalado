@@ -221,7 +221,7 @@
               type="button"
               @click="skipProfile"
               :disabled="loading"
-              class="flex-1 sm:flex-initial px-4 py-3 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 disabled:opacity-50"
+              class="flex-1 sm:flex-initial px-4 py-3 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
               Completar más tarde
             </button>

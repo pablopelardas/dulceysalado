@@ -1,9 +1,19 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { apiService, type Product, type Category, type CatalogFilters } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
 import EMPRESA_CONFIG from '@/config/empresa.config'
 
 export const useCatalogStore = defineStore('catalog', () => {
+  // Get auth store and ensure it's initialized
+  const authStore = useAuthStore()
+  
+  // Initialize auth on store creation if not already done
+  if (!authStore.token && !authStore.user) {
+    console.log('🔍 catalogStore: Initializing auth store')
+    authStore.initializeAuth()
+  }
+  
   // State
   const products = ref<Product[]>([])
   const featuredProducts = ref<Product[]>([])
@@ -40,7 +50,7 @@ export const useCatalogStore = defineStore('catalog', () => {
   let currentProductsController: AbortController | null = null
   
   // Cache system for search results
-  const searchCache = ref<Map<string, any>>(new Map())
+  const searchCache = ref<Map<string, CatalogResponse>>(new Map())
   const CACHE_SIZE_LIMIT = 50 // Maximum number of cached searches
   
   // Errors
@@ -86,15 +96,37 @@ export const useCatalogStore = defineStore('catalog', () => {
       : categories.value
   })
   
-  const currentFilters = computed((): CatalogFilters => ({
-    listaPrecioCodigo: selectedPriceList.value ?? undefined,
-    busqueda: searchQuery.value ?? undefined,
-    destacados: showFeaturedOnly.value ?? undefined,
-    codigoRubro: selectedCategory.value ?? undefined,
-    ordenarPor: sortBy.value ?? undefined,
-    page: currentPage.value,
-    pageSize: pageSize.value
-  }))
+  // Computed para determinar qué lista de precios usar
+  const effectivePriceList = computed(() => {
+    console.log('🔍 effectivePriceList check:')
+    console.log('  - isAuthenticated:', authStore.isAuthenticated)
+    console.log('  - user.lista_precio:', authStore.user?.lista_precio)
+    console.log('  - user.lista_precio?.codigo:', authStore.user?.lista_precio?.codigo)
+    
+    // Si el usuario está autenticado y tiene lista de precios, usarla
+    if (authStore.isAuthenticated && authStore.user?.lista_precio?.codigo) {
+      const listCodigo = authStore.user.lista_precio.codigo
+      console.log('🔍 effectivePriceList: Using user price list:', listCodigo, 'for user:', authStore.user.codigo)
+      return listCodigo
+    }
+    // Si no, dejar que el backend use la predeterminada (no enviar parámetro)
+    console.log('🔍 effectivePriceList: No user authenticated or no price list, using default')
+    return null
+  })
+  
+  const currentFilters = computed((): CatalogFilters => {
+    const filters = {
+      listaPrecioCodigo: effectivePriceList.value || undefined,
+      busqueda: searchQuery.value || undefined,
+      destacados: showFeaturedOnly.value || undefined,
+      codigoRubro: selectedCategory.value || undefined,
+      ordenarPor: sortBy.value || undefined,
+      page: currentPage.value,
+      pageSize: pageSize.value
+    }
+    console.log('🔍 currentFilters:', filters)
+    return filters
+  })
 
   // Get category by ID
   const getCategoryById = computed(() => {
@@ -109,7 +141,7 @@ export const useCatalogStore = defineStore('catalog', () => {
   // Helper function to generate cache key from filters
   const generateCacheKey = (filters: CatalogFilters): string => {
     const sortedEntries = Object.entries(filters)
-      .filter(([_, value]) => value !== undefined && value !== null)
+      .filter(([, value]) => value !== undefined && value !== null)
       .sort(([a], [b]) => a.localeCompare(b))
     return JSON.stringify(sortedEntries)
   }
@@ -127,7 +159,7 @@ export const useCatalogStore = defineStore('catalog', () => {
   const fetchOriginalTotalCount = async () => {
     try {
       const response = await apiService.getCatalog({
-        listaPrecioCodigo: selectedPriceList.value ?? undefined,
+        listaPrecioCodigo: effectivePriceList.value || undefined,
         page: 1,
         pageSize: 1 // Solo necesitamos el total_count
       })
@@ -147,14 +179,7 @@ export const useCatalogStore = defineStore('catalog', () => {
     
     // Check cache first
     if (searchCache.value.has(cacheKey)) {
-      const cachedData = searchCache.value.get(cacheKey) as {
-        productos: Product[]
-        total_count: number
-        total_pages: number
-        page: number
-        page_size: number
-        categorias?: Category[]
-      }
+      const cachedData = searchCache.value.get(cacheKey) as CatalogResponse
       
       // Update state with cached data
       products.value = cachedData.productos
@@ -259,7 +284,7 @@ export const useCatalogStore = defineStore('catalog', () => {
     featuredError.value = null
     
     try {
-      const response = await apiService.getFeaturedProducts(selectedPriceList.value ?? undefined, limit)
+      const response = await apiService.getFeaturedProducts(effectivePriceList.value || undefined, limit)
       
       if (response.error) {
         featuredError.value = response.error
@@ -281,7 +306,7 @@ export const useCatalogStore = defineStore('catalog', () => {
     productError.value = null
     
     try {
-      const response = await apiService.getProduct(codigo, selectedPriceList.value ?? undefined)
+      const response = await apiService.getProduct(codigo, effectivePriceList.value || undefined)
       
       if (response.error) {
         productError.value = response.error
@@ -332,12 +357,9 @@ export const useCatalogStore = defineStore('catalog', () => {
     await fetchProducts() // Fetch products with new search
   }
 
-  const setPriceList = async (priceListId: string | null) => {
-    console.log('setPriceList called with:', priceListId)
-    selectedPriceList.value = priceListId
-    console.log('selectedPriceList.value set to:', selectedPriceList.value)
-    currentPage.value = 1 // Reset to first page when changing price list
-    await fetchProducts() // Fetch products with new price list
+  const setPriceList = async (_priceListId: string | null) => {
+    // Esta función ya no se usa, pero la mantenemos por compatibilidad
+    console.log('setPriceList deprecated - price list is now automatic based on user authentication')
   }
 
   const setFeaturedOnly = async (featured: boolean) => {
@@ -431,6 +453,35 @@ export const useCatalogStore = defineStore('catalog', () => {
     }
   }
 
+  // Watcher para actualizar cuando cambia el usuario (login/logout)
+  watch(
+    () => authStore.user,
+    async (newUser, oldUser) => {
+      console.log('🔍 User watcher triggered - oldUser:', oldUser?.codigo, 'newUser:', newUser?.codigo)
+      
+      // Refrescar el catálogo si la lista de precios del usuario cambió
+      const oldListCodigo = oldUser?.lista_precio?.codigo
+      const newListCodigo = newUser?.lista_precio?.codigo
+      
+      if (oldListCodigo !== newListCodigo) {
+        console.log('🔍 User price list changed from', oldListCodigo, 'to', newListCodigo, '- refreshing catalog')
+        await fetchProducts()
+      }
+    }
+  )
+  
+  // Watcher adicional para detectar cuando el usuario se autentica inicialmente
+  watch(
+    () => authStore.isAuthenticated,
+    async (isAuth, wasAuth) => {
+      console.log('🔍 Auth status changed from', wasAuth, 'to', isAuth)
+      if (isAuth && !wasAuth && authStore.user?.lista_precio?.codigo) {
+        console.log('🔍 User just logged in, refreshing catalog with price list:', authStore.user.lista_precio.codigo)
+        await fetchProducts()
+      }
+    }
+  )
+  
   // Initialize all required data (except products which are fetched separately)
   const initializeAll = async (): Promise<void> => {
     initializing.value = true

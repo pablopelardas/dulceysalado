@@ -2,7 +2,7 @@
 <template>
   <article 
     :class="[
-      'relative bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden h-full',
+      'group relative bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden h-full',
       viewMode === 'grid' ? 'flex flex-col' : 'flex flex-row items-center gap-4 p-4',
       product.destacado ? 'border-2 hover:shadow-xl hover:-translate-y-1.5' : 'hover:-translate-y-1'
     ]"
@@ -39,34 +39,18 @@
         </svg>
       </div>
 
-      <!-- Overlay con acciones (solo desktop y grid) -->
+      <!-- Overlay con indicador de agregar al carrito -->
       <div 
-        v-if="viewMode === 'grid'"
-        class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end justify-center gap-2 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 lg:flex hidden"
+        class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100"
       >
-        <button 
-          class="flex items-center gap-1 px-3 py-2 text-white font-semibold text-sm rounded transition-colors duration-200 hover:opacity-80"
-          :style="{ backgroundColor: 'var(--theme-accent)' }"
-          @click.stop="handleAddToCart"
-          aria-label="Agregar a mi lista"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-          </svg>
-          Agregar
-        </button>
-        
-        <button 
-          v-if="showQuickView"
-          class="flex items-center gap-1 px-3 py-2 bg-white text-gray-900 font-semibold text-sm rounded transition-colors duration-200 hover:bg-gray-100"
-          @click.stop="handleQuickView"
-          aria-label="Vista rápida"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-          </svg>
-        </button>
+        <div class="flex flex-col items-center gap-2 text-white">
+          <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+          <span class="text-sm font-medium">Agregar al carrito</span>
+        </div>
       </div>
     </div>
 
@@ -158,18 +142,6 @@
       </div>
     </div>
 
-    <!-- Botón flotante para móviles (solo en grid) -->
-    <button
-      v-if="viewMode === 'grid'"
-      class="lg:hidden absolute bottom-3 right-3 w-12 h-12 rounded-full text-white shadow-lg flex items-center justify-center z-20 transition-all duration-200 hover:scale-110 active:scale-95"
-      :style="{ backgroundColor: 'var(--theme-accent)' }"
-      @click.stop="handleAddToCart"
-      aria-label="Agregar a mi lista"
-    >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-      </svg>
-    </button>
 
     <!-- Indicador de carga -->
     <div v-if="loading" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex items-center justify-center">
@@ -228,7 +200,8 @@ const handleQuickView = () => {
 }
 
 const handleCardClick = () => {
-  emit('cardClick', props.product)
+  // Al hacer click en cualquier parte de la tarjeta, abre el modal de agregar al carrito
+  emit('openCart', props.product)
 }
 </script>
 

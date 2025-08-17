@@ -151,7 +151,7 @@
             <button
               type="button"
               @click="handleGoogleLogin"
-              class="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+              class="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed"
               :disabled="authStore.loading"
             >
               <svg class="h-5 w-5" viewBox="0 0 24 24">

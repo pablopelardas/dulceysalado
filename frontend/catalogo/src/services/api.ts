@@ -65,6 +65,62 @@ interface UserProfile {
   lista_precio_id: number
 }
 
+interface CreateOrderRequest {
+  items: OrderItem[]
+  observaciones?: string
+  direccion_entrega?: string
+  fecha_entrega?: string
+  horario_entrega?: string
+}
+
+interface OrderItem {
+  codigo_producto: string
+  cantidad: number
+  precio_unitario: number
+}
+
+interface OrderResponse {
+  id: number
+  cliente_id: number
+  empresa_id: number
+  numero: string
+  fecha_pedido: string
+  fecha_entrega?: string
+  horario_entrega?: string
+  direccion_entrega?: string
+  observaciones?: string
+  monto_total: number
+  estado: string
+  motivo_rechazo?: string | null
+  usuario_gestion_id?: number | null
+  fecha_gestion?: string | null
+  created_at: string
+  updated_at: string
+  cliente_nombre: string
+  cliente_email: string
+  cliente_telefono: string
+  items: {
+    id: number
+    pedido_id: number
+    codigo_producto: string
+    nombre_producto: string
+    cantidad: number
+    precio_unitario: number
+    subtotal: number
+    observaciones?: string | null
+  }[]
+}
+
+interface PaginatedOrdersResponse {
+  items: OrderResponse[]
+  total_count: number
+  page: number
+  page_size: number
+  total_pages: number
+  has_next_page: boolean
+  has_previous_page: boolean
+}
+
 interface Product {
   codigo: string
   nombre: string
@@ -195,10 +251,14 @@ class ApiService {
     const companyId = this.getCompanyId()
     params.empresaId = companyId
     
+    console.log('🔍 buildQueryString input params:', params)
+    
     const queryString = Object.entries(params)
-      .filter(([_, value]) => value !== undefined && value !== null)
+      .filter(([, value]) => value !== undefined && value !== null)
       .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
       .join('&')
+    
+    console.log('🔍 buildQueryString output:', queryString)
     
     return queryString ? `?${queryString}` : ''
   }
@@ -208,6 +268,8 @@ class ApiService {
     try {
       const queryString = this.buildQueryString(params)
       const url = `${this.baseUrl}${endpoint}${queryString}`
+      
+      console.log('🔍 API fetch URL:', url)
       
       const response = await fetch(url, {
         method: 'GET',
@@ -237,6 +299,7 @@ class ApiService {
 
   // Get catalog with filters
   async getCatalog(filters: CatalogFilters = {}, signal?: AbortSignal): Promise<ApiResponse<CatalogResponse>> {
+    console.log('🔍 getCatalog called with filters:', filters)
     return this.fetch<CatalogResponse>('/api/catalog', filters, signal)
   }
 
@@ -460,6 +523,100 @@ class AuthApiService {
 
     return response.json()
   }
+
+  async createOrder(orderData: CreateOrderRequest, accessToken: string): Promise<OrderResponse> {
+    const url = `${this.baseUrl}/api/cliente-auth/pedidos`
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(orderData)
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+
+    return response.json()
+  }
+
+  async getOrderHistory(
+    accessToken: string, 
+    page: number = 1, 
+    pageSize: number = 20,
+    estado?: string,
+    fechaDesde?: string,
+    fechaHasta?: string
+  ): Promise<PaginatedOrdersResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString()
+    })
+    
+    if (estado) params.append('estado', estado)
+    if (fechaDesde) params.append('fechaDesde', fechaDesde)
+    if (fechaHasta) params.append('fechaHasta', fechaHasta)
+    
+    const url = `${this.baseUrl}/api/cliente-auth/pedidos?${params.toString()}`
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+
+    return response.json()
+  }
+  
+  async getOrderById(orderId: number, accessToken: string): Promise<OrderResponse> {
+    const url = `${this.baseUrl}/api/cliente-auth/pedidos/${orderId}`
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+
+    return response.json()
+  }
+  
+  async cancelOrder(orderId: number, motivo: string, accessToken: string): Promise<void> {
+    const url = `${this.baseUrl}/api/cliente-auth/pedidos/${orderId}/cancelar`
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({ motivo })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+  }
 }
 
 // Export singleton instances
@@ -481,5 +638,9 @@ export type {
   ChangePasswordRequest,
   UpdateProfileRequest,
   UpdateProfileResponse,
-  UserProfile
+  UserProfile,
+  CreateOrderRequest,
+  OrderItem,
+  OrderResponse,
+  PaginatedOrdersResponse
 }

@@ -7,7 +7,7 @@
     <div class="text-red-600 mb-4">{{ error }}</div>
     <button
       @click="retry"
-      class="bg-[--theme-primary] text-white px-4 py-2 rounded-md hover:bg-[--theme-primary-dark] transition-colors"
+      class="bg-[--theme-primary] text-white px-4 py-2 rounded-md hover:bg-[--theme-primary-dark] transition-colors cursor-pointer"
     >
       Intentar nuevamente
     </button>
@@ -36,7 +36,7 @@
             v-for="(url, index) in product.imagen_urls"
             :key="index"
             @click="currentImageIndex = index"
-            class="flex-shrink-0 w-16 h-16 bg-gray-50 rounded-md overflow-hidden border-2 transition-colors"
+            class="flex-shrink-0 w-16 h-16 bg-gray-50 rounded-md overflow-hidden border-2 transition-colors cursor-pointer"
             :class="currentImageIndex === index ? 'border-[--theme-primary]' : 'border-gray-200 hover:border-gray-300'"
           >
             <img
@@ -135,7 +135,7 @@
           <button
             v-if="allowOrders && product.stock !== 0"
             @click="addToCart"
-            class="w-full bg-[--theme-primary] text-white py-3 px-6 rounded-md text-lg font-medium hover:bg-[--theme-primary-dark] transition-colors"
+            class="w-full bg-[--theme-primary] text-white py-3 px-6 rounded-md text-lg font-medium hover:bg-[--theme-primary-dark] transition-colors cursor-pointer"
           >
             Agregar al carrito
           </button>
@@ -148,7 +148,7 @@
           <button
             v-if="whatsappUrl"
             @click="contactWhatsApp"
-            class="w-full bg-green-500 text-white py-3 px-6 rounded-md font-medium hover:bg-green-600 transition-colors flex items-center justify-center"
+            class="w-full bg-green-500 text-white py-3 px-6 rounded-md font-medium hover:bg-green-600 transition-colors flex items-center justify-center cursor-pointer"
           >
             <ChatBubbleLeftRightIcon class="h-5 w-5 mr-2" />
             Consultar por WhatsApp
@@ -156,7 +156,7 @@
           
           <button
             @click="goBack"
-            class="w-full border border-gray-300 text-gray-700 py-2 px-6 rounded-md font-medium hover:bg-gray-50 transition-colors"
+            class="w-full border border-gray-300 text-gray-700 py-2 px-6 rounded-md font-medium hover:bg-gray-50 transition-colors cursor-pointer"
           >
             Volver al catálogo
           </button>

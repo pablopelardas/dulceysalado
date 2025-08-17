@@ -69,6 +69,10 @@ public partial class DistricatalogoContext : DbContext
 
     public virtual DbSet<DistriCatalogoAPI.Domain.Entities.EmpresaFeature> EmpresaFeatures { get; set; }
 
+    public virtual DbSet<DistriCatalogoAPI.Domain.Entities.Pedido> Pedidos { get; set; }
+
+    public virtual DbSet<DistriCatalogoAPI.Domain.Entities.PedidoItem> PedidoItems { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<CategoriasBase>(entity =>
@@ -1286,6 +1290,10 @@ public partial class DistricatalogoContext : DbContext
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.ClienteRefreshTokenConfiguration());
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.ClienteLoginHistoryConfiguration());
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.CustomerSyncSessionConfiguration());
+        
+        // Pedidos Configuration
+        modelBuilder.ApplyConfiguration(new Persistence.Configurations.PedidoConfiguration());
+        modelBuilder.ApplyConfiguration(new Persistence.Configurations.PedidoItemConfiguration());
 
         OnModelCreatingPartial(modelBuilder);
     }

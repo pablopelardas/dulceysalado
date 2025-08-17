@@ -13,11 +13,6 @@ import { useCatalogStore } from '@/stores/catalog'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import ProductGrid from '@/components/catalog/ProductGrid.vue'
 
-interface Props {
-  listId?: string
-}
-
-const props = defineProps<Props>()
 const route = useRoute()
 const router = useRouter()
 const catalogStore = useCatalogStore()
@@ -127,7 +122,6 @@ const handlePopState = async () => {
 }
 
 onMounted(async () => {
-  console.log('Catalog mounted with props:', props)
   console.log('Route query:', route.query)
   
   // Add popstate listener for browser navigation
@@ -136,13 +130,8 @@ onMounted(async () => {
   // Initialize catalog data
   await catalogStore.initializeAll() // This will fetch categories, novedades, and ofertas
   
-  // Handle price list from route parameter (without fetching)
-  if (props.listId) {
-    catalogStore.selectedPriceList = props.listId
-    document.title = `Catálogo - Lista ${props.listId} - ${EMPRESA_CONFIG.nombre}`
-  } else {
-    document.title = `Catálogo - ${EMPRESA_CONFIG.nombre}`
-  }
+  // Set document title
+  document.title = `Catálogo - ${EMPRESA_CONFIG.nombre}`
   
   // Restore state from URL query params
   await restoreFromURL()

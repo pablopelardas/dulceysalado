@@ -11,7 +11,13 @@ interface User {
   telefono?: string
   direccion?: string
   empresa_id: number
-  lista_precio_id: number
+  lista_precio?: {
+    id: number
+    codigo: string
+    nombre: string
+    descripcion?: string
+    activo: boolean
+  }
 }
 
 interface LoginCredentials {
@@ -247,6 +253,44 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Helper para ejecutar llamadas autenticadas con retry automático
+  const executeWithAuth = async <T>(
+    apiCall: (token: string) => Promise<T>
+  ): Promise<T> => {
+    if (!token.value) {
+      throw new Error('No hay token de autenticación')
+    }
+
+    try {
+      // Intentar la llamada original
+      return await apiCall(token.value)
+    } catch (error: any) {
+      // Si es un error 401, intentar refrescar el token
+      const errorMessage = error.message || ''
+      const is401 = errorMessage.includes('401') || 
+                    errorMessage.includes('Unauthorized') ||
+                    errorMessage.includes('Token expired')
+      
+      if (is401) {
+        console.log('Token expirado, intentando refrescar...')
+        
+        const refreshed = await refreshAccessToken()
+        
+        if (refreshed && token.value) {
+          // Reintentar la llamada con el nuevo token
+          console.log('Token refrescado, reintentando llamada...')
+          return await apiCall(token.value)
+        } else {
+          // Si no se pudo refrescar, ya se hizo logout
+          throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.')
+        }
+      }
+      
+      // Si no es un error 401, propagar el error original
+      throw error
+    }
+  }
+
   return {
     // State
     user,
@@ -268,6 +312,7 @@ export const useAuthStore = defineStore('auth', () => {
     refreshUserProfile,
     clearError,
     refreshAccessToken,
-    fetchUserProfile
+    fetchUserProfile,
+    executeWithAuth
   }
 })

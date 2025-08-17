@@ -18,7 +18,7 @@
           title=""
           :products="mockNovedades"
           :icon="null"
-          :modal-open="showAddToCartModal"
+          :modal-open="false"
           @open-cart="openAddToCartModal"
         />
       </section>
@@ -38,7 +38,7 @@
           title=""
           :products="mockOfertas"
           :icon="null"
-          :modal-open="showAddToCartModal"
+          :modal-open="false"
           @open-cart="openAddToCartModal"
         />
       </section>
@@ -239,18 +239,12 @@
       </div>
     </div>
     
-    <!-- Add to Cart Modal -->
-    <AddToCartModal
-      :is-open="showAddToCartModal"
-      :product="selectedProduct"
-      @close="closeAddToCartModal"
-      @added="onProductAdded"
-    />
+    <!-- Modal is now handled globally in AppLayout -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick, inject } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useCatalogStore } from '@/stores/catalog'
 import { 
@@ -265,7 +259,7 @@ import ProductCarousel from './ProductCarousel.vue'
 import ProductSkeleton from '@/components/ui/ProductSkeleton.vue'
 import CategoryChipSkeleton from '@/components/ui/CategoryChipSkeleton.vue'
 import Pagination from '@/components/ui/Pagination.vue'
-import AddToCartModal from '@/components/cart/AddToCartModal.vue'
+// Modal is now handled globally
 import type { Product } from '@/services/api'
 
 // Stores
@@ -460,9 +454,10 @@ const getStoredViewMode = (): 'grid' | 'list' => {
 const viewMode = ref<'grid' | 'list'>(getStoredViewMode())
 const sortOrder = ref('nombre_asc')
 
-// Cart modal state
-const showAddToCartModal = ref(false)
-const selectedProduct = ref(null)
+// Inject global cart modal
+const openCartModal = inject('openCartModal') as ((product: any) => void) | undefined
+
+// State
 const isClearing = ref(false)
 const isInitialMount = ref(true)
 
@@ -644,18 +639,9 @@ const goToPage = (page: number | string) => {
 
 // Cart modal methods
 const openAddToCartModal = (product: any) => {
-  selectedProduct.value = product
-  showAddToCartModal.value = true
-}
-
-const closeAddToCartModal = () => {
-  showAddToCartModal.value = false
-  selectedProduct.value = null
-}
-
-const onProductAdded = (product: any, quantity: number) => {
-  console.log(`Added ${quantity} of ${product.nombre} to cart`)
-  // Could show a toast notification here
+  if (openCartModal) {
+    openCartModal(product)
+  }
 }
 
 const handleProductClick = (product: Product) => {

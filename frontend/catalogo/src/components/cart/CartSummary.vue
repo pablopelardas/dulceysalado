@@ -13,7 +13,7 @@
         <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 rounded-t-2xl">
           <div class="flex items-center justify-between">
             <h3 class="text-xl font-semibold text-gray-900">
-              Planificador de compras
+              Carrito de compras
             </h3>
             <button 
               @click="closeModal"
@@ -25,12 +25,12 @@
           <p class="text-sm text-gray-500 mt-1">
             {{ cartStore.itemCount }} {{ cartStore.itemCount === 1 ? 'producto' : 'productos' }} - {{ cartStore.totalItems }} {{ cartStore.totalItems === 1 ? 'unidad' : 'unidades' }} total
           </p>
-          <div class="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <p class="text-xs text-blue-700 flex items-center gap-2">
+          <div class="mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
+            <p class="text-xs text-green-700 flex items-center gap-2">
               <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
-              Esta herramienta es para planificar tu compra. No genera pedidos automáticos. Confirma disponibilidad y precios en el local.
+              Envía tu pedido directamente o exporta como lista de compras para planificar.
             </p>
           </div>
         </div>
@@ -213,23 +213,40 @@
           </div>
           
           <!-- Actions -->
-          <div class="flex gap-3">
+          <div class="space-y-3">
+            <!-- Primary Action: Send Order -->
             <button 
-              @click="clearCart"
-              class="flex items-center gap-2 px-4 py-3 text-red-700 bg-red-100 hover:bg-red-200 rounded-lg font-medium transition-colors cursor-pointer border border-red-200"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Vaciar lista
-            </button>
-            <button 
-              @click="openExportOptions"
-              class="flex-1 px-4 py-3 text-white rounded-lg font-medium transition-colors cursor-pointer"
+              @click="openOrderModal"
+              class="w-full flex items-center justify-center gap-2 px-6 py-4 text-white rounded-lg font-semibold text-lg transition-colors cursor-pointer shadow-md hover:shadow-lg"
               :style="{ background: 'var(--theme-accent)' }"
             >
-              Exportar lista
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4"/>
+              </svg>
+              🛒 Enviar Pedido
             </button>
+            
+            <!-- Secondary Actions -->
+            <div class="grid grid-cols-2 gap-3">
+              <button 
+                @click="openExportOptions"
+                class="flex items-center justify-center gap-2 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors cursor-pointer border border-gray-200"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                📋 Exportar Lista
+              </button>
+              <button 
+                @click="clearCart"
+                class="flex items-center justify-center gap-2 px-4 py-3 text-red-700 bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors cursor-pointer border border-red-200"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Vaciar
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -257,6 +274,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   close: []
   openExport: []
+  openOrder: []
 }>()
 
 // Store
@@ -275,6 +293,10 @@ const clearCart = () => {
 
 const openExportOptions = () => {
   emit('openExport')
+}
+
+const openOrderModal = () => {
+  emit('openOrder')
 }
 
 const updateQuantity = (codigo: string, event: Event) => {
