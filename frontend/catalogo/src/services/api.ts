@@ -53,6 +53,40 @@ interface UpdateProfileResponse {
   cliente: UserProfile
 }
 
+interface RegisterRequest {
+  empresa_id: number
+  nombre: string
+  email: string
+  password: string
+  telefono?: string
+  direccion?: string
+}
+
+interface RegisterResponse {
+  message: string
+  cliente: {
+    id: number
+    empresa_id: number
+    codigo: string
+    nombre: string
+    email: string
+    telefono?: string
+    direccion?: string
+    username: string
+    tiene_acceso: boolean
+    activo: boolean
+    last_login?: string
+    lista_precio?: {
+      id: number
+      codigo: string
+      nombre: string
+    }
+  }
+  access_token: string
+  refresh_token: string
+  expires_in: string
+}
+
 interface UserProfile {
   id: number
   codigo: string
@@ -452,6 +486,30 @@ class AuthApiService {
       method: 'POST',
       body: JSON.stringify(loginData)
     })
+  }
+
+  async register(registerData: RegisterRequest): Promise<RegisterResponse> {
+    // Agregar empresa_id si no está presente
+    const completeRegisterData = {
+      ...registerData,
+      empresa_id: registerData.empresa_id || this.EMPRESA_ID
+    }
+
+    return this.authFetch<RegisterResponse>('/api/cliente-auth/register', {
+      method: 'POST',
+      body: JSON.stringify(completeRegisterData)
+    })
+  }
+
+  async loginWithGoogle(): Promise<LoginResponse> {
+    // Redirigir al endpoint de OAuth Google con callback dinámico
+    const callbackUrl = encodeURIComponent(`${window.location.origin}/auth/google/callback`)
+    const googleAuthUrl = `${this.baseUrl}/api/cliente-auth/google?empresaId=${this.EMPRESA_ID}&redirect_uri=${callbackUrl}`
+    window.location.href = googleAuthUrl
+    
+    // Esta función no retorna directamente porque hay una redirección
+    // El backend redirigirá de vuelta con los tokens
+    return new Promise(() => {}) // Never resolves in this flow
   }
 
   async refreshToken(refreshToken: string): Promise<LoginResponse> {

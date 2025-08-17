@@ -2,7 +2,7 @@
 <template>
   <div class="min-h-screen bg-black">
     <!-- Header spacer -->
-    <div class="h-12 md:h-14 lg:h-16"></div>
+    <div class="h-14 lg:h-16"></div>
     
     <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <!-- Header -->
@@ -27,7 +27,7 @@
                   </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-300">Lista de precios</label>
-                    <p class="text-white">{{ (authStore.user as any)?.lista_precio?.nombre || authStore.user?.lista_precio_id || 'No asignada' }}</p>
+                    <p class="text-white">{{ (authStore.user as any)?.lista_precio?.nombre || 'No asignada' }}</p>
                   </div>
                 </div>
               </div>
@@ -286,7 +286,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { authApiService } from '@/services/api'
+// authApiService import removed - not used
 
 const router = useRouter()
 const authStore = useAuthStore()

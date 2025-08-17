@@ -121,7 +121,7 @@
             <button
               type="submit"
               :disabled="authStore.loading"
-              class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               :style="{ backgroundColor: 'var(--theme-accent)' }"
             >
               <span v-if="authStore.loading" class="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -217,10 +217,15 @@ const handleSubmit = async () => {
   }
 }
 
-const handleGoogleLogin = () => {
-  // Redirigir al backend para iniciar el flujo OAuth
-  const redirectUrl = encodeURIComponent(window.location.origin + '/auth/google/callback')
-  window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:7000'}/api/cliente-auth/google?redirect_uri=${redirectUrl}&empresa_id=1`
+const handleGoogleLogin = async () => {
+  authStore.clearError()
+  
+  const success = await authStore.loginWithGoogle()
+  
+  if (success) {
+    // La redirección se maneja automáticamente en el auth store
+    // No necesitamos hacer nada aquí ya que window.location.href redirige
+  }
 }
 
 // Lifecycle

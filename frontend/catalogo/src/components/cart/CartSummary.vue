@@ -45,7 +45,7 @@
           
           <div v-else class="p-6 pb-48">
             <div 
-              v-for="(item, index) in cartStore.items" 
+              v-for="item in cartStore.items" 
               :key="item.codigo"
               class="border border-gray-100 rounded-lg mb-4 last:mb-0 overflow-hidden"
             >

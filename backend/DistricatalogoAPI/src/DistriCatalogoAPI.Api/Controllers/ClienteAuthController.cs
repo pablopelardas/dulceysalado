@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
 using DistriCatalogoAPI.Application.Queries.Clientes;
+using DistriCatalogoAPI.Application.Commands.Clientes;
 using DistriCatalogoAPI.Application.DTOs;
 using DistriCatalogoAPI.Domain.Interfaces;
 using System.Security.Claims;
@@ -97,6 +98,63 @@ namespace DistriCatalogoAPI.Api.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = "Error en el proceso de autenticación", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Registrar nuevo cliente
+        /// </summary>
+        [HttpPost("register")]
+        public async Task<ActionResult<ClienteAuthResponseDto>> Register([FromBody] ClienteRegisterDto registerDto)
+        {
+            try
+            {
+                // Crear comando para registro
+                var command = new RegisterClienteCommand
+                {
+                    EmpresaId = registerDto.EmpresaId,
+                    Nombre = registerDto.Nombre,
+                    Email = registerDto.Email,
+                    Password = registerDto.Password,
+                    Telefono = registerDto.Telefono,
+                    Direccion = registerDto.Direccion
+                };
+
+                // Ejecutar registro
+                var clienteDto = await _mediator.Send(command);
+
+                // Buscar la entidad completa para generar tokens
+                var clienteEntity = await _clienteRepository.GetByIdAsync(clienteDto.Id);
+                if (clienteEntity == null)
+                {
+                    return BadRequest(new { message = "Error en el proceso de registro" });
+                }
+
+                // Generar tokens
+                var accessToken = await _clienteAuthService.GenerateAccessTokenAsync(clienteEntity);
+                var refreshToken = await _clienteAuthService.GenerateRefreshTokenAsync(clienteEntity);
+
+                // Actualizar último login
+                await _clienteRepository.UpdateLastLoginAsync(clienteDto.Id);
+
+                var response = new ClienteAuthResponseDto
+                {
+                    Message = "Registro exitoso",
+                    Cliente = clienteDto,
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    ExpiresIn = "24h"
+                };
+
+                return Ok(response);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error en el proceso de registro", error = ex.Message });
             }
         }
 

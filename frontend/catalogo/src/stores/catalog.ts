@@ -50,7 +50,7 @@ export const useCatalogStore = defineStore('catalog', () => {
   let currentProductsController: AbortController | null = null
   
   // Cache system for search results
-  const searchCache = ref<Map<string, CatalogResponse>>(new Map())
+  const searchCache = ref<Map<string, any>>(new Map())
   const CACHE_SIZE_LIMIT = 50 // Maximum number of cached searches
   
   // Errors
@@ -179,7 +179,14 @@ export const useCatalogStore = defineStore('catalog', () => {
     
     // Check cache first
     if (searchCache.value.has(cacheKey)) {
-      const cachedData = searchCache.value.get(cacheKey) as CatalogResponse
+      const cachedData = searchCache.value.get(cacheKey) as {
+        productos: Product[]
+        total_count: number
+        total_pages: number
+        page: number
+        page_size: number
+        categorias?: Category[]
+      }
       
       // Update state with cached data
       products.value = cachedData.productos
@@ -240,7 +247,7 @@ export const useCatalogStore = defineStore('catalog', () => {
         // Update filtered categories only when there's a search query
         if (response.data.categorias && searchQuery.value) {
           // Filter to show only categories with products (product_count > 0)
-          filteredCategories.value = response.data.categorias.filter(category => category.product_count > 0)
+          filteredCategories.value = response.data.categorias.filter((category: Category) => category.product_count > 0)
         }
       }
     } catch (err) {
@@ -357,7 +364,7 @@ export const useCatalogStore = defineStore('catalog', () => {
     await fetchProducts() // Fetch products with new search
   }
 
-  const setPriceList = async (_priceListId: string | null) => {
+  const setPriceList = async () => {
     // Esta función ya no se usa, pero la mantenemos por compatibilidad
     console.log('setPriceList deprecated - price list is now automatic based on user authentication')
   }

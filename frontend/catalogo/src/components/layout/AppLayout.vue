@@ -8,7 +8,7 @@
     />
     
     <!-- Header Spacer -->
-    <div class="h-12 md:h-14 lg:h-16"></div>
+    <div class="h-14 lg:h-16"></div>
     
     <!-- Main Content con container apropiado -->
     <main class="flex-1">
@@ -58,6 +58,15 @@
       @clear="handleClearList"
     />
     
+    <!-- Floating Cart Button (solo en desktop y ciertas vistas) -->
+    <div class="hidden md:block">
+      <FloatingCart 
+        v-if="shouldShowFloatingCart"
+        @open-summary="showCartSummary = true"
+        @open-export="showExportOptions = true"
+      />
+    </div>
+    
     <!-- Floating WhatsApp Button -->
     <FloatingWhatsApp />
     
@@ -67,7 +76,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, provide } from 'vue'
+import { ref, computed, onMounted, provide } from 'vue'
+import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useWelcomeBack } from '@/composables/useWelcomeBack'
 import AppHeader from './AppHeader.vue'
@@ -77,14 +87,24 @@ import ExportOptions from '@/components/cart/ExportOptions.vue'
 import OrderModal from '@/components/cart/OrderModal.vue'
 import AddToCartModal from '@/components/cart/AddToCartModal.vue'
 import WelcomeBackModal from '@/components/ui/WelcomeBackModal.vue'
+import FloatingCart from '@/components/cart/FloatingCart.vue'
 import FloatingWhatsApp from '@/components/ui/FloatingWhatsApp.vue'
 import ScrollToTop from '@/components/ui/ScrollToTop.vue'
 
 // Stores
 const cartStore = useCartStore()
+const route = useRoute()
 
 // Composables
 const { showWelcomeModal, checkWelcomeBack, handleKeepList, handleClearList } = useWelcomeBack()
+
+// Computed
+const shouldShowFloatingCart = computed(() => {
+  // Solo mostrar el carrito flotante en pantallas grandes en vistas donde tiene sentido
+  // En móvil, el carrito está en el header
+  const routesWithCart = ['catalogo', 'Category', 'Product']
+  return routesWithCart.includes(route.name as string)
+})
 
 // Modal state
 const showCartSummary = ref(false)

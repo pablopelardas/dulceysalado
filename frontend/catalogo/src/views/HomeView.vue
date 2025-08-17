@@ -5,7 +5,7 @@
     <HomeHeader />
     
     <!-- Header Spacer -->
-    <div class="h-12 md:h-14 lg:h-16"></div>
+    <div class="h-14 lg:h-16"></div>
     
     <!-- Hero Section -->
     <HeroSection />
@@ -234,7 +234,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+// useRouter import removed - not used
 import { useCatalogStore } from '@/stores/catalog'
 import { useCartStore } from '@/stores/cart'
 import HomeHeader from '@/components/home/HomeHeader.vue'
@@ -251,7 +251,7 @@ import type { Product } from '@/services/api'
 // Stores
 const catalogStore = useCatalogStore()
 const cartStore = useCartStore()
-const router = useRouter()
+// router removed - not used currently
 
 // Map state
 const mapLoaded = ref(true) // Asumimos que el mapa se cargará correctamente
@@ -477,9 +477,7 @@ const handleButtonLeave = (event: Event) => {
   }
 }
 
-const handleProductClick = (product: Product) => {
-  router.push(`/product/${product.codigo}`)
-}
+// handleProductClick removed - using direct navigation
 
 // Cart methods
 const openCartSummary = () => {

@@ -115,7 +115,7 @@ const processCallback = async () => {
     
     if (isNew) {
       // Usuario nuevo: ir a completar perfil
-      redirectTo = '/completar-perfil'
+      redirectTo = '/completar-perfil?new=true'
     } else {
       // Usuario existente: ir al home o página guardada
       redirectTo = route.query.redirect as string || '/'

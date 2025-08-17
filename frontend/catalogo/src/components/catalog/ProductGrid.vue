@@ -244,8 +244,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch, nextTick, inject } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, watch, inject } from 'vue'
+// useRouter import removed - not used
 import { useCatalogStore } from '@/stores/catalog'
 import { 
   XMarkIcon,
@@ -264,7 +264,7 @@ import type { Product } from '@/services/api'
 
 // Stores
 const catalogStore = useCatalogStore()
-const router = useRouter()
+// router removed - not used currently
 
 // Mock data para las secciones
 const mockNovedades = ref<Product[]>([
@@ -469,7 +469,7 @@ const error = computed(() => catalogStore.productsError)
 const hasProducts = computed(() => catalogStore.hasProducts)
 const currentPage = computed(() => catalogStore.currentPage)
 const totalPages = computed(() => catalogStore.totalPages)
-const totalCount = computed(() => catalogStore.totalCount)
+// totalCount computed property removed - not used
 
 // Display the current filtered count (what's actually being shown)
 const displayProductCount = computed(() => 
@@ -490,7 +490,7 @@ const showEmptyState = computed(() =>
 )
 
 // Check if we're in initial loading state (show skeletons for everything)
-const isInitialLoading = computed(() => catalogStore.initializing)
+// isInitialLoading computed property removed - not used
 
 // Update loading to include initial loading
 const isLoading = computed(() => loading.value || catalogStore.initializing)
@@ -644,9 +644,7 @@ const openAddToCartModal = (product: any) => {
   }
 }
 
-const handleProductClick = (product: Product) => {
-  router.push(`/product/${product.codigo}`)
-}
+// handleProductClick removed - using direct navigation in template
 
 const fetchProducts = async () => {
   await catalogStore.fetchProducts()

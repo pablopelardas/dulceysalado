@@ -154,7 +154,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import type { Product } from '@/services/api'
 import EMPRESA_CONFIG from '@/config/empresa.config'
 
@@ -191,13 +191,7 @@ const formatPrice = (price: number): string => {
   }).format(price)
 }
 
-const handleAddToCart = () => {
-  emit('openCart', props.product)
-}
-
-const handleQuickView = () => {
-  emit('quickView', props.product)
-}
+// Event handlers removed - using direct card click functionality
 
 const handleCardClick = () => {
   // Al hacer click en cualquier parte de la tarjeta, abre el modal de agregar al carrito

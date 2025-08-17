@@ -98,4 +98,14 @@ namespace DistriCatalogoAPI.Application.DTOs
         public string CurrentPassword { get; set; } = string.Empty;
         public string NewPassword { get; set; } = string.Empty;
     }
+    
+    public class ClienteRegisterDto
+    {
+        public int EmpresaId { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string? Telefono { get; set; }
+        public string? Direccion { get; set; }
+    }
 }

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { authApiService, type LoginResponse, type UserProfile } from '@/services/api'
+import { authApiService } from '@/services/api'
 
 interface User {
   id: number
@@ -26,10 +26,9 @@ interface LoginCredentials {
 }
 
 interface RegisterData {
+  nombre: string
   email: string
   password: string
-  nombre: string
-  apellido: string
   telefono?: string
   direccion?: string
 }
@@ -70,7 +69,25 @@ export const useAuthStore = defineStore('auth', () => {
 
       return true
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Error al iniciar sesión'
+      // Intentar extraer el mensaje del error JSON si existe
+      let errorMessage = 'Error al iniciar sesión'
+      
+      if (err instanceof Error) {
+        try {
+          // Intentar parsear el mensaje como JSON para extraer solo el mensaje
+          const errorData = JSON.parse(err.message)
+          if (errorData.message) {
+            errorMessage = errorData.message
+          } else {
+            errorMessage = err.message
+          }
+        } catch {
+          // Si no es JSON válido, usar el mensaje tal como está
+          errorMessage = err.message
+        }
+      }
+      
+      error.value = errorMessage
       return false
     } finally {
       loading.value = false
@@ -82,35 +99,76 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
-      // TODO: Reemplazar con llamada real a la API
-      // const response = await authAPI.register(registerData)
-      
-      // Por ahora simulamos una respuesta exitosa
-      const mockResponse = {
-        user: {
-          id: Date.now(),
-          codigo: 'CLI' + Date.now(),
-          email: registerData.email,
-          nombre: registerData.nombre,
-          apellido: registerData.apellido,
-          telefono: registerData.telefono,
-          direccion: registerData.direccion,
-          empresa_id: 1,
-          lista_precio_id: 1
-        },
-        token: 'mock-jwt-token-' + Date.now()
-      }
+      const response = await authApiService.register({
+        empresa_id: 1, // Dulce y Salado
+        nombre: registerData.nombre,
+        email: registerData.email,
+        password: registerData.password,
+        telefono: registerData.telefono,
+        direccion: registerData.direccion
+      })
 
-      user.value = mockResponse.user
-      token.value = mockResponse.token
+      // Mapear la respuesta del backend al formato esperado por el frontend
+      user.value = {
+        id: response.cliente.id,
+        codigo: response.cliente.codigo,
+        nombre: response.cliente.nombre,
+        email: response.cliente.email,
+        telefono: response.cliente.telefono,
+        direccion: response.cliente.direccion,
+        empresa_id: response.cliente.empresa_id,
+        lista_precio: response.cliente.lista_precio ? {
+          ...response.cliente.lista_precio,
+          activo: true // Valor por defecto si no viene del backend
+        } : undefined
+      }
+      
+      token.value = response.access_token
+      refreshToken.value = response.refresh_token
 
       // Guardar en localStorage
-      localStorage.setItem('auth_token', mockResponse.token)
-      localStorage.setItem('user_data', JSON.stringify(mockResponse.user))
+      localStorage.setItem('auth_token', response.access_token)
+      localStorage.setItem('refresh_token', response.refresh_token)
+      localStorage.setItem('user_data', JSON.stringify(user.value))
 
+      console.log('Registro completado exitosamente:', user.value)
       return true
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Error al registrarse'
+      // Intentar extraer el mensaje del error JSON si existe
+      let errorMessage = 'Error al registrarse'
+      
+      if (err instanceof Error) {
+        try {
+          // Intentar parsear el mensaje como JSON para extraer solo el mensaje
+          const errorData = JSON.parse(err.message)
+          if (errorData.message) {
+            errorMessage = errorData.message
+          } else {
+            errorMessage = err.message
+          }
+        } catch {
+          // Si no es JSON válido, usar el mensaje tal como está
+          errorMessage = err.message
+        }
+      }
+      
+      error.value = errorMessage
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const loginWithGoogle = async (): Promise<boolean> => {
+    loading.value = true
+    error.value = null
+
+    try {
+      await authApiService.loginWithGoogle()
+      // La redirección manejará el resto del flujo
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Error al iniciar sesión con Google'
       return false
     } finally {
       loading.value = false
@@ -158,7 +216,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const updateProfile = async (profileData: Record<string, any>): Promise<boolean> => {
+  const updateProfile = async (profileData: Record<string, unknown>): Promise<boolean> => {
     loading.value = true
     error.value = null
 
@@ -264,9 +322,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       // Intentar la llamada original
       return await apiCall(token.value)
-    } catch (error: any) {
+    } catch (error) {
       // Si es un error 401, intentar refrescar el token
-      const errorMessage = error.message || ''
+      const errorMessage = (error as Error).message || ''
       const is401 = errorMessage.includes('401') || 
                     errorMessage.includes('Unauthorized') ||
                     errorMessage.includes('Token expired')
@@ -306,6 +364,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Actions
     login,
     register,
+    loginWithGoogle,
     logout,
     initializeAuth,
     updateProfile,

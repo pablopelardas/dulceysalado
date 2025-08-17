@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+// useRoute import removed - not used
 import { RouterLink } from 'vue-router'
 import { EMPRESA_CONFIG } from '@/config/empresa.config'
 import { useCatalogStore } from '@/stores/catalog'
@@ -64,7 +64,7 @@ import ProductDetail from '@/components/catalog/ProductDetail.vue'
 import ProductCard from '@/components/catalog/ProductCard.vue'
 
 // Composables
-const route = useRoute()
+// route removed - not used currently
 const catalogStore = useCatalogStore()
 const { setProductSeo } = useSeo()
 

@@ -7,7 +7,7 @@
         @click="toggleCart"
         class="group cursor-pointer"
         :class="[
-          compact ? 'relative' : 'fixed top-6 right-6 z-40',
+          compact ? 'relative' : 'fixed top-16 md:top-20 lg:top-24 right-4 md:right-6 z-40',
           { 'animate-bounce': justAdded && !compact }
         ]"
       >
@@ -196,7 +196,7 @@ interface Props {
   compact?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   alwaysShow: false,
   compact: false
 })

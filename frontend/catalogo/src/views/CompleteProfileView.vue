@@ -14,10 +14,10 @@
         
         <div class="text-center">
           <h2 class="text-3xl font-extrabold text-white">
-            ¡Bienvenido/a {{ authStore.user?.nombre || 'a nuestra plataforma' }}!
+            {{ isNewUser ? '¡Bienvenido/a' : '¡Hola' }} {{ authStore.user?.nombre || 'a nuestra plataforma' }}!
           </h2>
           <p class="mt-2 text-lg text-gray-300">
-            Completá tu perfil para personalizar tu experiencia
+            {{ isNewUser ? 'Tu cuenta se creó exitosamente. Ahora podés' : 'Podés' }} completar tu perfil para personalizar tu experiencia
           </p>
           <p class="mt-1 text-sm text-gray-400">
             Todos los campos son opcionales, podés completarlos ahora o más tarde
@@ -233,14 +233,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { EMPRESA_CONFIG } from '@/config/empresa.config'
 import { applyTheme } from '@/utils/theme'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
+
+// Computed
+const isNewUser = computed(() => route.query.new === 'true')
 
 // State
 const loading = ref(false)
@@ -279,7 +283,7 @@ const handleSubmit = async () => {
   try {
     // Filtrar campos vacíos
     const updateData = Object.entries(form.value)
-      .filter(([_, value]) => value.trim() !== '')
+      .filter(([, value]) => value.trim() !== '')
       .reduce((acc, [key, value]) => {
         acc[key] = value.trim()
         return acc

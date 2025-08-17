@@ -1,4 +1,4 @@
-import { ref, h, render } from 'vue'
+import { h, render } from 'vue'
 import Toast from '@/components/ui/Toast.vue'
 
 interface ToastOptions {
