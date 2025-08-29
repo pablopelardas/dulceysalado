@@ -537,73 +537,67 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
             };
         }
 
+        private static readonly Dictionary<string, System.Reflection.PropertyInfo> _propertyCache = new();
+        private static readonly Dictionary<string, System.Reflection.FieldInfo> _fieldCache = new();
+
         private ProductBase MapToDomain(Infrastructure.Models.ProductosBase model)
         {
-            // Usar reflection para crear instancia y establecer propiedades privadas usando backing fields
+            // Mapeo directo usando AutoMapper sería más eficiente, pero por ahora optimizamos el reflection
             var product = Activator.CreateInstance(typeof(ProductBase), true) as ProductBase;
             var productType = typeof(ProductBase);
 
-            _logger.LogDebug("Mapeando ProductBase desde DB: Id={Id}, Codigo={Codigo}", model.Id, model.Codigo);
-
-            void SetProperty(string propertyName, object value)
+            void SetPropertyOptimized(string propertyName, object value)
             {
-                var prop = productType.GetProperty(propertyName);
+                if (!_propertyCache.TryGetValue(propertyName, out var prop))
+                {
+                    prop = productType.GetProperty(propertyName);
+                    _propertyCache[propertyName] = prop;
+                }
+                
                 if (prop != null && prop.CanWrite)
                 {
                     prop.SetValue(product, value);
                 }
                 else
                 {
-                    var field = productType.GetField($"<{propertyName}>k__BackingField", 
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    if (field != null)
+                    var fieldKey = $"<{propertyName}>k__BackingField";
+                    if (!_fieldCache.TryGetValue(fieldKey, out var field))
                     {
-                        field.SetValue(product, value);
+                        field = productType.GetField(fieldKey, 
+                            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        _fieldCache[fieldKey] = field;
                     }
-                    else
-                    {
-                        _logger.LogDebug("No se pudo establecer propiedad {PropertyName} en ProductBase", propertyName);
-                    }
+                    field?.SetValue(product, value);
                 }
             }
 
-            SetProperty("Id", model.Id);
-            SetProperty("Codigo", model.Codigo);
-            SetProperty("Descripcion", model.Descripcion ?? "");
-            SetProperty("CodigoRubro", model.CodigoRubro ?? 0);
-            // SetProperty("Precio", model.Precio ?? 0); // ELIMINADO: precio ahora está en productos_base_precios
-            // SetProperty("Existencia", model.Existencia ?? 0); // TODO: Manejar en ProductoBaseStockRepository
-            SetProperty("Grupo1", model.Grupo1);
-            SetProperty("Grupo2", model.Grupo2);
-            SetProperty("Grupo3", model.Grupo3);
-            SetProperty("FechaAlta", model.FechaAlta ?? DateTime.UtcNow);
-            SetProperty("FechaModi", model.FechaModi ?? DateTime.UtcNow);
-            SetProperty("Imputable", model.Imputable ?? "S");
-            SetProperty("Disponible", model.Disponible ?? "S");
-            SetProperty("CodigoUbicacion", model.CodigoUbicacion ?? string.Empty);
-
-            // Campos web
-            SetProperty("Visible", model.Visible ?? true);
-            SetProperty("Destacado", model.Destacado ?? false);
-            SetProperty("OrdenCategoria", model.OrdenCategoria ?? 0);
-            SetProperty("ImagenUrl", model.ImagenUrl ?? string.Empty);
-            SetProperty("ImagenAlt", model.ImagenAlt ?? string.Empty);
-            SetProperty("DescripcionCorta", model.DescripcionCorta ?? string.Empty);
-            SetProperty("DescripcionLarga", model.DescripcionLarga ?? string.Empty);
-            SetProperty("Tags", model.Tags ?? string.Empty);
-            SetProperty("CodigoBarras", model.CodigoBarras ?? string.Empty);
-            SetProperty("Marca", model.Marca ?? string.Empty);
-            SetProperty("UnidadMedida", model.UnidadMedida ?? "UN");
-
-            // Control
-            SetProperty("AdministradoPorEmpresaId", model.AdministradoPorEmpresaId);
-            SetProperty("ActualizadoGecom", model.ActualizadoGecom ?? DateTime.UtcNow);
-
-            // Base
-            SetProperty("CreatedAt", model.CreatedAt ?? DateTime.UtcNow);
-            SetProperty("UpdatedAt", model.UpdatedAt ?? DateTime.UtcNow);
-
-            _logger.LogDebug("ProductBase mapeado exitosamente: Id={Id}, Codigo={Codigo}", product?.Id, product?.Codigo);
+            SetPropertyOptimized("Id", model.Id);
+            SetPropertyOptimized("Codigo", model.Codigo);
+            SetPropertyOptimized("Descripcion", model.Descripcion ?? "");
+            SetPropertyOptimized("CodigoRubro", model.CodigoRubro ?? 0);
+            SetPropertyOptimized("Grupo1", model.Grupo1);
+            SetPropertyOptimized("Grupo2", model.Grupo2);
+            SetPropertyOptimized("Grupo3", model.Grupo3);
+            SetPropertyOptimized("FechaAlta", model.FechaAlta ?? DateTime.UtcNow);
+            SetPropertyOptimized("FechaModi", model.FechaModi ?? DateTime.UtcNow);
+            SetPropertyOptimized("Imputable", model.Imputable ?? "S");
+            SetPropertyOptimized("Disponible", model.Disponible ?? "S");
+            SetPropertyOptimized("CodigoUbicacion", model.CodigoUbicacion ?? string.Empty);
+            SetPropertyOptimized("Visible", model.Visible ?? true);
+            SetPropertyOptimized("Destacado", model.Destacado ?? false);
+            SetPropertyOptimized("OrdenCategoria", model.OrdenCategoria ?? 0);
+            SetPropertyOptimized("ImagenUrl", model.ImagenUrl ?? string.Empty);
+            SetPropertyOptimized("ImagenAlt", model.ImagenAlt ?? string.Empty);
+            SetPropertyOptimized("DescripcionCorta", model.DescripcionCorta ?? string.Empty);
+            SetPropertyOptimized("DescripcionLarga", model.DescripcionLarga ?? string.Empty);
+            SetPropertyOptimized("Tags", model.Tags ?? string.Empty);
+            SetPropertyOptimized("CodigoBarras", model.CodigoBarras ?? string.Empty);
+            SetPropertyOptimized("Marca", model.Marca ?? string.Empty);
+            SetPropertyOptimized("UnidadMedida", model.UnidadMedida ?? "UN");
+            SetPropertyOptimized("AdministradoPorEmpresaId", model.AdministradoPorEmpresaId);
+            SetPropertyOptimized("ActualizadoGecom", model.ActualizadoGecom ?? DateTime.UtcNow);
+            SetPropertyOptimized("CreatedAt", model.CreatedAt ?? DateTime.UtcNow);
+            SetPropertyOptimized("UpdatedAt", model.UpdatedAt ?? DateTime.UtcNow);
 
             return product ?? throw new InvalidOperationException("Error al mapear ProductBase desde DB");
         }

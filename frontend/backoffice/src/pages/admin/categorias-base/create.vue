@@ -42,7 +42,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Nueva Categoría Base - DistriCatalogo',
+  title: 'Nueva Categoría Base - Dulce y Salado',
   meta: [
     { name: 'description', content: 'Crear nueva categoría base del sistema' }
   ]

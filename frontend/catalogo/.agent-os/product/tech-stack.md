@@ -45,7 +45,7 @@
 ## Deployment & Hosting
 - **Application Hosting:** Express.js server with PM2 process management
 - **Asset Hosting:** Static files served through Express.js with compression
-- **Database Hosting:** External API (https://api.districatalogo.com)
+- **Database Hosting:** External API (https://api.dulceysalado.com)
 - **Deployment Solution:** PM2 with ecosystem configuration
 
 ## Architecture Patterns

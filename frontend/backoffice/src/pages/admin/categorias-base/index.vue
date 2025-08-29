@@ -180,7 +180,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Categorías Base - DistriCatalogo',
+  title: 'Categorías Base - Dulce y Salado',
   meta: [
     { name: 'description', content: 'Gestión de categorías base del sistema' }
   ]

@@ -65,45 +65,101 @@ namespace DistriCatalogoAPI.Application.Handlers.ProductosBase
             var empresaId = request.EmpresaId ?? await GetEmpresaPrincipalIdAsync();
             _logger.LogInformation("Empresa seleccionada para stock: {EmpresaId}", empresaId);
 
-            // Obtener todos los productos primero, luego filtraremos por stock
-            var (allProducts, totalBeforeStockFilter) = await _productRepository.GetPagedAsync(
-                request.Visible,
-                request.Destacado,
-                request.CodigoRubro,
-                request.Busqueda,
-                1, // Obtener todo para filtrar por stock
-                int.MaxValue, // Sin límite inicial
-                request.SortBy,
-                request.SortOrder,
-                listaSeleccionada?.Id,
-                true, // Incluir todos los productos inicialmente
-                request.SoloSinConfiguracion);
-
             List<Domain.Entities.ProductBase> products;
             int total;
 
-            // Si solo queremos productos con stock, filtrar después de obtener el stock
-            if (!request.IncluirSinExistencia)
+            // Verificar si estamos ordenando por stock - en ese caso necesitamos lógica especial
+            var isStockSort = !string.IsNullOrEmpty(request.SortBy) && 
+                            (request.SortBy.ToLower() == "existencia" || request.SortBy.ToLower() == "stock");
+
+            if (isStockSort)
             {
+                // Para ordenamiento por stock, obtener todos los productos y ordenar por stock en memoria
+                _logger.LogInformation("Ordenamiento por stock detectado - obteniendo productos para ordenar por stock");
+                
+                var (allProductsForStock, totalBeforeStockFilter) = await _productRepository.GetPagedAsync(
+                    request.Visible,
+                    request.Destacado,
+                    request.CodigoRubro,
+                    request.Busqueda,
+                    1,
+                    int.MaxValue, // Obtener todos para ordenar por stock
+                    null, // No ordenamiento en repositorio
+                    null,
+                    listaSeleccionada?.Id,
+                    true,
+                    request.SoloSinConfiguracion);
+
                 // Obtener stock para todos los productos
-                var productIds = allProducts.Select(p => p.Id).ToList();
-                var stockPorProducto = await _stockRepository.GetStockBatchAsync(empresaId, productIds);
+                var allProductIds = allProductsForStock.Select(p => p.Id).ToList();
+                var stockPorProducto = await _stockRepository.GetStockBatchAsync(empresaId, allProductIds);
                 
-                // Filtrar productos que tienen stock > 0
-                products = allProducts.Where(p => stockPorProducto.ContainsKey(p.Id) && stockPorProducto[p.Id] > 0).ToList();
-                total = products.Count;
+                // Filtrar por stock si es necesario
+                var filteredProducts = !request.IncluirSinExistencia
+                    ? allProductsForStock.Where(p => stockPorProducto.ContainsKey(p.Id) && stockPorProducto[p.Id] > 0).ToList()
+                    : allProductsForStock;
+
+                // Ordenar por stock
+                var isDescending = string.Equals(request.SortOrder, "desc", StringComparison.OrdinalIgnoreCase);
+                var orderedProducts = isDescending
+                    ? filteredProducts.OrderByDescending(p => stockPorProducto.GetValueOrDefault(p.Id, 0)).ToList()
+                    : filteredProducts.OrderBy(p => stockPorProducto.GetValueOrDefault(p.Id, 0)).ToList();
+
+                // Aplicar paginación
+                var skip = (request.Page - 1) * request.PageSize;
+                products = orderedProducts.Skip(skip).Take(request.PageSize).ToList();
+                total = filteredProducts.Count;
                 
-                _logger.LogInformation("Productos filtrados por stock - Total antes: {TotalBefore}, Total después: {TotalAfter}", 
-                    allProducts.Count, products.Count);
+                _logger.LogInformation("Ordenamiento por stock completado - Total: {Total}, Página: {Page}, Stock máximo: {MaxStock}", 
+                    total, request.Page, stockPorProducto.Values.DefaultIfEmpty(0).Max());
+            }
+            else if (!request.IncluirSinExistencia)
+            {
+                // Filtro normal por stock sin ordenamiento por stock
+                var expandedPageSize = Math.Max(request.PageSize * 3, 100);
+                var (allProducts, totalBeforeStockFilter) = await _productRepository.GetPagedAsync(
+                    request.Visible,
+                    request.Destacado,
+                    request.CodigoRubro,
+                    request.Busqueda,
+                    1,
+                    expandedPageSize * request.Page,
+                    request.SortBy,
+                    request.SortOrder,
+                    listaSeleccionada?.Id,
+                    true,
+                    request.SoloSinConfiguracion);
+
+                var allProductIds = allProducts.Select(p => p.Id).ToList();
+                var stockPorProducto = await _stockRepository.GetStockBatchAsync(empresaId, allProductIds);
                 
-                // Aplicar paginación después del filtro de stock
-                products = products.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+                var productsWithStock = allProducts.Where(p => stockPorProducto.ContainsKey(p.Id) && stockPorProducto[p.Id] > 0).ToList();
+                
+                var skip = (request.Page - 1) * request.PageSize;
+                products = productsWithStock.Skip(skip).Take(request.PageSize).ToList();
+                total = productsWithStock.Count;
+                
+                _logger.LogInformation("Productos filtrados por stock - Total antes: {TotalBefore}, Con stock: {WithStock}", 
+                    allProducts.Count, productsWithStock.Count);
             }
             else
             {
-                // Sin filtro de stock, aplicar paginación normal
+                // Sin filtro de stock ni ordenamiento por stock
+                var (allProducts, totalBeforeStockFilter) = await _productRepository.GetPagedAsync(
+                    request.Visible,
+                    request.Destacado,
+                    request.CodigoRubro,
+                    request.Busqueda,
+                    request.Page,
+                    request.PageSize,
+                    request.SortBy,
+                    request.SortOrder,
+                    listaSeleccionada?.Id,
+                    true,
+                    request.SoloSinConfiguracion);
+                    
+                products = allProducts;
                 total = totalBeforeStockFilter;
-                products = allProducts.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
             }
 
             var productDtos = new List<ProductoBaseDto>();
@@ -122,14 +178,14 @@ namespace DistriCatalogoAPI.Application.Handlers.ProductosBase
                     preciosPorProducto.Count);
             }
 
-            // Obtener stock para los productos finales (si no se obtuvo ya arriba)
+            // Obtener stock para los productos
             Dictionary<int, decimal> stockPorProductoFinal = new();
             if (products.Any())
             {
                 var productIds = products.Select(p => p.Id).ToList();
                 stockPorProductoFinal = await _stockRepository.GetStockBatchAsync(empresaId, productIds);
                 
-                _logger.LogInformation("Se encontraron {StockCount} stocks para los productos finales", 
+                _logger.LogInformation("Se encontraron {StockCount} stocks para los productos", 
                     stockPorProductoFinal.Count);
             }
 

@@ -2,7 +2,7 @@
 
 ## Pitch
 
-Districatalogo es un sistema de catálogo público multi-tenant que ayuda a empresas a mostrar sus productos a través de subdominios personalizados, proporcionando una solución completa de visualización de productos con temas dinámicos y funcionalidades de comercio electrónico.
+Dulce y Salado es un sistema de catálogo público multi-tenant que ayuda a empresas a mostrar sus productos a través de subdominios personalizados, proporcionando una solución completa de visualización de productos con temas dinámicos y funcionalidades de comercio electrónico.
 
 ## Users
 

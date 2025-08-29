@@ -7,11 +7,11 @@
           <div class="flex items-center mb-4">
             <UIcon name="i-heroicons-building-office" class="h-8 w-8 text-blue-600 dark:text-blue-400 mr-3" />
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              DistriCatalogo Admin
+              Dulce y Salado Admin
             </h3>
           </div>
           <p class="text-gray-600 dark:text-gray-400 text-sm leading-6 max-w-md">
-            Sistema integral de gestión de catálogos para distribuidores. 
+            Sistema de gestión de catálogo para Dulce y Salado. 
             Administra productos, categorías, usuarios y visualiza estadísticas de manera eficiente.
           </p>
           <div class="mt-4 flex items-center space-x-4">
@@ -114,7 +114,7 @@
           <!-- Copyright -->
           <div class="flex items-center space-x-4">
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              &copy; {{ currentYear }} DistriCatalogo. Todos los derechos reservados.
+              &copy; {{ currentYear }} Dulce y Salado. Todos los derechos reservados.
             </p>
           </div>
 

@@ -8,14 +8,14 @@ La API de Catálogo Público permite acceder a los productos y categorías de la
 
 ### Resolución por Subdominio (Recomendado)
 ```
-https://empresa1.districatalogo.com/api/catalog
-https://empresa2.districatalogo.com/api/catalog
+https://empresa1.dulceysalado.com/api/catalog
+https://empresa2.dulceysalado.com/api/catalog
 ```
 
 ### Resolución por Query Parameter (Para Testing)
 ```
 https://localhost:7000/api/catalog?empresaId=1
-https://api.districatalogo.com/api/catalog?empresaId=1
+https://api.dulceysalado.com/api/catalog?empresaId=1
 ```
 
 ## Autenticación
@@ -46,7 +46,7 @@ Obtiene el catálogo completo de productos con filtros opcionales.
 #### Ejemplo de Petición
 ```http
 GET /api/catalog?listaPrecioId=1&page=1&pageSize=20&codigoRubro=4
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 #### Ejemplo de Respuesta
@@ -99,7 +99,7 @@ Obtiene todas las categorías disponibles para la empresa.
 #### Ejemplo de Petición
 ```http
 GET /api/catalog/categorias
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 #### Ejemplo de Respuesta
@@ -147,7 +147,7 @@ Obtiene los detalles completos de un producto específico.
 #### Ejemplo de Petición
 ```http
 GET /api/catalog/producto/92?listaPrecioId=1
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 ### 4. Obtener Productos Destacados
@@ -167,7 +167,7 @@ Obtiene los productos marcados como destacados.
 #### Ejemplo de Petición
 ```http
 GET /api/catalog/destacados?listaPrecioId=1&limit=5
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 ### 5. Obtener Información de la Empresa
@@ -185,7 +185,7 @@ Obtiene la información y configuración de la empresa para customizar el catál
 #### Ejemplo de Petición
 ```http
 GET /api/catalog/empresa
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 #### Ejemplo de Respuesta
@@ -201,7 +201,7 @@ Host: empresa1.districatalogo.com
   "logo_url": "https://localhost:7000/api/images/empresa1-logo.png",
   "colores_tema": "#FF6B35,#004E89,#F7F7FF",
   "favicon_url": "https://localhost:7000/api/images/empresa1-favicon.png",
-  "dominio_personalizado": "empresa1.districatalogo.com",
+  "dominio_personalizado": "empresa1.dulceysalado.com",
   "url_whatsapp": "https://wa.me/5491112345678",
   "url_facebook": "https://facebook.com/empresa1",
   "url_instagram": "https://instagram.com/empresa1",
@@ -292,8 +292,8 @@ La API respeta las configuraciones específicas de cada empresa obtenidas del en
 
 ### Por Subdominio (Producción)
 ```
-empresa1.districatalogo.com → EmpresaId: 1
-empresa2.districatalogo.com → EmpresaId: 2
+empresa1.dulceysalado.com → EmpresaId: 1
+empresa2.dulceysalado.com → EmpresaId: 2
 ```
 
 ### Por Query Parameter (Testing)
@@ -316,37 +316,37 @@ empresa2.districatalogo.com → EmpresaId: 2
 ### 1. Cargar página principal del catálogo
 ```http
 GET /api/catalog?page=1&pageSize=20
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 ### 2. Filtrar por categoría específica
 ```http
 GET /api/catalog?codigoRubro=4&listaPrecioId=1
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 ### 3. Buscar productos
 ```http
 GET /api/catalog?busqueda=vino&listaPrecioId=1
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 ### 4. Cargar categorías para navegación
 ```http
 GET /api/catalog/categorias
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 ### 5. Ver productos destacados en homepage
 ```http
 GET /api/catalog/destacados?limit=8&listaPrecioId=1
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 ### 6. Obtener configuración de empresa para personalización
 ```http
 GET /api/catalog/empresa
-Host: empresa1.districatalogo.com
+Host: empresa1.dulceysalado.com
 ```
 
 ## Consideraciones de Implementación
@@ -371,10 +371,10 @@ Host: empresa1.districatalogo.com
 
 ### Con subdominio (Recomendado)
 ```
-https://empresa1.districatalogo.com/api/catalog
-https://empresa1.districatalogo.com/api/catalog/categorias
-https://empresa1.districatalogo.com/api/catalog/producto/92
-https://empresa1.districatalogo.com/api/catalog/destacados
+https://empresa1.dulceysalado.com/api/catalog
+https://empresa1.dulceysalado.com/api/catalog/categorias
+https://empresa1.dulceysalado.com/api/catalog/producto/92
+https://empresa1.dulceysalado.com/api/catalog/destacados
 ```
 
 ### Con empresaId (Para testing local)

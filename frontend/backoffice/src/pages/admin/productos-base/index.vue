@@ -33,12 +33,6 @@
         </ClientOnly>
       </div>
 
-      <!-- Selector de Empresa (solo para empresa principal) -->
-      <EmpresaSelector
-        v-model="empresaSeleccionada"
-        @empresa-changed="handleEmpresaChange"
-        class="mb-6"
-      />
 
       <!-- Filtros -->
       <UCard class="mb-6">
@@ -296,7 +290,6 @@
 <script setup lang="ts">
 import ListaPreciosSelector from '~/components/ui/ListaPreciosSelector.vue'
 import ImageEditModal from '~/components/ui/ImageEditModal.vue'
-import EmpresaSelector from '~/components/empresas/EmpresaSelector.vue'
 import type { ProductoBaseDto } from '~/types/productos'
 
 // Configuración de página
@@ -348,9 +341,6 @@ const incluirSinExistencia = ref(false)
 const currentPage = ref(1)
 const initialLoading = ref(true)
 
-// Estado para stock diferencial por empresa
-const empresaSeleccionada = ref<number | null>(null)
-const empresaNombre = ref<string>('')
 
 // Modales
 const showDeleteModal = ref(false)
@@ -396,7 +386,6 @@ const applyFilters = async () => {
     destacado: destacadoFilter.value !== 'all' ? destacadoFilter.value as boolean : undefined,
     soloSinConfiguracion: soloSinConfiguracion.value || undefined,
     incluirSinExistencia: incluirSinExistencia.value || undefined,
-    empresaId: empresaSeleccionada.value,
     page: 1
   })
   currentPage.value = 1
@@ -466,35 +455,6 @@ const handleListaChange = async (lista: any) => {
   }
 }
 
-// Handler para cambio de empresa
-const handleEmpresaChange = async (empresa: any) => {
-  console.log('handleEmpresaChange called with:', empresa)
-  
-  if (empresa) {
-    empresaSeleccionada.value = empresa.id
-    empresaNombre.value = empresa.nombre
-    
-    console.log('Setting empresaId to:', empresa.id)
-    
-    // Actualizar query params en URL
-    await navigateTo({ 
-      query: { ...useRoute().query, empresaId: empresa.id.toString() } 
-    })
-    
-    // Recargar productos con stock específico de empresa
-    await fetchProductos({}, empresa.id)
-  } else {
-    empresaSeleccionada.value = null
-    empresaNombre.value = ''
-    
-    // Limpiar query param
-    const { empresaId, ...restQuery } = useRoute().query
-    await navigateTo({ query: restQuery })
-    
-    // Recargar productos sin filtro de empresa
-    await fetchProductos()
-  }
-}
 
 // Watcher para sincronizar currentPage con pagination
 watch(() => pagination.value.page, (newPage) => {
@@ -506,23 +466,11 @@ watch(() => pagination.value.page, (newPage) => {
 // Cargar datos iniciales
 onMounted(async () => {
   try {
-    // Obtener empresaId desde query params
-    const route = useRoute()
-    const empresaIdParam = route.query.empresaId as string
-    
-    if (empresaIdParam) {
-      empresaSeleccionada.value = parseInt(empresaIdParam)
-    }
-    
     // Inicializar listas de precios primero
     await initListasPrecios()
     
-    // Cargar productos (con empresa si está seleccionada)
-    if (empresaSeleccionada.value) {
-      await fetchProductos({}, empresaSeleccionada.value)
-    } else {
-      await fetchProductos()
-    }
+    // Cargar productos
+    await fetchProductos()
   } finally {
     initialLoading.value = false
   }

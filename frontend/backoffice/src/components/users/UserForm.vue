@@ -77,40 +77,6 @@
       </div>
     </UCard>
 
-    <!-- Empresa (solo para empresa principal) -->
-    <UCard v-if="isMainCompany">
-      <template #header>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Asignación de Empresa
-        </h3>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Selecciona la empresa a la que pertenecerá este usuario
-        </p>
-      </template>
-      
-      <UFormField label="Empresa" name="empresa_id">
-        <USelect
-          v-model="formData.empresa_id"
-          :items="empresaOptions"
-          option-attribute="label"
-          class="w-full md:w-1/2"
-          value-attribute="value"
-          placeholder="Dejar vacío para empresa principal"
-          :disabled="loading || loadingEmpresas || mode === 'edit'"
-          :loading="loadingEmpresas"
-        />
-        <template #help>
-          <span class="text-sm text-gray-500 dark:text-gray-400">
-            <span v-if="mode === 'create'">
-              Opcional: Si no seleccionas empresa, el usuario será de la empresa principal
-            </span>
-            <span v-else>
-              La empresa del usuario no se puede modificar después de la creación
-            </span>
-          </span>
-        </template>
-      </UFormField>
-    </UCard>
 
     <!-- Rol -->
     <UCard>
@@ -204,24 +170,14 @@ const formData = reactive<UserFormData>({
   confirmPassword: '',
   rol: 'viewer',
   activo: true,
-  empresa_id: undefined,
   puede_gestionar_productos_base: false,
-  puede_gestionar_productos_empresa: false,
   puede_gestionar_categorias_base: false,
-  puede_gestionar_categorias_empresa: false,
   puede_gestionar_usuarios: false,
   puede_ver_estadisticas: false,
   ...props.initialData
 })
 
-// Estado para empresas
-const empresaOptions = ref<{ label: string; value: number }[]>([])
-const loadingEmpresas = ref(false)
-
 // Computed
-const isMainCompany = computed(() => {
-  return currentUser.value?.empresa?.tipo_empresa === 'principal'
-})
 
 const schema = computed(() => {
   return props.mode === 'create' ? createUserSchema : updateUserSchema
@@ -250,21 +206,10 @@ const onRoleChange = (role: string) => {
   // Aplicar permisos predeterminados según el rol
   const defaultPermissions = ROLE_PERMISSIONS[role] || {}
   
-  let permissionsToApply
-  // Solo aplicar permisos base si es empresa principal
-  if (isMainCompany.value) {
-    permissionsToApply = { ...defaultPermissions }
-  } else {
-    // Para empresas cliente, filtrar permisos base
-    permissionsToApply = { ...defaultPermissions }
-    delete permissionsToApply.puede_gestionar_productos_base
-    delete permissionsToApply.puede_gestionar_categorias_base
-  }
-  
   // Usar updateFormData para aplicar permisos correctamente
   const updatedData = {
     ...formData,
-    ...permissionsToApply
+    ...defaultPermissions
   }
   updateFormData(updatedData)
 }
@@ -292,42 +237,13 @@ const onError = (event: any) => {
 
 // Método para actualizar formData manualmente
 const updateFormData = (updatedData: UserFormData) => {
-  // Actualizar solo los permisos, preservando otros campos como empresa_id
+  // Actualizar solo los permisos
   formData.puede_gestionar_productos_base = updatedData.puede_gestionar_productos_base
-  formData.puede_gestionar_productos_empresa = updatedData.puede_gestionar_productos_empresa
   formData.puede_gestionar_categorias_base = updatedData.puede_gestionar_categorias_base
-  formData.puede_gestionar_categorias_empresa = updatedData.puede_gestionar_categorias_empresa
   formData.puede_gestionar_usuarios = updatedData.puede_gestionar_usuarios
   formData.puede_ver_estadisticas = updatedData.puede_ver_estadisticas
-  
-  // Si hay empresa_id en updatedData y no estamos solo actualizando permisos, preservarlo
-  if (updatedData.empresa_id !== undefined) {
-    formData.empresa_id = updatedData.empresa_id
-  }
 }
 
-// Cargar empresas para selector
-const fetchEmpresas = async () => {
-  if (!isMainCompany.value) return
-  
-  loadingEmpresas.value = true
-  try {
-    const response = await api.get('/api/Companies?page=1&pageSize=100&includeInactive=false') as any
-    
-    // Mapear las empresas de la respuesta
-    const empresas = response.empresas || []
-    empresaOptions.value = empresas.map((empresa: any) => ({
-      label: `${empresa.codigo} - ${empresa.nombre}`,
-      value: empresa.id
-    }))
-    
-  } catch (error) {
-    console.error('Error cargando empresas:', error)
-    empresaOptions.value = []
-  } finally {
-    loadingEmpresas.value = false
-  }
-}
 
 // Variable para controlar si es la primera vez que se aplican permisos
 const permissionsInitialized = ref(false)
@@ -340,10 +256,4 @@ watchEffect(() => {
   }
 })
 
-// Cargar empresas al montar si es empresa principal
-onMounted(() => {
-  if (isMainCompany.value) {
-    fetchEmpresas()
-  }
-})
 </script>

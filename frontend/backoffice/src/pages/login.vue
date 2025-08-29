@@ -6,7 +6,7 @@
           <UIcon name="i-heroicons-building-office" class="h-6 w-6 text-blue-600 dark:text-blue-400" />
         </div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
-          DistriCatalogo Admin
+          Dulce y Salado Admin
         </h2>
         <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           Ingresa a tu cuenta para administrar tu catálogo

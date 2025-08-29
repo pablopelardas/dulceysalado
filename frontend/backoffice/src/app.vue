@@ -1,7 +1,7 @@
 <script setup lang="ts">
 useHead({
   titleTemplate: (titleChunk) => {
-    return titleChunk ? `${titleChunk} - DistriCatalogo Admin Panel` : 'DistriCatalogo Admin Panel';
+    return titleChunk ? `${titleChunk} - Dulce y Salado Admin Panel` : 'Dulce y Salado Admin Panel';
   }
 })
 

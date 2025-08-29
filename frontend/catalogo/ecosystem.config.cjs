@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'catalogo-districatalogo',
+    name: 'catalogo-dulceysalado',
     script: 'server.js',
     instances: 2,
     exec_mode: 'cluster',

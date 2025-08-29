@@ -9,7 +9,7 @@
           </div>
           <div class="ml-3">
             <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              DistriCatalogo Admin
+              Dulce y Salado Admin
             </h1>
           </div>
         </div>

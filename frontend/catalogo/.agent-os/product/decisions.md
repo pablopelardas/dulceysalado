@@ -13,7 +13,7 @@
 
 ### Decision
 
-Desarrollar Districatalogo como una aplicación Vue.js 3 multi-tenant que permite a empresas mostrar catálogos de productos a través de subdominios personalizados, con funcionalidades completas de búsqueda, filtrado, carrito de compras y exportación a PDF.
+Desarrollar Dulce y Salado como una aplicación Vue.js 3 multi-tenant que permite a empresas mostrar catálogos de productos a través de subdominios personalizados, con funcionalidades completas de búsqueda, filtrado, carrito de compras y exportación a PDF.
 
 ### Context
 

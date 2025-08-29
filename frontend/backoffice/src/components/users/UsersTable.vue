@@ -27,7 +27,7 @@ defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 // Composables
-const { isEmpresaPrincipal, user: currentUser } = useAuth()
+const { user: currentUser } = useAuth()
 
 // Columnas de la tabla usando la estructura correcta de Nuxt UI
 const columns = computed<TableColumn<Usuario>[]>(() => {
@@ -70,24 +70,6 @@ const columns = computed<TableColumn<Usuario>[]>(() => {
       }
     }
   ]
-
-  // Agregar columna de empresa solo para empresa principal
-  if (isEmpresaPrincipal.value) {
-    baseColumns.push({
-      accessorKey: 'empresa',
-      header: 'Empresa',
-      cell: ({ row }) => {
-        const user = row.original
-        if (user.empresa) {
-          return h('div', {}, [
-            h('p', { class: 'font-medium text-gray-900 dark:text-gray-100' }, user.empresa.nombre),
-            h('p', { class: 'text-sm text-gray-500 dark:text-gray-400' }, user.empresa.codigo)
-          ])
-        }
-        return h('span', { class: 'text-gray-400 dark:text-gray-500' }, '-')
-      }
-    })
-  }
 
   return [
     ...baseColumns,

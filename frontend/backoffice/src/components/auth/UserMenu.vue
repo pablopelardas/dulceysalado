@@ -137,12 +137,6 @@ const userMenuItems = computed<DropdownMenuItem[][]>(() => [
   ...(isEmpresaPrincipal.value ? [
     [
       {
-        label: 'Agrupaciones',
-        icon: 'i-heroicons-squares-2x2',
-        to: '/admin/agrupaciones',
-        shortcuts: ['A']
-      },
-      {
         label: 'Listas de Precios',
         icon: 'i-heroicons-currency-dollar',
         to: '/admin/listas-precios',
@@ -150,15 +144,6 @@ const userMenuItems = computed<DropdownMenuItem[][]>(() => [
       }
     ]
   ] : []),
-  // Configuración
-  [
-    {
-      label: 'Configuración',
-      icon: 'i-heroicons-cog-6-tooth',
-      to: '/configuracion',
-      shortcuts: ['⌘', ',']
-    }
-  ],
   // Cerrar sesión
   [
     {

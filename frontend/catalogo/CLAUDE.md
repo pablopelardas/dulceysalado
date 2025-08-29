@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **documentation-only repository** for the Districatalogo Public API - a multi-tenant catalog system that allows businesses to display their products publicly through subdomains. The repository contains API documentation and Postman collections for testing.
+This is a **documentation-only repository** for the Dulce y Salado Public API - a multi-tenant catalog system that allows businesses to display their products publicly through subdomains. The repository contains API documentation and Postman collections for testing.
 
 ## Architecture
 
 ### API Structure
-- **Multi-tenant**: Each business has its own subdomain (e.g., `empresa1.districatalogo.com`)
+- **Multi-tenant**: Each business has its own subdomain (e.g., `empresa1.dulceysalado.com`)
 - **Public API**: No authentication required for catalog access
 - **Dynamic Configuration**: Business-specific settings control price visibility, stock display, and ordering capabilities
 - **Price Lists**: Multiple pricing tiers per business (mayorista, minorista, etc.)
@@ -30,12 +30,12 @@ This is a **documentation-only repository** for the Districatalogo Public API - 
 ## Testing
 
 ### Postman Collection
-- Located at `docs/Districatalogo PUBLIC.postman_collection.json`
+- Located at `docs/Dulce y Salado PUBLIC.postman_collection.json`
 - Contains examples for all endpoints with sample responses
 - Use `{{baseUrl}}` variable for environment switching
 
 ### Testing Methods
-- **Production**: Use subdomains (e.g., `empresa1.districatalogo.com`)
+- **Production**: Use subdomains (e.g., `empresa1.dulceysalado.com`)
 - **Development**: Use `?empresaId=1` parameter override
 - **Local**: `http://localhost:7000` with empresaId parameter
 

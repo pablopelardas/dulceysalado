@@ -10,12 +10,23 @@ definePageMeta({
 useHead({
   title: 'Dashboard',
   meta: [
-    { name: 'description', content: 'Panel de administración DistriCatalogo' }
+    { name: 'description', content: 'Panel de administración Dulce y Salado' }
   ]
 })
 
 const { user, empresa, isEmpresaPrincipal, userPermissions, isPermissionsLoaded } = useAuth()
 const features = useFeatures()
+
+// Función para obtener color del rol
+const getRoleColor = (role: string | undefined) => {
+  const colors: Record<string, 'primary' | 'error' | 'info' | 'neutral'> = {
+    'admin': 'error',
+    'editor': 'primary',
+    'viewer': 'info',
+    'default': 'neutral'
+  }
+  return colors[role || 'default'] || colors.default 
+}
 
 // Computed local para features específicos
 const clienteAutenticacionEnabled = computed(() => {
@@ -124,69 +135,38 @@ watchEffect(() => {
         </p>
       </div>
 
-      <!-- Cards de resumen -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Card de empresa -->
-        <UCard>
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <UIcon name="i-heroicons-building-office" class="h-8 w-8 text-blue-600" />
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Empresa</p>
+      <!-- Bienvenida con rol -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-medium text-gray-900 dark:text-gray-100">
               <ClientOnly>
                 <template #default>
-                  <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ empresa?.nombre || 'Cargando...' }}</p>
+                  Bienvenido, {{ user?.nombre || 'usuario' }}
                 </template>
                 <template #fallback>
-                  <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">Cargando...</p>
+                  Bienvenido, usuario
+                </template>
+              </ClientOnly>
+            </h2>
+            <div class="flex items-center gap-2 mt-2">
+              <ClientOnly>
+                <template #default>
+                  <UBadge 
+                    :color="getRoleColor(user?.rol)" 
+                    variant="subtle" 
+                    size="sm"
+                  >
+                    {{ user?.rol?.toUpperCase() || 'USUARIO' }}
+                  </UBadge>
+                </template>
+                <template #fallback>
+                  <USkeleton class="h-6 w-16 rounded" />
                 </template>
               </ClientOnly>
             </div>
           </div>
-        </UCard>
-
-        <!-- Card de tipo -->
-        <UCard>
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <UIcon name="i-heroicons-shield-check" class="h-8 w-8 text-green-600" />
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tipo</p>
-              <ClientOnly>
-                <template #default>
-                  <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {{ isEmpresaPrincipal ? 'Principal' : 'Cliente' }}
-                  </p>
-                </template>
-                <template #fallback>
-                  <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">Cliente</p>
-                </template>
-              </ClientOnly>
-            </div>
-          </div>
-        </UCard>
-
-        <!-- Card de rol -->
-        <UCard>
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <UIcon name="i-heroicons-user-circle" class="h-8 w-8 text-purple-600" />
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Rol</p>
-              <ClientOnly>
-                <template #default>
-                  <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ user?.rol?.toUpperCase() || 'USUARIO' }}</p>
-                </template>
-                <template #fallback>
-                  <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">USUARIO</p>
-                </template>
-              </ClientOnly>
-            </div>
-          </div>
-        </UCard>
+        </div>
       </div>
 
       <!-- Acciones rápidas -->
@@ -273,101 +253,6 @@ watchEffect(() => {
           </template>
         </ClientOnly>
 
-        <!-- Gestión de agrupaciones (solo empresa principal con permisos) -->
-        <ClientOnly>
-          <template #default>
-            <UCard v-if="!isPermissionsLoaded">
-              <template #header>
-                <div class="h-6 bg-gray-200 dark:bg-gray-600 rounded w-1/2 animate-pulse"></div>
-              </template>
-              <DashboardActionSkeleton />
-            </UCard>
-            <UCard v-else-if="isEmpresaPrincipal && userPermissions?.canManageProductosBase">
-              <template #header>
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Agrupaciones de Productos</h2>
-              </template>
-
-              <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                  <div>
-                    <h3 class="font-medium text-orange-900 dark:text-orange-100">Gestión de Agrupaciones</h3>
-                    <p class="text-sm text-orange-700 dark:text-orange-300">Administra grupos de productos sincronizados desde GECOM</p>
-                  </div>
-                  <UButton color="orange" variant="solid" to="/admin/agrupaciones">
-                    Gestionar
-                  </UButton>
-                </div>
-
-                <div class="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                  <div>
-                    <h3 class="font-medium text-amber-900 dark:text-amber-100">Configurar por Empresa</h3>
-                    <p class="text-sm text-amber-700 dark:text-amber-300">Define qué agrupaciones ve cada empresa cliente</p>
-                  </div>
-                  <UButton color="amber" variant="solid" to="/admin/agrupaciones/empresas">
-                    Gestionar
-                  </UButton>
-                </div>
-              </div>
-            </UCard>
-          </template>
-          <template #fallback>
-            <UCard>
-              <template #header>
-                <div class="h-6 bg-gray-200 dark:bg-gray-600 rounded w-1/2 animate-pulse"></div>
-              </template>
-              <DashboardActionSkeleton />
-            </UCard>
-          </template>
-        </ClientOnly>
-
-        <!-- Gestión de Marketing (solo empresa principal con permisos) -->
-        <ClientOnly>
-          <template #default>
-            <UCard v-if="!isPermissionsLoaded">
-              <template #header>
-                <div class="h-6 bg-gray-200 dark:bg-gray-600 rounded w-1/2 animate-pulse"></div>
-              </template>
-              <DashboardActionSkeleton />
-            </UCard>
-            <UCard v-else-if="isEmpresaPrincipal && userPermissions?.canManageProductosBase">
-              <template #header>
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Marketing y Promociones</h2>
-              </template>
-
-              <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <div>
-                    <h3 class="font-medium text-blue-900 dark:text-blue-100">Gestionar Novedades</h3>
-                    <p class="text-sm text-blue-700 dark:text-blue-300">Configura qué agrupaciones aparecen como novedades</p>
-                  </div>
-                  <UButton color="blue" variant="solid" to="/admin/marketing/novedades/empresas">
-                    <UIcon name="i-heroicons-star" class="mr-2" />
-                    Gestionar
-                  </UButton>
-                </div>
-
-                <div class="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                  <div>
-                    <h3 class="font-medium text-orange-900 dark:text-orange-100">Gestionar Ofertas</h3>
-                    <p class="text-sm text-orange-700 dark:text-orange-300">Configura qué agrupaciones aparecen como ofertas especiales</p>
-                  </div>
-                  <UButton color="orange" variant="solid" to="/admin/marketing/ofertas/empresas">
-                    <UIcon name="i-heroicons-tag" class="mr-2" />
-                    Gestionar
-                  </UButton>
-                </div>
-              </div>
-            </UCard>
-          </template>
-          <template #fallback>
-            <UCard>
-              <template #header>
-                <div class="h-6 bg-gray-200 dark:bg-gray-600 rounded w-1/2 animate-pulse"></div>
-              </template>
-              <DashboardActionSkeleton />
-            </UCard>
-          </template>
-        </ClientOnly>
 
         <!-- Gestión de listas de precios (solo empresa principal con permisos) -->
         <ClientOnly>
@@ -444,25 +329,14 @@ watchEffect(() => {
         </ClientOnly>
       </div>
 
-      <!-- Configuración de Empresa (para todas las empresas) -->
+      <!-- Mi Perfil -->
       <div class="mt-8">
         <UCard>
           <template #header>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Configuración de Empresa</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Mi Cuenta</h2>
           </template>
 
           <div class="space-y-4">
-            <div class="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <div>
-                <h3 class="font-medium text-blue-900 dark:text-blue-100">Personalización</h3>
-                <p class="text-sm text-blue-700 dark:text-blue-300">Configura la información y apariencia de tu empresa</p>
-              </div>
-              <UButton color="blue" variant="solid" to="/configuracion">
-                <UIcon name="i-heroicons-cog-6-tooth" class="mr-2" />
-                Configurar
-              </UButton>
-            </div>
-            
             <div class="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
               <div>
                 <h3 class="font-medium text-green-900 dark:text-green-100">Mi Perfil</h3>
@@ -494,15 +368,6 @@ watchEffect(() => {
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Administración</h2>
               </template>
               <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
-                  <div>
-                    <h3 class="font-medium text-pink-900 dark:text-pink-100">Empresas Cliente</h3>
-                    <p class="text-sm text-pink-700 dark:text-pink-300">Gestiona las empresas cliente del sistema</p>
-                  </div>
-                  <UButton color="pink" variant="solid" to="/admin/empresas-cliente">
-                    Gestionar
-                  </UButton>
-                </div>
 
                 <div v-if="clienteAutenticacionEnabled" class="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
                   <div>

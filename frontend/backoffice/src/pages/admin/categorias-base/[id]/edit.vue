@@ -78,7 +78,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Editar Categoría Base - DistriCatalogo',
+  title: 'Editar Categoría Base - Dulce y Salado',
   meta: [
     { name: 'description', content: 'Editar categoría base del sistema' }
   ]
