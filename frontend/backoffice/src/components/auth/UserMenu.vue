@@ -127,10 +127,16 @@ const userMenuItems = computed<DropdownMenuItem[][]>(() => [
       shortcuts: ['D']
     },
     {
+      label: 'Pedidos',
+      icon: 'i-heroicons-shopping-bag',
+      to: '/admin/pedidos',
+      shortcuts: ['P']
+    },
+    {
       label: 'Mi Perfil',
       icon: 'i-heroicons-user',
       to: '/profile',
-      shortcuts: ['P']
+      shortcuts: ['U']
     }
   ],
   // Gestión (solo empresa principal)

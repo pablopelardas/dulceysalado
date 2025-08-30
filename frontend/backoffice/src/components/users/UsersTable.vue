@@ -241,13 +241,8 @@ const canEdit = (user: Usuario) => {
     return false
   }
   
-  // Empresa principal puede editar cualquier usuario
-  if (isEmpresaPrincipal.value) {
-    return true
-  }
-  
-  // Empresa cliente solo puede editar usuarios de su empresa
-  return user.empresa_id === currentUser.value?.empresa_id
+  // En sistema single-tenant, puede editar cualquier usuario (excepto el propio)
+  return true
 }
 
 const canDelete = (user: Usuario) => {

@@ -209,6 +209,26 @@ watchEffect(() => {
           </div>
         </UCard>
 
+        <!-- Gestión de Pedidos -->
+        <UCard>
+          <template #header>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Gestión de Pedidos</h2>
+          </template>
+
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+              <div>
+                <h3 class="font-medium text-orange-900 dark:text-orange-100">Pedidos del Sistema</h3>
+                <p class="text-sm text-orange-700 dark:text-orange-300">Gestiona pedidos, acepta y rechaza solicitudes</p>
+              </div>
+              <UButton color="orange" variant="solid" to="/admin/pedidos">
+                <UIcon name="i-heroicons-shopping-bag" class="mr-2" />
+                Gestionar
+              </UButton>
+            </div>
+          </div>
+        </UCard>
+
         <!-- Gestión de categorías (solo mostrar si tiene permisos) -->
         <ClientOnly>
           <template #default>

@@ -7,14 +7,9 @@
           <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
             Gestión de Usuarios
           </h1>
-          <ClientOnly>
-            <p class="mt-2 text-gray-600 dark:text-gray-400">
-              Administra los usuarios de {{ isEmpresaPrincipal ? 'todas las empresas' : 'tu empresa' }}
-            </p>
-            <template #fallback>
-              <USkeleton class="h-4 w-64 mt-2" />
-            </template>
-          </ClientOnly>
+          <p class="mt-2 text-gray-600 dark:text-gray-400">
+            Administra los usuarios del sistema
+          </p>
         </div>
         
         <ClientOnly>
@@ -57,24 +52,6 @@
             />
           </UFormField>
 
-          <!-- Selector de empresa (solo para empresa principal) -->
-          <ClientOnly>
-            <UFormField v-if="isEmpresaPrincipal" label="Empresa">
-              <USelectMenu
-                v-model="empresaFilter"
-                :items="empresaOptions"
-                value-key="value"
-                placeholder="Todas las empresas"
-                :loading="loadingEmpresas"
-                @change="applyFilters"
-              />
-            </UFormField>
-            <template #fallback>
-              <UFormField label="Empresa">
-                <USkeleton class="h-10 w-full rounded" />
-              </UFormField>
-            </template>
-          </ClientOnly>
         </div>
 
         <!-- Botones de acción -->
@@ -130,19 +107,6 @@
                   <USkeleton class="h-6 w-14 rounded-full" />
                 </div>
                 
-                <!-- Empresa (condicional) -->
-                <ClientOnly>
-                  <div v-if="isEmpresaPrincipal" class="w-32">
-                    <USkeleton class="h-4 w-28 mb-1" />
-                    <USkeleton class="h-3 w-20" />
-                  </div>
-                  <template #fallback>
-                    <div class="w-32">
-                      <USkeleton class="h-4 w-28 mb-1" />
-                      <USkeleton class="h-3 w-20" />
-                    </div>
-                  </template>
-                </ClientOnly>
                 
                 <!-- Último login -->
                 <div class="w-24">
@@ -289,15 +253,13 @@ useHead({
 
 // Composables
 const { users, loading, error, pagination, fetchUsers, deleteUser: deleteUserAction, changePage: changePageAction, applyFilters: applyFiltersAction, clearFilters } = useUsers()
-const { isEmpresaPrincipal, userPermissions, user: currentUser } = useAuth()
+const { userPermissions, user: currentUser } = useAuth()
 const api = useApi()
 
 // Estado reactivo
 const searchQuery = ref('')
 const roleFilter = ref<'admin' | 'editor' | 'viewer' | 'all'>('all')
-const empresaFilter = ref<string | number>('all')
 const currentPage = ref(1)
-const loadingEmpresas = ref(false)
 const initialLoading = ref(true) // Para distinguir carga inicial de carga de datos
 
 // Modales
@@ -312,58 +274,7 @@ const roleOptions = [
   { label: 'Viewer', value: 'viewer' }
 ]
 
-// Opciones de empresas
-const empresaOptions = ref<{ label: string; value: string | number }[]>([
-  { label: 'Todas las empresas', value: 'all' }
-])
 
-// Cargar empresas para selector
-const fetchEmpresas = async () => {
-  if (!isEmpresaPrincipal.value) return
-  
-  loadingEmpresas.value = true
-  try {
-    const response = await api.get('/api/Companies?page=1&pageSize=100&includeInactive=false') as any
-    
-    // Mapear las empresas de la respuesta
-    const empresas = response.empresas || []
-    
-    // Crear opciones incluyendo la empresa principal
-    const options = [
-      { label: 'Todas las empresas', value: 'all' }
-    ]
-    
-    // Agregar empresa principal si existe
-    if (currentUser.value?.empresa) {
-      options.push({
-        label: `${currentUser.value.empresa.codigo} - ${currentUser.value.empresa.nombre} (Principal)`,
-        value: currentUser.value.empresa.id.toString()
-      })
-    }
-    
-    // Agregar empresas cliente
-    options.push(...empresas.map((empresa: any) => ({
-      label: `${empresa.codigo} - ${empresa.nombre}`,
-      value: empresa.id
-    })))
-    
-    empresaOptions.value = options
-    
-  } catch (error) {
-    console.error('Error cargando empresas:', error)
-    // En caso de error, al menos mostrar la empresa principal si existe
-    const fallbackOptions = [{ label: 'Todas las empresas', value: 'all' }]
-    if (currentUser.value?.empresa) {
-      fallbackOptions.push({
-        label: `${currentUser.value.empresa.codigo} - ${currentUser.value.empresa.nombre} (Principal)`,
-        value: currentUser.value.empresa.id.toString()
-      })
-    }
-    empresaOptions.value = fallbackOptions
-  } finally {
-    loadingEmpresas.value = false
-  }
-}
 
 // Importar composable para debounce
 
@@ -377,7 +288,6 @@ const applyFilters = async () => {
   await applyFiltersAction({
     search: searchQuery.value,
     rol: (roleFilter.value && roleFilter.value !== 'all') ? roleFilter.value : undefined,
-    empresa_id: (empresaFilter.value && empresaFilter.value !== 'all') ? Number(empresaFilter.value) : undefined,
     page: 1
   })
   currentPage.value = 1
@@ -386,7 +296,6 @@ const applyFilters = async () => {
 const clearAllFilters = async () => {
   searchQuery.value = ''
   roleFilter.value = 'all'
-  empresaFilter.value = 'all'
   currentPage.value = 1
   await clearFilters()
 }
@@ -439,9 +348,6 @@ watch(showChangePasswordModal, (newValue) => {
 onMounted(async () => {
   try {
     await fetchUsers()
-    if (isEmpresaPrincipal.value) {
-      await fetchEmpresas()
-    }
   } finally {
     // Marcar que la carga inicial ha terminado
     initialLoading.value = false

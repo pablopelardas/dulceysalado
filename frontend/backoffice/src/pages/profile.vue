@@ -13,9 +13,23 @@ useHead({
 })
 
 const { user, empresa, userPermissions, isEmpresaPrincipal } = useAuth()
+const { getMyPreferences, updateMyPreferences } = useNotificationPreferences()
+const toast = useToast()
 
 // Estado para modal de cambio de contraseña
 const showPasswordModal = ref(false)
+
+// Estado para preferencias de notificaciones - inicializar vacío para evitar valores por defecto mientras carga
+const preferences = ref<UserNotificationPreferences>({
+  user_id: user.value?.id || 0,
+  notificacion_nuevos_pedidos: false,
+  notificacion_correcciones_aprobadas: false,
+  notificacion_correcciones_rechazadas: false,
+  notificacion_pedidos_cancelados: false
+})
+
+const isLoadingPreferences = ref(true) // Comenzar en loading hasta que se carguen los datos
+const isSavingPreferences = ref(false)
 
 // Helper functions
 const getRoleColor = (role: string | undefined) => {
@@ -47,6 +61,63 @@ const handlePasswordChangeSuccess = () => {
   // No necesitamos hacer nada especial aquí para el cambio de contraseña propio
   // El toast ya se muestra desde el modal
 }
+
+// Cargar preferencias de notificaciones
+const loadPreferences = async () => {
+  if (!user.value?.id) {
+    isLoadingPreferences.value = false
+    return
+  }
+  
+  try {
+    const userPreferences = await getMyPreferences()
+    preferences.value = userPreferences
+  } catch (error) {
+    console.error('Error cargando preferencias:', error)
+    toast.add({
+      title: 'Error',
+      description: 'No se pudieron cargar las preferencias de notificaciones',
+      color: 'red'
+    })
+    // En caso de error, mantener valores por defecto (todos activados)
+    preferences.value = {
+      user_id: user.value?.id || 0,
+      notificacion_nuevos_pedidos: true,
+      notificacion_correcciones_aprobadas: true,
+      notificacion_correcciones_rechazadas: true,
+      notificacion_pedidos_cancelados: true
+    }
+  } finally {
+    isLoadingPreferences.value = false
+  }
+}
+
+// Guardar preferencias de notificaciones
+const savePreferences = async () => {
+  try {
+    isSavingPreferences.value = true
+    await updateMyPreferences(preferences.value)
+    toast.add({
+      title: 'Preferencias actualizadas',
+      description: 'Tus preferencias de notificaciones han sido guardadas',
+      color: 'green'
+    })
+  } catch (error) {
+    console.error('Error guardando preferencias:', error)
+    toast.add({
+      title: 'Error',
+      description: 'No se pudieron guardar las preferencias de notificaciones',
+      color: 'red'
+    })
+  } finally {
+    isSavingPreferences.value = false
+  }
+}
+
+// Cargar preferencias al montar el componente
+onMounted(() => {
+  loadPreferences()
+})
 </script>
 <template>
   <div class="container mx-auto px-4 py-8">
@@ -187,6 +258,124 @@ const handlePasswordChangeSuccess = () => {
               <UIcon name="i-heroicons-key" class="mr-2" />
               Cambiar Contraseña
             </UButton>
+          </div>
+        </div>
+      </UCard>
+
+      <!-- Preferencias de Notificaciones -->
+      <UCard class="mb-6">
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Preferencias de Notificaciones</h2>
+            <UButton
+              :loading="isSavingPreferences"
+              :disabled="isLoadingPreferences"
+              color="primary"
+              @click="savePreferences"
+            >
+              <UIcon name="i-heroicons-check" class="mr-2" />
+              Guardar
+            </UButton>
+          </div>
+        </template>
+
+        <div v-if="isLoadingPreferences" class="space-y-4">
+          <!-- Skeleton Loading -->
+          <div class="animate-pulse">
+            <div v-for="i in 4" :key="i" class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg mb-4">
+              <div class="flex items-center space-x-3 flex-1">
+                <div class="h-5 w-5 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                <div>
+                  <div class="h-4 w-36 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+                  <div class="h-3 w-52 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+              </div>
+              <div class="h-6 w-11 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="space-y-6">
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            Configura qué notificaciones por email deseas recibir cuando ocurren eventos importantes en los pedidos.
+          </p>
+
+          <div class="grid grid-cols-1 gap-4">
+            <!-- Nuevos Pedidos -->
+            <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3">
+                  <UIcon name="i-heroicons-inbox-arrow-down" class="text-blue-500 h-5 w-5" />
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">Nuevos Pedidos</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      Recibir email cuando llegan nuevos pedidos
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <USwitch v-model="preferences.notificacion_nuevos_pedidos" />
+            </div>
+
+            <!-- Correcciones Aprobadas -->
+            <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3">
+                  <UIcon name="i-heroicons-check-circle" class="text-green-500 h-5 w-5" />
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">Correcciones Aprobadas</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      Recibir email cuando clientes aprueban correcciones
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <USwitch v-model="preferences.notificacion_correcciones_aprobadas" />
+            </div>
+
+            <!-- Correcciones Rechazadas -->
+            <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3">
+                  <UIcon name="i-heroicons-x-circle" class="text-red-500 h-5 w-5" />
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">Correcciones Rechazadas</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      Recibir email cuando clientes rechazan correcciones
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <USwitch v-model="preferences.notificacion_correcciones_rechazadas" />
+            </div>
+
+            <!-- Pedidos Cancelados -->
+            <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3">
+                  <UIcon name="i-heroicons-no-symbol" class="text-orange-500 h-5 w-5" />
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">Pedidos Cancelados</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      Recibir email cuando clientes cancelan pedidos
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <USwitch v-model="preferences.notificacion_pedidos_cancelados" />
+            </div>
+          </div>
+
+          <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div class="flex items-start space-x-3">
+              <UIcon name="i-heroicons-information-circle" class="text-blue-500 h-5 w-5 mt-0.5" />
+              <div>
+                <p class="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>Nota:</strong> Estas preferencias solo afectan las notificaciones automáticas del sistema. 
+                  Los emails importantes de cambios de estado de pedidos siempre se enviarán directamente a los clientes.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </UCard>
