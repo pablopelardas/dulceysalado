@@ -11,23 +11,23 @@
         <p class="mt-2 text-gray-300">Gestiona tu información personal y preferencias</p>
       </div>
 
-      <div class="bg-gray-900 shadow rounded-lg border border-gray-700">
+      <div class="bg-white/95 shadow-lg rounded-lg">
 
         <!-- Content -->
         <div class="p-6">
           <!-- Información Personal -->
             <!-- Información de cuenta -->
             <div class="mb-8">
-              <h3 class="text-lg font-medium text-white mb-4">Información de cuenta</h3>
-              <div class="bg-gray-800 rounded-lg p-4 mb-6 border border-gray-700">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Información de cuenta</h3>
+              <div class="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-300">Código de cliente</label>
-                    <p class="text-white font-mono">{{ authStore.user?.codigo }}</p>
+                    <label class="block text-sm font-medium text-gray-600">Código de cliente</label>
+                    <p class="text-gray-900 font-mono">{{ authStore.user?.codigo }}</p>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-300">Lista de precios</label>
-                    <p class="text-white">{{ (authStore.user as any)?.lista_precio?.nombre || 'No asignada' }}</p>
+                    <label class="block text-sm font-medium text-gray-600">Lista de precios</label>
+                    <p class="text-gray-900">{{ (authStore.user as any)?.lista_precio?.nombre || 'No asignada' }}</p>
                   </div>
                 </div>
               </div>
@@ -36,12 +36,12 @@
             <!-- Formulario de datos personales -->
             <form @submit.prevent="handleSubmit">
               <div class="space-y-6">
-                <h3 class="text-lg font-medium text-white">Datos personales</h3>
+                <h3 class="text-lg font-medium text-gray-900">Datos personales</h3>
                 
                 <!-- Nombre y Email -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label for="nombre" class="block text-sm font-medium text-gray-300 mb-2">
+                    <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
                       Nombre *
                     </label>
                     <input
@@ -49,13 +49,13 @@
                       v-model="form.nombre"
                       type="text"
                       required
-                      class="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
+                      class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
                       placeholder="Tu nombre completo"
                       :disabled="loading"
                     />
                   </div>
                   <div>
-                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                       Email *
                     </label>
                     <input
@@ -63,7 +63,7 @@
                       v-model="form.email"
                       type="email"
                       required
-                      class="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
+                      class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
                       placeholder="tu@email.com"
                       :disabled="loading"
                     />
@@ -72,14 +72,14 @@
 
                 <!-- Teléfono -->
                 <div>
-                  <label for="telefono" class="block text-sm font-medium text-gray-300 mb-2">
+                  <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
                     Teléfono
                   </label>
                   <input
                     id="telefono"
                     v-model="form.telefono"
                     type="tel"
-                    class="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
+                    class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
                     placeholder="Ej: +54 11 1234-5678"
                     :disabled="loading"
                   />
@@ -87,14 +87,14 @@
 
                 <!-- Dirección -->
                 <div>
-                  <label for="direccion" class="block text-sm font-medium text-gray-300 mb-2">
+                  <label for="direccion" class="block text-sm font-medium text-gray-700 mb-2">
                     Dirección
                   </label>
                   <input
                     id="direccion"
                     v-model="form.direccion"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
+                    class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
                     placeholder="Ej: Av. Corrientes 1234"
                     :disabled="loading"
                   />
@@ -103,26 +103,26 @@
                 <!-- Localidad, Provincia y Altura -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label for="localidad" class="block text-sm font-medium text-gray-300 mb-2">
+                    <label for="localidad" class="block text-sm font-medium text-gray-700 mb-2">
                       Localidad
                     </label>
                     <input
                       id="localidad"
                       v-model="form.localidad"
                       type="text"
-                      class="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
+                      class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
                       placeholder="Ej: CABA"
                       :disabled="loading"
                     />
                   </div>
                   <div>
-                    <label for="provincia" class="block text-sm font-medium text-gray-300 mb-2">
+                    <label for="provincia" class="block text-sm font-medium text-gray-700 mb-2">
                       Provincia
                     </label>
                     <select
                       id="provincia"
                       v-model="form.provincia"
-                      class="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
+                      class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
                       :disabled="loading"
                     >
                       <option value="">Seleccionar provincia</option>
@@ -153,14 +153,14 @@
                     </select>
                   </div>
                   <div>
-                    <label for="altura" class="block text-sm font-medium text-gray-300 mb-2">
+                    <label for="altura" class="block text-sm font-medium text-gray-700 mb-2">
                       Altura
                     </label>
                     <input
                       id="altura"
                       v-model="form.altura"
                       type="text"
-                      class="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
+                      class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
                       placeholder="Ej: 1234"
                       :disabled="loading"
                     />
@@ -170,14 +170,14 @@
                 <!-- CUIT y Tipo IVA -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label for="cuit" class="block text-sm font-medium text-gray-300 mb-2">
+                    <label for="cuit" class="block text-sm font-medium text-gray-700 mb-2">
                       CUIT
                     </label>
                     <input
                       id="cuit"
                       v-model="form.cuit"
                       type="text"
-                      class="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
+                      class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
                       placeholder="Ej: 20-12345678-9"
                       :disabled="loading"
                       maxlength="13"
@@ -185,13 +185,13 @@
                     />
                   </div>
                   <div>
-                    <label for="tipoIva" class="block text-sm font-medium text-gray-300 mb-2">
+                    <label for="tipoIva" class="block text-sm font-medium text-gray-700 mb-2">
                       Condición ante IVA
                     </label>
                     <select
                       id="tipoIva"
                       v-model="form.tipo_iva"
-                      class="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
+                      class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
                       :disabled="loading"
                     >
                       <option value="">Seleccionar condición</option>
@@ -205,7 +205,7 @@
                 </div>
 
                 <!-- Error message -->
-                <div v-if="error" class="rounded-md bg-red-50 p-4">
+                <div v-if="error" class="rounded-md bg-red-50 p-4 border border-red-200">
                   <div class="flex">
                     <div class="flex-shrink-0">
                       <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,7 +221,7 @@
                 </div>
 
                 <!-- Success message -->
-                <div v-if="successMessage" class="rounded-md bg-green-50 p-4">
+                <div v-if="successMessage" class="rounded-md bg-green-50 p-4 border border-green-200">
                   <div class="flex">
                     <div class="flex-shrink-0">
                       <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,10 +237,10 @@
                 </div>
 
                 <!-- Action buttons -->
-                <div class="flex justify-between items-center pt-6 border-t border-gray-700">
+                <div class="flex justify-between items-center pt-6 border-t border-gray-200">
                   <RouterLink 
                     to="/catalogo"
-                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200"
+                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors duration-200"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -253,7 +253,7 @@
                       type="button"
                       @click="resetForm"
                       :disabled="loading"
-                      class="px-4 py-2 border border-gray-600 text-sm font-medium rounded-lg text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                      class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                     >
                       Restablecer
                     </button>

@@ -72,6 +72,15 @@ const router = createRouter({
       }
     },
     {
+      path: '/correccion/:token',
+      name: 'correccion',
+      component: () => import('../views/CorreccionView.vue'),
+      props: true,
+      meta: { 
+        public: true // Ruta pública, no requiere autenticación
+      }
+    },
+    {
       // Catch all route for 404
       path: '/:pathMatch(.*)*',
       name: 'NotFound',

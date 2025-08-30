@@ -475,6 +475,27 @@ class AuthApiService {
     }
   }
 
+  // Método público para rutas que no requieren autenticación
+  async publicFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const url = `${this.baseUrl}${endpoint}`
+    
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }))
+      throw { status: response.status, message: errorData.message || `HTTP error! status: ${response.status}` }
+    }
+
+    return response.json()
+  }
+
   async login(username: string, password: string): Promise<LoginResponse> {
     const loginData: LoginRequest = {
       empresa_id: this.EMPRESA_ID,
@@ -674,6 +695,64 @@ class AuthApiService {
       const errorText = await response.text()
       throw new Error(errorText || `HTTP error! status: ${response.status}`)
     }
+  }
+
+  async approveCorrection(orderId: number, comentario?: string, accessToken?: string): Promise<void> {
+    const url = `${this.baseUrl}/api/cliente-auth/pedidos/${orderId}/correccion/aprobar`
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({ comentario })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+  }
+
+  async rejectCorrection(orderId: number, comentario?: string, accessToken?: string): Promise<void> {
+    const url = `${this.baseUrl}/api/cliente-auth/pedidos/${orderId}/correccion/rechazar`
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({ comentario })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+  }
+
+  async getOrderCorrection(orderId: number, accessToken?: string): Promise<any> {
+    const url = `${this.baseUrl}/api/cliente-auth/pedidos/${orderId}/correccion`
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+
+    return response.json()
   }
 }
 
