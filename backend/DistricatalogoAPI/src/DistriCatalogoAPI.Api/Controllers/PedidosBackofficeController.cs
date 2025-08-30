@@ -38,7 +38,7 @@ namespace DistriCatalogoAPI.Api.Controllers
         {
             try
             {
-                var empresaIdClaim = User.FindFirst("empresa_id")?.Value;
+                var empresaIdClaim = User.FindFirst("empresaId")?.Value;
                 if (string.IsNullOrEmpty(empresaIdClaim) || !int.TryParse(empresaIdClaim, out var empresaId))
                 {
                     return Unauthorized(new { message = "Token inválido" });
@@ -74,7 +74,7 @@ namespace DistriCatalogoAPI.Api.Controllers
         {
             try
             {
-                var empresaIdClaim = User.FindFirst("empresa_id")?.Value;
+                var empresaIdClaim = User.FindFirst("empresaId")?.Value;
                 if (string.IsNullOrEmpty(empresaIdClaim) || !int.TryParse(empresaIdClaim, out var empresaId))
                 {
                     return Unauthorized(new { message = "Token inválido" });
@@ -241,7 +241,7 @@ namespace DistriCatalogoAPI.Api.Controllers
         {
             try
             {
-                var empresaIdClaim = User.FindFirst("empresa_id")?.Value;
+                var empresaIdClaim = User.FindFirst("empresaId")?.Value;
                 if (string.IsNullOrEmpty(empresaIdClaim) || !int.TryParse(empresaIdClaim, out var empresaId))
                 {
                     return Unauthorized(new { message = "Token inválido" });
@@ -270,7 +270,7 @@ namespace DistriCatalogoAPI.Api.Controllers
         {
             try
             {
-                var empresaIdClaim = User.FindFirst("empresa_id")?.Value;
+                var empresaIdClaim = User.FindFirst("empresaId")?.Value;
                 if (string.IsNullOrEmpty(empresaIdClaim) || !int.TryParse(empresaIdClaim, out var empresaId))
                 {
                     return Unauthorized(new { message = "Token inválido" });
@@ -292,10 +292,77 @@ namespace DistriCatalogoAPI.Api.Controllers
                 return StatusCode(500, new { message = "Error interno del servidor" });
             }
         }
+        
+        /// <summary>
+        /// Corregir un pedido
+        /// </summary>
+        [HttpPut("{id}/corregir")]
+        public async Task<ActionResult> CorregirPedido(int id, [FromBody] CorregirPedidoDto dto)
+        {
+            try
+            {
+                var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(usuarioIdClaim) || !int.TryParse(usuarioIdClaim, out var usuarioId))
+                {
+                    return Unauthorized(new { message = "Token inválido" });
+                }
+
+                var command = new DistriCatalogoAPI.Application.Commands.Pedidos.CorregirPedidoCommand
+                {
+                    PedidoId = id,
+                    UsuarioId = usuarioId,
+                    ItemsCorregidos = dto.Items.Select(i => new DistriCatalogoAPI.Application.Commands.Pedidos.CorregirPedidoCommand.ItemCorreccion
+                    {
+                        CodigoProducto = i.CodigoProducto,
+                        NuevaCantidad = i.NuevaCantidad,
+                        Motivo = i.Motivo
+                    }).ToList(),
+                    MotivoCorreccion = dto.MotivoCorreccion,
+                    EnviarAlCliente = dto.EnviarAlCliente
+                };
+
+                var resultado = await _mediator.Send(command);
+
+                if (resultado.Success)
+                {
+                    _logger.LogInformation("Pedido {PedidoId} corregido por usuario {UsuarioId}", id, usuarioId);
+                    
+                    return Ok(new { 
+                        message = "Pedido corregido exitosamente",
+                        token = resultado.Token,
+                        correction_url = resultado.CorrectionUrl,
+                        enviado_al_cliente = resultado.EnviadoAlCliente
+                    });
+                }
+                else
+                {
+                    return BadRequest(new { message = "No se pudo corregir el pedido" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error corrigiendo pedido {PedidoId}", id);
+                return StatusCode(500, new { message = "Error interno del servidor" });
+            }
+        }
     }
 
     public class RechazarPedidoDto
     {
         public string Motivo { get; set; } = string.Empty;
+    }
+    
+    public class CorregirPedidoDto
+    {
+        public List<ItemCorreccionDto> Items { get; set; } = new();
+        public string? MotivoCorreccion { get; set; }
+        public bool EnviarAlCliente { get; set; } = true;
+        
+        public class ItemCorreccionDto
+        {
+            public string CodigoProducto { get; set; } = string.Empty;
+            public int NuevaCantidad { get; set; }
+            public string? Motivo { get; set; }
+        }
     }
 }

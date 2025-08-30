@@ -42,6 +42,8 @@ public partial class DistricatalogoContext : DbContext
     public virtual DbSet<SyncSession> SyncSessions { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
+    
+    public virtual DbSet<DistriCatalogoAPI.Domain.Entities.UserNotificationPreferences> UserNotificationPreferences { get; set; }
 
     public virtual DbSet<VistaCatalogoEmpresa> VistaCatalogoEmpresas { get; set; }
 
@@ -72,6 +74,8 @@ public partial class DistricatalogoContext : DbContext
     public virtual DbSet<DistriCatalogoAPI.Domain.Entities.Pedido> Pedidos { get; set; }
 
     public virtual DbSet<DistriCatalogoAPI.Domain.Entities.PedidoItem> PedidoItems { get; set; }
+    
+    public virtual DbSet<DistriCatalogoAPI.Domain.Entities.CorreccionToken> CorrecionTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -1285,6 +1289,9 @@ public partial class DistricatalogoContext : DbContext
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.FeatureDefinitionConfiguration());
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.EmpresaFeatureConfiguration());
         
+        // Users Configuration
+        modelBuilder.ApplyConfiguration(new Persistence.Configurations.UserNotificationPreferencesConfiguration());
+        
         // Clientes Configuration
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.ClienteConfiguration());
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.ClienteRefreshTokenConfiguration());
@@ -1294,6 +1301,7 @@ public partial class DistricatalogoContext : DbContext
         // Pedidos Configuration
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.PedidoConfiguration());
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.PedidoItemConfiguration());
+        modelBuilder.ApplyConfiguration(new Persistence.Configurations.CorreccionTokenConfiguration());
 
         OnModelCreatingPartial(modelBuilder);
     }

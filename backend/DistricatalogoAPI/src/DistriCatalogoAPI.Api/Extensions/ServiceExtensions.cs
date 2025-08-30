@@ -8,6 +8,7 @@ using DistriCatalogoAPI.Infrastructure.Models;
 using DistriCatalogoAPI.Infrastructure.Repositories;
 using DistriCatalogoAPI.Infrastructure.Services;
 using DistriCatalogoAPI.Infrastructure.Configuration;
+using DistriCatalogoAPI.Application.Configuration;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
@@ -65,6 +66,9 @@ namespace DistriCatalogoAPI.Api.Extensions
             // Company Resolution Configuration
             services.Configure<CompanyResolverOptions>(configuration.GetSection(CompanyResolverOptions.SectionName));
 
+            // Application Configuration
+            services.Configure<ApplicationOptions>(configuration.GetSection(ApplicationOptions.SectionName));
+
             // Stock Cache Configuration
             services.AddStockCaching(configuration);
 
@@ -88,6 +92,8 @@ namespace DistriCatalogoAPI.Api.Extensions
             services.AddScoped<IFeatureRepository, FeatureRepository>();
             services.AddScoped<IClienteRepository, ClienteRepository>();
             services.AddScoped<IPedidoRepository, PedidoRepository>();
+            services.AddScoped<ICorreccionTokenRepository, CorreccionTokenRepository>();
+            services.AddScoped<IUserNotificationPreferencesRepository, UserNotificationPreferencesRepository>();
 
             // Repositories - Módulo 04 Catalog Management 
             services.AddScoped<ICategoryEmpresaRepository, CategoryEmpresaRepository>();
@@ -107,6 +113,7 @@ namespace DistriCatalogoAPI.Api.Extensions
             services.AddScoped<IStockCacheService, StockCacheService>();
             services.AddScoped<IClienteAuthService, ClienteAuthService>();
             services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+            services.AddScoped<INotificationService, NotificationService>();
             
             // HTTP Client para servicios de Google
             services.AddHttpClient<IGoogleAuthService, GoogleAuthService>();

@@ -30,6 +30,9 @@ namespace DistriCatalogoAPI.Application.DTOs
         
         // Items
         public List<PedidoItemDto> Items { get; set; } = new();
+        
+        // Correcciones
+        public List<CorreccionTokenDto> Correcciones { get; set; } = new();
     }
 
     public class PedidoItemDto
@@ -89,5 +92,17 @@ namespace DistriCatalogoAPI.Application.DTOs
         public decimal MontoTotalHoy { get; set; }
         public decimal MontoTotalSemana { get; set; }
         public decimal MontoTotalMes { get; set; }
+    }
+
+    public class CorreccionTokenDto
+    {
+        public int Id { get; set; }
+        public string Token { get; set; } = string.Empty;
+        public DateTime FechaCreacion { get; set; }
+        public DateTime FechaExpiracion { get; set; }
+        public bool Utilizado { get; set; }
+        public DateTime? FechaUso { get; set; }
+        public string? MotivoCorreccion { get; set; }
+        public string? PedidoOriginalJson { get; set; }
     }
 }

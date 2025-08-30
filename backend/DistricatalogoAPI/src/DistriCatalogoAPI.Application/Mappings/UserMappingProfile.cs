@@ -24,6 +24,10 @@ namespace DistriCatalogoAPI.Application.Mappings
                 .ForMember(dest => dest.Activo, opt => opt.MapFrom(src => src.IsActive))
                 .ForMember(dest => dest.UltimoLogin, opt => opt.MapFrom(src => src.LastLogin))
                 .ForMember(dest => dest.Empresa, opt => opt.Ignore()); // Will be filled separately
+
+            // Mapping para UserNotificationPreferences
+            CreateMap<UserNotificationPreferences, UserNotificationPreferencesDto>();
+            CreateMap<UserNotificationPreferencesDto, UserNotificationPreferences>();
         }
 
         private string MapRoleToSimple(UserRole role)

@@ -225,10 +225,179 @@ namespace DistriCatalogoAPI.Api.Controllers
                 return StatusCode(500, new { message = "Error interno del servidor" });
             }
         }
+
+        /// <summary>
+        /// Obtener detalles de corrección de un pedido
+        /// </summary>
+        [HttpGet("{id}/correccion")]
+        public async Task<ActionResult<CorreccionDto>> ObtenerCorreccion(int id)
+        {
+            try
+            {
+                var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var empresaIdClaim = User.FindFirst("empresa_id")?.Value;
+
+                if (string.IsNullOrEmpty(clienteIdClaim) || string.IsNullOrEmpty(empresaIdClaim) ||
+                    !int.TryParse(clienteIdClaim, out var clienteId) || !int.TryParse(empresaIdClaim, out var empresaId))
+                {
+                    return Unauthorized(new { message = "Token inválido" });
+                }
+
+                var query = new GetCorreccionByPedidoQuery
+                {
+                    PedidoId = id,
+                    ClienteId = clienteId,
+                    EmpresaId = empresaId
+                };
+
+                var correccion = await _mediator.Send(query);
+
+                if (correccion == null)
+                {
+                    return NotFound(new { message = "Corrección no encontrada para este pedido" });
+                }
+
+                return Ok(correccion);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error obteniendo corrección del pedido {PedidoId}", id);
+                return StatusCode(500, new { message = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Aprobar corrección de un pedido (desde el cliente autenticado)
+        /// </summary>
+        [HttpPut("{id}/correccion/aprobar")]
+        public async Task<ActionResult> AprobarCorreccion(int id, [FromBody] RespuestaCorreccionDto respuestaDto)
+        {
+            try
+            {
+                var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var empresaIdClaim = User.FindFirst("empresa_id")?.Value;
+
+                if (string.IsNullOrEmpty(clienteIdClaim) || string.IsNullOrEmpty(empresaIdClaim) ||
+                    !int.TryParse(clienteIdClaim, out var clienteId) || !int.TryParse(empresaIdClaim, out var empresaId))
+                {
+                    return Unauthorized(new { message = "Token inválido" });
+                }
+
+                // Verificar que el pedido pertenece al cliente
+                var pedidoQuery = new GetPedidoByIdQuery
+                {
+                    PedidoId = id,
+                    EmpresaId = empresaId
+                };
+
+                var pedido = await _mediator.Send(pedidoQuery);
+                if (pedido == null || pedido.ClienteId != clienteId)
+                {
+                    return NotFound(new { message = "Pedido no encontrado" });
+                }
+
+                if (pedido.Estado != "CorreccionPendiente")
+                {
+                    return BadRequest(new { message = "El pedido no tiene una corrección pendiente" });
+                }
+
+                var command = new AprobarCorreccionCommand
+                {
+                    PedidoId = id,
+                    ClienteId = clienteId,
+                    Comentario = respuestaDto.Comentario,
+                    UpdatedBy = clienteId.ToString()
+                };
+
+                var resultado = await _mediator.Send(command);
+
+                if (resultado)
+                {
+                    _logger.LogInformation("Corrección del pedido {PedidoId} aprobada por cliente {ClienteId}", id, clienteId);
+                    return Ok(new { message = "Corrección aprobada exitosamente" });
+                }
+                else
+                {
+                    return BadRequest(new { message = "No se pudo aprobar la corrección" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error aprobando corrección del pedido {PedidoId}", id);
+                return StatusCode(500, new { message = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Rechazar corrección de un pedido (desde el cliente autenticado)
+        /// </summary>
+        [HttpPut("{id}/correccion/rechazar")]
+        public async Task<ActionResult> RechazarCorreccion(int id, [FromBody] RespuestaCorreccionDto respuestaDto)
+        {
+            try
+            {
+                var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var empresaIdClaim = User.FindFirst("empresa_id")?.Value;
+
+                if (string.IsNullOrEmpty(clienteIdClaim) || string.IsNullOrEmpty(empresaIdClaim) ||
+                    !int.TryParse(clienteIdClaim, out var clienteId) || !int.TryParse(empresaIdClaim, out var empresaId))
+                {
+                    return Unauthorized(new { message = "Token inválido" });
+                }
+
+                // Verificar que el pedido pertenece al cliente
+                var pedidoQuery = new GetPedidoByIdQuery
+                {
+                    PedidoId = id,
+                    EmpresaId = empresaId
+                };
+
+                var pedido = await _mediator.Send(pedidoQuery);
+                if (pedido == null || pedido.ClienteId != clienteId)
+                {
+                    return NotFound(new { message = "Pedido no encontrado" });
+                }
+
+                if (pedido.Estado != "CorreccionPendiente")
+                {
+                    return BadRequest(new { message = "El pedido no tiene una corrección pendiente" });
+                }
+
+                var command = new RechazarCorreccionCommand
+                {
+                    PedidoId = id,
+                    ClienteId = clienteId,
+                    Comentario = respuestaDto.Comentario,
+                    UpdatedBy = clienteId.ToString()
+                };
+
+                var resultado = await _mediator.Send(command);
+
+                if (resultado)
+                {
+                    _logger.LogInformation("Corrección del pedido {PedidoId} rechazada por cliente {ClienteId}", id, clienteId);
+                    return Ok(new { message = "Corrección rechazada" });
+                }
+                else
+                {
+                    return BadRequest(new { message = "No se pudo rechazar la corrección" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error rechazando corrección del pedido {PedidoId}", id);
+                return StatusCode(500, new { message = "Error interno del servidor" });
+            }
+        }
     }
 
     public class CancelarPedidoDto
     {
         public string? Motivo { get; set; }
+    }
+
+    public class RespuestaCorreccionDto
+    {
+        public string? Comentario { get; set; }
     }
 }

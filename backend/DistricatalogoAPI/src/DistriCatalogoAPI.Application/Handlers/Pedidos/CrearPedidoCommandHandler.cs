@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using DistriCatalogoAPI.Application.Commands.Pedidos;
 using DistriCatalogoAPI.Application.DTOs;
+using DistriCatalogoAPI.Application.Interfaces;
 using DistriCatalogoAPI.Domain.Entities;
 using DistriCatalogoAPI.Domain.Interfaces;
 
@@ -16,17 +17,20 @@ namespace DistriCatalogoAPI.Application.Handlers.Pedidos
     {
         private readonly IPedidoRepository _pedidoRepository;
         private readonly IClienteRepository _clienteRepository;
+        private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
         private readonly ILogger<CrearPedidoCommandHandler> _logger;
 
         public CrearPedidoCommandHandler(
             IPedidoRepository pedidoRepository,
             IClienteRepository clienteRepository,
+            INotificationService notificationService,
             IMapper mapper,
             ILogger<CrearPedidoCommandHandler> logger)
         {
             _pedidoRepository = pedidoRepository;
             _clienteRepository = clienteRepository;
+            _notificationService = notificationService;
             _mapper = mapper;
             _logger = logger;
         }
@@ -108,6 +112,17 @@ namespace DistriCatalogoAPI.Application.Handlers.Pedidos
 
                 // Obtener el pedido completo con navegación
                 var pedidoCompleto = await _pedidoRepository.GetByIdAsync(pedidoCreado.Id, true);
+                
+                // Notificar a usuarios de la empresa sobre el nuevo pedido
+                try
+                {
+                    await _notificationService.NotificarNuevoPedidoAsync(pedidoCompleto);
+                }
+                catch (Exception notificationEx)
+                {
+                    _logger.LogError(notificationEx, "Error enviando notificaciones para pedido {PedidoId}", pedidoCompleto.Id);
+                    // No lanzamos la excepción para no afectar la creación del pedido
+                }
                 
                 return _mapper.Map<PedidoDto>(pedidoCompleto);
             }

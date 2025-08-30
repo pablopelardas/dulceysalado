@@ -12,15 +12,18 @@ namespace DistriCatalogoAPI.Application.Handlers.Pedidos
     public class GetPedidoByIdQueryHandler : IRequestHandler<GetPedidoByIdQuery, PedidoDto?>
     {
         private readonly IPedidoRepository _pedidoRepository;
+        private readonly ICorreccionTokenRepository _correccionTokenRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<GetPedidoByIdQueryHandler> _logger;
 
         public GetPedidoByIdQueryHandler(
             IPedidoRepository pedidoRepository,
+            ICorreccionTokenRepository correccionTokenRepository,
             IMapper mapper,
             ILogger<GetPedidoByIdQueryHandler> logger)
         {
             _pedidoRepository = pedidoRepository;
+            _correccionTokenRepository = correccionTokenRepository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -34,7 +37,16 @@ namespace DistriCatalogoAPI.Application.Handlers.Pedidos
                 return null;
             }
 
-            return _mapper.Map<PedidoDto>(pedido);
+            var pedidoDto = _mapper.Map<PedidoDto>(pedido);
+            
+            // Incluir correcciones si se solicita
+            if (request.IncludeCorrecciones)
+            {
+                var correcciones = await _correccionTokenRepository.GetByPedidoIdAsync(request.PedidoId);
+                pedidoDto.Correcciones = _mapper.Map<List<CorreccionTokenDto>>(correcciones);
+            }
+
+            return pedidoDto;
         }
     }
 }

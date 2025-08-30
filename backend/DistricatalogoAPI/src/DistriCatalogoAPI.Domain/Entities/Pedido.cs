@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DistriCatalogoAPI.Domain.Entities
 {
@@ -44,8 +45,8 @@ namespace DistriCatalogoAPI.Domain.Entities
         
         public void RechazarPedido(int usuarioId, string motivo)
         {
-            if (Estado != PedidoEstado.Pendiente)
-                throw new InvalidOperationException("Solo se pueden rechazar pedidos pendientes");
+            if (Estado == PedidoEstado.Completado || Estado == PedidoEstado.Rechazado || Estado == PedidoEstado.Cancelado)
+                throw new InvalidOperationException("No se pueden rechazar pedidos completados, ya rechazados o cancelados");
                 
             if (string.IsNullOrWhiteSpace(motivo))
                 throw new ArgumentException("El motivo de rechazo es requerido");
@@ -70,8 +71,8 @@ namespace DistriCatalogoAPI.Domain.Entities
         
         public void CancelarPedido(int usuarioId, string motivo = "Cancelado por el cliente")
         {
-            if (Estado == PedidoEstado.Completado)
-                throw new InvalidOperationException("No se pueden cancelar pedidos completados");
+            if (Estado != PedidoEstado.Pendiente)
+                throw new InvalidOperationException("Solo se pueden cancelar pedidos pendientes");
                 
             Estado = PedidoEstado.Cancelado;
             UsuarioGestionId = usuarioId;
@@ -91,6 +92,91 @@ namespace DistriCatalogoAPI.Domain.Entities
             return Estado == PedidoEstado.Pendiente;
         }
         
+        public void IniciarCorreccion(int usuarioId)
+        {
+            if (Estado != PedidoEstado.Pendiente && Estado != PedidoEstado.CorreccionRechazada)
+                throw new InvalidOperationException("Solo se pueden corregir pedidos pendientes o con corrección rechazada");
+                
+            Estado = PedidoEstado.EnCorreccion;
+            UsuarioGestionId = usuarioId;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        
+        public void EnviarCorreccionAlCliente(int usuarioId)
+        {
+            if (Estado != PedidoEstado.EnCorreccion)
+                throw new InvalidOperationException("El pedido debe estar en corrección");
+                
+            Estado = PedidoEstado.CorreccionPendiente;
+            UsuarioGestionId = usuarioId;
+            FechaGestion = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        
+        public void AprobarCorreccion()
+        {
+            if (Estado != PedidoEstado.CorreccionPendiente)
+                throw new InvalidOperationException("No hay corrección pendiente de aprobación");
+                
+            Estado = PedidoEstado.Pendiente; // Vuelve a pendiente para que pueda ser aceptado
+            UpdatedAt = DateTime.UtcNow;
+        }
+        
+        public void RechazarCorreccion()
+        {
+            if (Estado != PedidoEstado.CorreccionPendiente)
+                throw new InvalidOperationException("No hay corrección pendiente de rechazo");
+                
+            Estado = PedidoEstado.CorreccionRechazada;
+            UpdatedAt = DateTime.UtcNow;
+        }
+        
+        public void ModificarItem(string codigoProducto, int nuevaCantidad)
+        {
+            if (Estado != PedidoEstado.EnCorreccion)
+                throw new InvalidOperationException("Solo se pueden modificar items durante la corrección");
+                
+            var item = Items.FirstOrDefault(i => i.CodigoProducto == codigoProducto);
+            if (item == null)
+                throw new ArgumentException($"Item con código {codigoProducto} no encontrado");
+                
+            if (nuevaCantidad <= 0)
+            {
+                Items.Remove(item);
+            }
+            else
+            {
+                item.ActualizarCantidad(nuevaCantidad);
+            }
+            
+            CalcularMontoTotal();
+        }
+
+        public void ModificarItem(string codigoProducto, int nuevaCantidad, string? motivoCorreccion)
+        {
+            if (Estado != PedidoEstado.EnCorreccion)
+                throw new InvalidOperationException("Solo se pueden modificar items durante la corrección");
+                
+            var item = Items.FirstOrDefault(i => i.CodigoProducto == codigoProducto);
+            if (item == null)
+                throw new ArgumentException($"Item con código {codigoProducto} no encontrado");
+                
+            if (nuevaCantidad <= 0)
+            {
+                Items.Remove(item);
+            }
+            else
+            {
+                item.ActualizarCantidad(nuevaCantidad);
+                if (!string.IsNullOrWhiteSpace(motivoCorreccion))
+                {
+                    item.Observaciones = motivoCorreccion;
+                }
+            }
+            
+            CalcularMontoTotal();
+        }
+        
         public string GenerateNumero()
         {
             var fecha = FechaPedido.ToString("yyyyMMdd");
@@ -105,6 +191,9 @@ namespace DistriCatalogoAPI.Domain.Entities
         Aceptado = 1,
         Rechazado = 2,
         Completado = 3,
-        Cancelado = 4
+        Cancelado = 4,
+        EnCorreccion = 5,
+        CorreccionPendiente = 6,
+        CorreccionRechazada = 7
     }
 }

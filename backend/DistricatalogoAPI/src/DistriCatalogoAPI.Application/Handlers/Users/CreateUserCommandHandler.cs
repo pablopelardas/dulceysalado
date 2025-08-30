@@ -16,16 +16,37 @@ namespace DistriCatalogoAPI.Application.Handlers.Users
     public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserDto>
     {
         private readonly IUserRepository _userRepository;
+        private readonly ICompanyRepository _companyRepository;
+        private readonly IUserNotificationPreferencesRepository _notificationPreferencesRepository;
         private readonly IMapper _mapper;
 
-        public CreateUserCommandHandler(IUserRepository userRepository, IMapper mapper)
+        public CreateUserCommandHandler(
+            IUserRepository userRepository, 
+            ICompanyRepository companyRepository,
+            IUserNotificationPreferencesRepository notificationPreferencesRepository,
+            IMapper mapper)
         {
             _userRepository = userRepository;
+            _companyRepository = companyRepository;
+            _notificationPreferencesRepository = notificationPreferencesRepository;
             _mapper = mapper;
         }
 
         public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
+            // Si no se especifica empresa, usar la empresa principal (primera empresa activa)
+            int empresaId = request.EmpresaId;
+            if (empresaId == 0)
+            {
+                var companies = await _companyRepository.GetAllAsync();
+                var mainCompany = companies.FirstOrDefault(c => c.Activa);
+                if (mainCompany == null)
+                {
+                    throw new InvalidOperationException("No hay empresas activas en el sistema");
+                }
+                empresaId = mainCompany.Id;
+            }
+
             // Authorization check
             if (request.RequestingUserId.HasValue)
             {
@@ -36,7 +57,7 @@ namespace DistriCatalogoAPI.Application.Handlers.Users
                 }
 
                 // Check if requesting user can manage users from the target company
-                if (!requestingUser.CanManageUsersFromCompany(request.EmpresaId))
+                if (!requestingUser.CanManageUsersFromCompany(empresaId))
                 {
                     throw new UnauthorizedAccessException("Permisos insuficientes para crear usuarios en esta empresa");
                 }
@@ -54,12 +75,12 @@ namespace DistriCatalogoAPI.Application.Handlers.Users
             var passwordHash = Password.HashPassword(request.Password);
 
             // Get company type and map role correctly
-            var companyType = await _userRepository.GetCompanyTypeAsync(request.EmpresaId);
+            var companyType = await _userRepository.GetCompanyTypeAsync(empresaId);
             var role = _userRepository.MapDatabaseRoleToEnum(request.Rol, companyType);
 
             // Create user entity
             var user = new User(
-                request.EmpresaId,
+                empresaId,
                 email,
                 passwordHash,
                 request.Nombre,
@@ -68,6 +89,9 @@ namespace DistriCatalogoAPI.Application.Handlers.Users
 
             // Save to repository
             user = await _userRepository.CreateAsync(user);
+
+            // Crear preferencias de notificación por defecto para el nuevo usuario
+            await _notificationPreferencesRepository.CreateDefaultPreferencesForUserAsync(user.Id);
 
             // Map to DTO
             var userDto = _mapper.Map<UserDto>(user);

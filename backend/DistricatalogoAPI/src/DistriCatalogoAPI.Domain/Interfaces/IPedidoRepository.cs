@@ -9,6 +9,7 @@ namespace DistriCatalogoAPI.Domain.Interfaces
     {
         // Operaciones básicas
         Task<Pedido?> GetByIdAsync(int id, bool includeItems = true);
+        Task<Pedido?> GetByIdWithItemsAsync(int id); // Para correcciones
         Task<Pedido?> GetByNumeroAsync(string numero, bool includeItems = true);
         Task<IEnumerable<Pedido>> GetAllAsync(int empresaId, bool includeItems = false);
         Task<Pedido> AddAsync(Pedido pedido);

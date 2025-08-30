@@ -27,6 +27,14 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
             
             return await query.FirstOrDefaultAsync(p => p.Id == id);
         }
+        
+        public async Task<Pedido?> GetByIdWithItemsAsync(int id)
+        {
+            return await _context.Pedidos
+                .Include(p => p.Items)
+                .Include(p => p.Cliente)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
 
         public async Task<Pedido?> GetByNumeroAsync(string numero, bool includeItems = true)
         {

@@ -3,11 +3,10 @@ using DistriCatalogoAPI.Application.DTOs;
 
 namespace DistriCatalogoAPI.Application.Queries.Pedidos
 {
-    public class GetPedidoByIdQuery : IRequest<PedidoDto?>
+    public class GetCorreccionByPedidoQuery : IRequest<CorreccionDto?>
     {
         public int PedidoId { get; set; }
+        public int ClienteId { get; set; }
         public int EmpresaId { get; set; }
-        public bool IncludeItems { get; set; } = true;
-        public bool IncludeCorrecciones { get; set; } = true;
     }
 }

@@ -24,6 +24,11 @@ namespace DistriCatalogoAPI.Application.Mappings
 
             CreateMap<PedidoItem, PedidoItemDto>();
 
+            CreateMap<CorreccionToken, CorreccionTokenDto>()
+                .ForMember(dest => dest.FechaCreacion, opt => opt.MapFrom(src => ConvertToArgentinaTime(src.FechaCreacion)))
+                .ForMember(dest => dest.FechaExpiracion, opt => opt.MapFrom(src => ConvertToArgentinaTime(src.FechaExpiracion)))
+                .ForMember(dest => dest.FechaUso, opt => opt.MapFrom(src => src.FechaUso.HasValue ? ConvertToArgentinaTime(src.FechaUso.Value) : (DateTime?)null));
+
             CreateMap<CrearPedidoDto, CrearPedidoCommand>();
             CreateMap<CrearPedidoItemDto, PedidoItem>();
         }
