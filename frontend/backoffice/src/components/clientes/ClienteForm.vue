@@ -47,9 +47,8 @@
         </UFormField>
         
         <UFormField label="Teléfono" name="telefono">
-          <UInput 
+          <PhoneInput 
             v-model="formData.telefono"
-            placeholder="Número de teléfono"
             :disabled="loading"
           />
         </UFormField>
@@ -251,6 +250,7 @@
 
 <script setup lang="ts">
 import { z } from 'zod'
+import PhoneInput from '~/components/ui/PhoneInput.vue'
 import type { CreateClienteCommand, UpdateClienteCommand, ClienteDto } from '~/types/clientes'
 import type { ListaPrecioInfo } from '~/types/productos'
 

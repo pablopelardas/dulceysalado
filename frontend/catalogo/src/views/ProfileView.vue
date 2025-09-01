@@ -71,19 +71,11 @@
                 </div>
 
                 <!-- Teléfono -->
-                <div>
-                  <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
-                    Teléfono
-                  </label>
-                  <input
-                    id="telefono"
-                    v-model="form.telefono"
-                    type="tel"
-                    class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
-                    placeholder="Ej: +54 11 1234-5678"
-                    :disabled="loading"
-                  />
-                </div>
+                <PhoneInput
+                  v-model="form.telefono"
+                  label="Teléfono"
+                  :disabled="loading"
+                />
 
                 <!-- Dirección -->
                 <div>
@@ -95,77 +87,11 @@
                     v-model="form.direccion"
                     type="text"
                     class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
-                    placeholder="Ej: Av. Corrientes 1234"
+                    placeholder="Ej: Av. Corrientes 1234, CABA, Buenos Aires"
                     :disabled="loading"
                   />
                 </div>
 
-                <!-- Localidad, Provincia y Altura -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label for="localidad" class="block text-sm font-medium text-gray-700 mb-2">
-                      Localidad
-                    </label>
-                    <input
-                      id="localidad"
-                      v-model="form.localidad"
-                      type="text"
-                      class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
-                      placeholder="Ej: CABA"
-                      :disabled="loading"
-                    />
-                  </div>
-                  <div>
-                    <label for="provincia" class="block text-sm font-medium text-gray-700 mb-2">
-                      Provincia
-                    </label>
-                    <select
-                      id="provincia"
-                      v-model="form.provincia"
-                      class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
-                      :disabled="loading"
-                    >
-                      <option value="">Seleccionar provincia</option>
-                      <option value="Buenos Aires">Buenos Aires</option>
-                      <option value="CABA">Ciudad Autónoma de Buenos Aires</option>
-                      <option value="Catamarca">Catamarca</option>
-                      <option value="Chaco">Chaco</option>
-                      <option value="Chubut">Chubut</option>
-                      <option value="Córdoba">Córdoba</option>
-                      <option value="Corrientes">Corrientes</option>
-                      <option value="Entre Ríos">Entre Ríos</option>
-                      <option value="Formosa">Formosa</option>
-                      <option value="Jujuy">Jujuy</option>
-                      <option value="La Pampa">La Pampa</option>
-                      <option value="La Rioja">La Rioja</option>
-                      <option value="Mendoza">Mendoza</option>
-                      <option value="Misiones">Misiones</option>
-                      <option value="Neuquén">Neuquén</option>
-                      <option value="Río Negro">Río Negro</option>
-                      <option value="Salta">Salta</option>
-                      <option value="San Juan">San Juan</option>
-                      <option value="San Luis">San Luis</option>
-                      <option value="Santa Cruz">Santa Cruz</option>
-                      <option value="Santa Fe">Santa Fe</option>
-                      <option value="Santiago del Estero">Santiago del Estero</option>
-                      <option value="Tierra del Fuego">Tierra del Fuego</option>
-                      <option value="Tucumán">Tucumán</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label for="altura" class="block text-sm font-medium text-gray-700 mb-2">
-                      Altura
-                    </label>
-                    <input
-                      id="altura"
-                      v-model="form.altura"
-                      type="text"
-                      class="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
-                      placeholder="Ej: 1234"
-                      :disabled="loading"
-                    />
-                  </div>
-                </div>
 
                 <!-- CUIT y Tipo IVA -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -286,6 +212,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import PhoneInput from '@/components/ui/PhoneInput.vue'
 // authApiService import removed - not used
 
 const router = useRouter()
@@ -302,11 +229,8 @@ const form = ref({
   email: '',
   telefono: '',
   direccion: '',
-  localidad: '',
-  provincia: '',
   cuit: '',
-  tipo_iva: '',
-  altura: ''
+  tipo_iva: ''
 })
 
 
@@ -350,11 +274,8 @@ const loadUserData = async () => {
       email: user.email || '',
       telefono: user.telefono || '',
       direccion: user.direccion || '',
-      localidad: (user as any).localidad || '',
-      provincia: (user as any).provincia || '',
       cuit: (user as any).cuit || '',
-      tipo_iva: (user as any).tipo_iva || '',
-      altura: (user as any).altura || ''
+      tipo_iva: (user as any).tipo_iva || ''
     }
     
     form.value = { ...userData }

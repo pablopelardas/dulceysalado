@@ -59,14 +59,13 @@
               />
               
               <!-- Phone input -->
-              <input
+              <PhoneInput
                 v-else-if="field === 'telefono' || field === 'celular' || field === 'whatsapp'"
                 v-model="formData[field]"
-                type="tel"
                 :id="field"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[--theme-primary] focus:border-transparent"
-                :placeholder="getFieldPlaceholder(field)"
+                :required="true"
+                :placeholder="getPhonePlaceholder(field)"
+                class="w-full"
               />
               
               <!-- Number input -->
@@ -151,6 +150,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
+import PhoneInput from '@/components/ui/PhoneInput.vue'
 
 export interface CustomerData {
   [key: string]: string | undefined
@@ -202,8 +202,8 @@ const getFieldPlaceholder = (field: string): string => {
     nombre: 'Juan Pérez',
     numero_cliente: '12345',
     telefono: '+54 9 11 1234-5678',
-    direccion_entrega: 'Av. Corrientes 1234, Piso 5, CABA',
-    direccion: 'Av. Corrientes 1234',
+    direccion_entrega: 'Av. Corrientes 1234, Piso 5, CABA, Buenos Aires',
+    direccion: 'Av. Corrientes 1234, CABA, Buenos Aires',
     email: 'juan@ejemplo.com',
     observaciones: 'Instrucciones especiales...',
     dni: '12345678',
@@ -218,6 +218,10 @@ const getFieldPlaceholder = (field: string): string => {
   }
   
   return placeholders[field] || 'Ingrese ' + getFieldLabel(field).toLowerCase()
+}
+
+const getPhonePlaceholder = (field: string): string => {
+  return '11 1234-5678'
 }
 
 const isTextareaField = (field: string): boolean => {

@@ -107,19 +107,11 @@
           </div>
 
           <!-- Teléfono -->
-          <div>
-            <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
-              Teléfono
-            </label>
-            <input
-              id="telefono"
-              v-model="form.telefono"
-              type="tel"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
-              placeholder="Ej: +54 11 1234-5678"
-              :disabled="authStore.loading"
-            />
-          </div>
+          <PhoneInput
+            v-model="form.telefono"
+            label="Teléfono"
+            :disabled="authStore.loading"
+          />
 
           <!-- Dirección -->
           <div>
@@ -131,7 +123,7 @@
               v-model="form.direccion"
               type="text"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
-              placeholder="Tu dirección completa"
+              placeholder="Ej: Av. Corrientes 1234, CABA, Buenos Aires"
               :disabled="authStore.loading"
             />
           </div>
@@ -266,6 +258,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { EMPRESA_CONFIG } from '@/config/empresa.config'
 import { applyTheme } from '@/utils/theme'
+import PhoneInput from '@/components/ui/PhoneInput.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
