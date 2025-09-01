@@ -76,6 +76,12 @@ public partial class DistricatalogoContext : DbContext
     public virtual DbSet<DistriCatalogoAPI.Domain.Entities.PedidoItem> PedidoItems { get; set; }
     
     public virtual DbSet<DistriCatalogoAPI.Domain.Entities.CorreccionToken> CorrecionTokens { get; set; }
+    
+    public virtual DbSet<DistriCatalogoAPI.Domain.Entities.DeliverySettings> DeliverySettings { get; set; }
+    
+    public virtual DbSet<DistriCatalogoAPI.Domain.Entities.DeliverySchedule> DeliverySchedules { get; set; }
+    
+    public virtual DbSet<DistriCatalogoAPI.Domain.Entities.DeliverySlot> DeliverySlots { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -1302,6 +1308,11 @@ public partial class DistricatalogoContext : DbContext
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.PedidoConfiguration());
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.PedidoItemConfiguration());
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.CorreccionTokenConfiguration());
+        
+        // Delivery Configuration
+        modelBuilder.ApplyConfiguration(new Persistence.Configurations.DeliverySettingsConfiguration());
+        modelBuilder.ApplyConfiguration(new Persistence.Configurations.DeliveryScheduleConfiguration());
+        modelBuilder.ApplyConfiguration(new Persistence.Configurations.DeliverySlotConfiguration());
 
         OnModelCreatingPartial(modelBuilder);
     }

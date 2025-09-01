@@ -54,6 +54,7 @@ namespace DistriCatalogoAPI.Application.DTOs
         public string? DireccionEntrega { get; set; }
         public DateTime? FechaEntrega { get; set; }
         public string? HorarioEntrega { get; set; }
+        public string? DeliverySlot { get; set; }
     }
 
     public class CrearPedidoItemDto

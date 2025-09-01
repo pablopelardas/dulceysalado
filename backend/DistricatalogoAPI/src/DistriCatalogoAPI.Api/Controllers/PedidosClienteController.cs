@@ -49,6 +49,7 @@ namespace DistriCatalogoAPI.Api.Controllers
                     DireccionEntrega = crearPedidoDto.DireccionEntrega,
                     FechaEntrega = crearPedidoDto.FechaEntrega,
                     HorarioEntrega = crearPedidoDto.HorarioEntrega,
+                    DeliverySlot = crearPedidoDto.DeliverySlot,
                     CreatedBy = clienteId.ToString()
                 };
 

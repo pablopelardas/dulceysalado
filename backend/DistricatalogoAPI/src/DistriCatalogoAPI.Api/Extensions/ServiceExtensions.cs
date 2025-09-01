@@ -94,6 +94,7 @@ namespace DistriCatalogoAPI.Api.Extensions
             services.AddScoped<IPedidoRepository, PedidoRepository>();
             services.AddScoped<ICorreccionTokenRepository, CorreccionTokenRepository>();
             services.AddScoped<IUserNotificationPreferencesRepository, UserNotificationPreferencesRepository>();
+            services.AddScoped<IDeliveryRepository, DeliveryRepository>();
 
             // Repositories - Módulo 04 Catalog Management 
             services.AddScoped<ICategoryEmpresaRepository, CategoryEmpresaRepository>();
