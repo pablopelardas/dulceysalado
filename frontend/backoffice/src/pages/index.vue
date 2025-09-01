@@ -226,6 +226,17 @@ watchEffect(() => {
                 Gestionar
               </UButton>
             </div>
+
+            <div class="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <div>
+                <h3 class="font-medium text-amber-900 dark:text-amber-100">Configuración de Entregas</h3>
+                <p class="text-sm text-amber-700 dark:text-amber-300">Configura horarios y capacidad de entrega</p>
+              </div>
+              <UButton color="amber" variant="solid" to="/admin/delivery-config">
+                <UIcon name="i-heroicons-truck" class="mr-2" />
+                Configurar
+              </UButton>
+            </div>
           </div>
         </UCard>
 
