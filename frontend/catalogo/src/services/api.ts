@@ -105,6 +105,7 @@ interface CreateOrderRequest {
   direccion_entrega?: string
   fecha_entrega?: string
   horario_entrega?: string
+  delivery_slot?: string
 }
 
 interface OrderItem {
@@ -742,6 +743,31 @@ class AuthApiService {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+
+    return response.json()
+  }
+
+  async getDeliverySlots(accessToken: string, startDate?: string, endDate?: string, slotType?: 'Morning' | 'Afternoon'): Promise<any> {
+    const params = new URLSearchParams()
+    if (startDate) params.append('startDate', startDate)
+    if (endDate) params.append('endDate', endDate)
+    if (slotType) params.append('slotType', slotType)
+    
+    const queryString = params.toString()
+    const url = `${this.baseUrl}/api/cliente-auth/delivery/slots${queryString ? `?${queryString}` : ''}`
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
         'Accept': 'application/json',
         'Authorization': `Bearer ${accessToken}`
       }

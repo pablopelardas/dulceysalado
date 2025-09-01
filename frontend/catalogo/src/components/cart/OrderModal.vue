@@ -124,38 +124,11 @@
                 </div>
               </div>
 
-              <!-- Delivery Date -->
-              <div>
-                <label for="fecha_entrega" class="block text-sm font-medium text-gray-700 mb-2">
-                  Fecha de entrega preferida (opcional)
-                </label>
-                <input
-                  id="fecha_entrega"
-                  v-model="orderForm.fecha_entrega"
-                  type="date"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  :disabled="loading"
-                  :min="today"
-                />
-              </div>
-
-              <!-- Delivery Time -->
-              <div>
-                <label for="horario_entrega" class="block text-sm font-medium text-gray-700 mb-2">
-                  Horario de entrega preferido (opcional)
-                </label>
-                <select
-                  id="horario_entrega"
-                  v-model="orderForm.horario_entrega"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  :disabled="loading"
-                >
-                  <option value="">Seleccionar horario</option>
-                  <option value="Mañana (8:00 - 12:00)">Mañana (8:00 - 12:00)</option>
-                  <option value="Tarde (12:00 - 18:00)">Tarde (12:00 - 18:00)</option>
-                  <option value="Noche (18:00 - 22:00)">Noche (18:00 - 22:00)</option>
-                </select>
-              </div>
+              <!-- Delivery Slot Selection -->
+              <DeliverySlotSelector
+                v-model="deliverySlotData"
+                :disabled="loading"
+              />
 
               <!-- Observations -->
               <div>
@@ -247,6 +220,7 @@ import {
   XMarkIcon,
   UserIcon
 } from '@heroicons/vue/24/outline'
+import DeliverySlotSelector from '@/components/delivery/DeliverySlotSelector.vue'
 
 interface Props {
   isOpen: boolean
@@ -277,6 +251,13 @@ const orderForm = ref<OrderData>({
   horario_entrega: ''
 })
 
+// Delivery slot data
+const deliverySlotData = ref({
+  fecha_entrega: '',
+  horario_entrega: '',
+  delivery_slot: ''
+})
+
 // Computed
 const today = computed(() => {
   const date = new Date()
@@ -298,6 +279,11 @@ const resetForm = () => {
     direccion_entrega: '',
     fecha_entrega: '',
     horario_entrega: ''
+  }
+  deliverySlotData.value = {
+    fecha_entrega: '',
+    horario_entrega: '',
+    delivery_slot: ''
   }
   error.value = null
   success.value = null
@@ -327,8 +313,16 @@ const handleSubmit = async () => {
   success.value = null
 
   try {
+    // Merge delivery slot data with order form
+    const orderData = {
+      ...orderForm.value,
+      fecha_entrega: deliverySlotData.value.fecha_entrega || orderForm.value.fecha_entrega,
+      horario_entrega: deliverySlotData.value.horario_entrega || orderForm.value.horario_entrega,
+      delivery_slot: deliverySlotData.value.delivery_slot || undefined
+    }
+
     const orderResponse = await authStore.executeWithAuth(
-      (token) => cartStore.createOrder(orderForm.value, token)
+      (token) => cartStore.createOrder(orderData, token)
     )
     
     success.value = `Pedido #${orderResponse.numero} creado exitosamente`

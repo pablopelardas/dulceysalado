@@ -17,6 +17,7 @@ export interface OrderData {
   direccion_entrega?: string
   fecha_entrega?: string
   horario_entrega?: string
+  delivery_slot?: string
 }
 
 export interface OrderItem {
@@ -33,6 +34,7 @@ export interface CreateOrderRequest {
   direccion_entrega?: string
   fecha_entrega?: string
   horario_entrega?: string
+  delivery_slot?: string
 }
 
 export interface OrderResponse {
@@ -351,7 +353,8 @@ export const useCartStore = defineStore('cart', () => {
       observaciones: orderData.observaciones,
       direccion_entrega: orderData.direccion_entrega,
       fecha_entrega: orderData.fecha_entrega,
-      horario_entrega: orderData.horario_entrega
+      horario_entrega: orderData.horario_entrega,
+      delivery_slot: orderData.delivery_slot
     }
 
     try {
