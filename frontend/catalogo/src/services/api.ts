@@ -782,9 +782,101 @@ class AuthApiService {
   }
 }
 
+// Solicitud de Reventa Service
+interface CreateSolicitudReventaRequest {
+  cuit?: string
+  razon_social?: string
+  direccion_comercial?: string
+  localidad?: string
+  provincia?: string
+  codigo_postal?: string
+  telefono_comercial?: string
+  categoria_iva?: string
+  email_comercial?: string
+}
+
+interface SolicitudReventaResponse {
+  id: number
+  cliente_id: number
+  cliente_nombre?: string
+  cliente_email?: string
+  cuit?: string
+  razon_social?: string
+  direccion_comercial?: string
+  localidad?: string
+  provincia?: string
+  codigo_postal?: string
+  telefono_comercial?: string
+  categoria_iva?: string
+  email_comercial?: string
+  estado: string
+  comentario_respuesta?: string
+  fecha_respuesta?: string
+  respondido_por?: string
+  fecha_solicitud: string
+}
+
+class SolicitudReventaService {
+  private baseUrl: string
+
+  constructor() {
+    this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:7000'
+  }
+
+  async createSolicitud(data: CreateSolicitudReventaRequest, accessToken: string): Promise<SolicitudReventaResponse> {
+    const response = await fetch(`${this.baseUrl}/api/solicitudreventa`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(data)
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      let errorMessage = `HTTP error! status: ${response.status}`
+      
+      try {
+        const errorData = JSON.parse(errorText)
+        errorMessage = errorData.message || errorMessage
+      } catch {
+        errorMessage = errorText || errorMessage
+      }
+      
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  async getMiSolicitud(accessToken: string): Promise<SolicitudReventaResponse | null> {
+    const response = await fetch(`${this.baseUrl}/api/solicitudreventa/mi-solicitud`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+
+    if (response.status === 404) {
+      return null
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+
+    return response.json()
+  }
+}
+
 // Export singleton instances
 export const apiService = new ApiService()
 export const authApiService = new AuthApiService()
+export const solicitudReventaService = new SolicitudReventaService()
 
 // Export types for use in components
 export type { 
@@ -805,5 +897,7 @@ export type {
   CreateOrderRequest,
   OrderItem,
   OrderResponse,
-  PaginatedOrdersResponse
+  PaginatedOrdersResponse,
+  CreateSolicitudReventaRequest,
+  SolicitudReventaResponse
 }

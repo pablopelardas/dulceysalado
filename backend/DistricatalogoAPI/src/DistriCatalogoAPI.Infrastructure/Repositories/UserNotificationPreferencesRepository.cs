@@ -50,6 +50,7 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
                 TipoNotificacion.CorreccionAprobada => query.Where(joined => joined.Preferences.NotificacionCorreccionesAprobadas),
                 TipoNotificacion.CorreccionRechazada => query.Where(joined => joined.Preferences.NotificacionCorreccionesRechazadas),
                 TipoNotificacion.PedidoCancelado => query.Where(joined => joined.Preferences.NotificacionPedidosCancelados),
+                TipoNotificacion.NuevaSolicitudReventa => query.Where(joined => joined.Preferences.NotificacionSolicitudesReventa),
                 _ => throw new ArgumentException($"Tipo de notificación no soportado: {tipoNotificacion}")
             };
 
@@ -106,6 +107,7 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
                 NotificacionCorreccionesAprobadas = true,
                 NotificacionCorreccionesRechazadas = true,
                 NotificacionPedidosCancelados = true,
+                NotificacionSolicitudesReventa = true,
                 CreatedBy = "SYSTEM_AUTO",
                 UpdatedBy = "SYSTEM_AUTO"
             };
@@ -131,6 +133,7 @@ namespace DistriCatalogoAPI.Infrastructure.Repositories
                 TipoNotificacion.CorreccionAprobada => query.Where(joined => joined.Preferences.NotificacionCorreccionesAprobadas),
                 TipoNotificacion.CorreccionRechazada => query.Where(joined => joined.Preferences.NotificacionCorreccionesRechazadas),
                 TipoNotificacion.PedidoCancelado => query.Where(joined => joined.Preferences.NotificacionPedidosCancelados),
+                TipoNotificacion.NuevaSolicitudReventa => query.Where(joined => joined.Preferences.NotificacionSolicitudesReventa),
                 _ => throw new ArgumentException($"Tipo de notificación no soportado: {tipoNotificacion}")
             };
 

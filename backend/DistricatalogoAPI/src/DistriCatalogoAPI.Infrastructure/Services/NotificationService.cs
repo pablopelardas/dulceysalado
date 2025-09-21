@@ -37,8 +37,8 @@ namespace DistriCatalogoAPI.Infrastructure.Services
             _smtpPassword = configuration["Email:SmtpPassword"] ?? "";
             _fromEmail = configuration["Email:FromEmail"] ?? "";
             _fromName = configuration["Email:FromName"] ?? "Dulce y Salado";
-            _baseUrl = configuration["Application:CatalogUrl"] ?? "https://dulceysalado.com";
-            _backofficeUrl = configuration["Application:BackofficeUrl"] ?? "https://admin.dulceysalado.com";
+            _baseUrl = configuration["Application:CatalogUrl"] ?? "https://dulceysaladomax.com";
+            _backofficeUrl = configuration["Application:BackofficeUrl"] ?? "https://admin.dulceysaladomax.com";
         }
 
         public async Task NotificarCambioEstadoPedidoAsync(Pedido pedido, string estadoAnterior)
@@ -575,6 +575,185 @@ namespace DistriCatalogoAPI.Infrastructure.Services
                         <div class='footer'>
                             <p>Sistema de Gestión de Pedidos - Dulce & Salado</p>
                             <p style='font-size: 12px; margin-top: 10px; opacity: 0.8;'>Este es un mensaje automático, no responder a este email</p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+        }
+
+        // Métodos para Solicitudes de Reventa
+        public async Task NotificarNuevaSolicitudReventaAsync(SolicitudReventa solicitud, Cliente cliente)
+        {
+            try
+            {
+                // Obtener usuarios que tienen habilitadas las notificaciones de solicitudes de reventa
+                var usuariosConNotificacion = await _notificationPreferencesRepository
+                    .GetUsersWithEmailForNotificationTypeAsync(solicitud.EmpresaId, TipoNotificacion.NuevaSolicitudReventa);
+
+                if (!usuariosConNotificacion.Any())
+                {
+                    _logger.LogWarning("No hay usuarios con notificaciones de solicitudes de reventa habilitadas en la empresa {EmpresaId}", solicitud.EmpresaId);
+                    return;
+                }
+
+                var asunto = $"📋 Nueva Solicitud de Cuenta de Reventa - {cliente.Nombre ?? cliente.Codigo}";
+                var mensaje = GenerarMensajeNuevaSolicitudReventa(solicitud, cliente);
+
+                foreach (var (preferences, userEmail) in usuariosConNotificacion)
+                {
+                    await EnviarEmailAsync(userEmail, asunto, mensaje, true);
+                }
+                
+                _logger.LogInformation("Notificaciones de nueva solicitud de reventa enviadas a {UsuarioCount} usuarios para solicitud {SolicitudId}", 
+                    usuariosConNotificacion.Count(), solicitud.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error enviando notificaciones de nueva solicitud de reventa {SolicitudId}", solicitud.Id);
+            }
+        }
+
+        public async Task NotificarRespuestaSolicitudReventaAsync(SolicitudReventa solicitud, Cliente cliente)
+        {
+            if (string.IsNullOrEmpty(cliente.Email))
+            {
+                _logger.LogWarning("Cliente {ClienteId} no tiene email para notificar respuesta de solicitud", cliente.Id);
+                return;
+            }
+
+            var aprobada = solicitud.Estado == EstadoSolicitud.Aprobada;
+            var asunto = aprobada 
+                ? "✅ Tu solicitud de cuenta de reventa ha sido aprobada - Dulce y Salado"
+                : "📋 Respuesta a tu solicitud de cuenta de reventa - Dulce y Salado";
+            
+            var mensaje = GenerarMensajeRespuestaSolicitudReventa(solicitud, cliente, aprobada);
+
+            await EnviarEmailAsync(cliente.Email, asunto, mensaje, true);
+            
+            _logger.LogInformation("Notificación de respuesta de solicitud enviada al cliente {ClienteId}: {Estado}", 
+                cliente.Id, solicitud.Estado.ToString());
+        }
+
+        private string GenerarMensajeNuevaSolicitudReventa(SolicitudReventa solicitud, Cliente cliente)
+        {
+            return $@"
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #1E1E1E; margin: 0; padding: 0; background-color: #F5F5F5; }}
+                        .container {{ max-width: 600px; margin: 0 auto; background-color: #FFFFFF; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }}
+                        .header {{ background-color: #4A4A4A; color: #FFFFFF; padding: 30px 20px; text-align: center; }}
+                        .logo {{ margin-bottom: 15px; }}
+                        .logo img {{ height: 100px; width: auto; }}
+                        .content {{ padding: 30px 20px; background-color: #FFFFFF; }}
+                        .solicitud-info {{ background-color: #F5F5F5; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #28a745; }}
+                        .footer {{ background-color: #1E1E1E; color: #FFFFFF; padding: 20px; text-align: center; font-size: 14px; }}
+                        h1 {{ margin: 0; font-size: 24px; font-weight: 600; }}
+                        h2 {{ color: #1E1E1E; font-size: 18px; margin-bottom: 15px; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            <div class='logo'>
+                                <img src='https://dulceysaladomax.com/assets/logo-dulceysalado.png' alt='Dulce & Salado' />
+                            </div>
+                            <h1>📋 Nueva Solicitud de Cuenta de Reventa</h1>
+                        </div>
+                        <div class='content'>
+                            <p style='font-size: 16px; margin-bottom: 25px;'>Se ha recibido una nueva solicitud de cuenta de reventa:</p>
+                            
+                            <div class='solicitud-info'>
+                                <h2>Datos del Cliente</h2>
+                                <p><strong>Cliente:</strong> {cliente.Nombre ?? cliente.Codigo}</p>
+                                <p><strong>Email:</strong> {cliente.Email ?? "No especificado"}</p>
+                                <p><strong>Teléfono:</strong> {cliente.Telefono ?? "No especificado"}</p>
+                            </div>
+
+                            <div class='solicitud-info'>
+                                <h2>Datos de la Empresa</h2>
+                                <p><strong>CUIT:</strong> {solicitud.Cuit ?? "No especificado"}</p>
+                                <p><strong>Razón Social:</strong> {solicitud.RazonSocial ?? "No especificado"}</p>
+                                <p><strong>Categoría IVA:</strong> {solicitud.CategoriaIva ?? "No especificado"}</p>
+                                <p><strong>Dirección:</strong> {solicitud.DireccionComercial ?? "No especificado"}</p>
+                                <p><strong>Localidad:</strong> {solicitud.Localidad ?? "No especificado"}</p>
+                                <p><strong>Provincia:</strong> {solicitud.Provincia ?? "No especificado"}</p>
+                                <p><strong>Código Postal:</strong> {solicitud.CodigoPostal ?? "No especificado"}</p>
+                                <p><strong>Teléfono Comercial:</strong> {solicitud.TelefonoComercial ?? "No especificado"}</p>
+                                <p><strong>Email Comercial:</strong> {solicitud.EmailComercial ?? "No especificado"}</p>
+                            </div>
+                            
+                            <div style='text-align: center; margin-top: 30px;'>
+                                <a href='{_backofficeUrl}/admin/solicitudes-reventa' class='btn' style='display: inline-block; padding: 15px 30px; background-color: #28a745; color: #FFFFFF !important; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0;'>Gestionar Solicitud</a>
+                            </div>
+                        </div>
+                        <div class='footer'>
+                            <p>Sistema de Gestión - Dulce & Salado</p>
+                            <p style='font-size: 12px; margin-top: 10px; opacity: 0.8;'>Este es un mensaje automático</p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+        }
+
+        private string GenerarMensajeRespuestaSolicitudReventa(SolicitudReventa solicitud, Cliente cliente, bool aprobada)
+        {
+            var colorEstado = aprobada ? "#28a745" : "#dc3545";
+            var textoEstado = aprobada ? "APROBADA" : "RECHAZADA";
+            var mensaje = aprobada 
+                ? "¡Felicitaciones! Tu solicitud de cuenta de reventa ha sido aprobada. Ya puedes acceder a los precios especiales de reventa."
+                : "Lamentablemente tu solicitud no ha sido aprobada en esta ocasión.";
+
+            return $@"
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #1E1E1E; margin: 0; padding: 0; background-color: #F5F5F5; }}
+                        .container {{ max-width: 600px; margin: 0 auto; background-color: #FFFFFF; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }}
+                        .header {{ background-color: #4A4A4A; color: #FFFFFF; padding: 30px 20px; text-align: center; }}
+                        .logo {{ margin-bottom: 15px; }}
+                        .logo img {{ height: 100px; width: auto; }}
+                        .content {{ padding: 30px 20px; background-color: #FFFFFF; }}
+                        .estado-info {{ background-color: #F5F5F5; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid {colorEstado}; }}
+                        .footer {{ background-color: #1E1E1E; color: #FFFFFF; padding: 20px; text-align: center; font-size: 14px; }}
+                        h1 {{ margin: 0; font-size: 24px; font-weight: 600; }}
+                        h2 {{ color: #1E1E1E; font-size: 18px; margin-bottom: 15px; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='header'>
+                            <div class='logo'>
+                                <img src='https://dulceysaladomax.com/assets/logo-dulceysalado.png' alt='Dulce & Salado' />
+                            </div>
+                            <h1>Respuesta a tu Solicitud de Reventa</h1>
+                        </div>
+                        <div class='content'>
+                            <p style='font-size: 16px; margin-bottom: 25px;'>Hola <strong>{cliente.Nombre ?? "Cliente"}</strong>,</p>
+                            
+                            <div class='estado-info'>
+                                <h2>Estado de tu Solicitud: <span style='color: {colorEstado}'>{textoEstado}</span></h2>
+                                <p>{mensaje}</p>
+                            </div>
+
+                            {(string.IsNullOrEmpty(solicitud.ComentarioRespuesta) ? "" : $@"
+                            <div class='estado-info'>
+                                <h2>Comentarios</h2>
+                                <p>{solicitud.ComentarioRespuesta}</p>
+                            </div>")}
+                            
+                            {(aprobada ? $@"
+                            <div style='text-align: center; margin-top: 30px;'>
+                                <p>Ya puedes acceder al catálogo con los nuevos precios:</p>
+                                <a href='{_baseUrl}' class='btn' style='display: inline-block; padding: 15px 30px; background-color: #28a745; color: #FFFFFF !important; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0;'>Ir al Catálogo</a>
+                            </div>" : @"
+                            <div style='text-align: center; margin-top: 30px;'>
+                                <p>Si tienes alguna duda o deseas más información, no dudes en contactarnos.</p>
+                            </div>")}
+                        </div>
+                        <div class='footer'>
+                            <p>Sistema de Gestión - Dulce & Salado</p>
+                            <p style='font-size: 12px; margin-top: 10px; opacity: 0.8;'>Este es un mensaje automático</p>
                         </div>
                     </div>
                 </body>

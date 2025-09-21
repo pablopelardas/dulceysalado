@@ -31,6 +31,13 @@
             Pedidos
           </NuxtLink>
           <NuxtLink 
+            to="/admin/solicitudes-reventa" 
+            class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 px-3 py-2 text-sm font-medium transition-colors"
+            active-class="text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
+          >
+            Solicitudes
+          </NuxtLink>
+          <NuxtLink 
             to="/profile" 
             class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 px-3 py-2 text-sm font-medium transition-colors"
             active-class="text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400"
@@ -87,6 +94,13 @@
           active-class="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50"
         >
           Pedidos
+        </NuxtLink>
+        <NuxtLink 
+          to="/admin/solicitudes-reventa" 
+          class="block px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
+          active-class="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50"
+        >
+          Solicitudes
         </NuxtLink>
         <NuxtLink 
           to="/profile" 

@@ -10,12 +10,14 @@ import { onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { EMPRESA_CONFIG } from '@/config/empresa.config'
 import { useCatalogStore } from '@/stores/catalog'
+import { useAuthStore } from '@/stores/auth'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import ProductGrid from '@/components/catalog/ProductGrid.vue'
 
 const route = useRoute()
 const router = useRouter()
 const catalogStore = useCatalogStore()
+const authStore = useAuthStore()
 
 // Function to update URL with current state
 const updateURL = () => {
@@ -115,6 +117,15 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   }
 }, { deep: true })
 
+// Watch for user lista_precio changes
+watch(() => authStore.user?.lista_precio?.id, async (newListaId, oldListaId) => {
+  if (newListaId && oldListaId && newListaId !== oldListaId) {
+    console.log('Lista de precios del usuario cambió, actualizando productos...')
+    // Refrescar los productos con la nueva lista de precios
+    await catalogStore.fetchProducts()
+  }
+}, { deep: true })
+
 // Handle browser back/forward
 const handlePopState = async () => {
   await restoreFromURL()
@@ -123,22 +134,32 @@ const handlePopState = async () => {
 
 onMounted(async () => {
   console.log('Route query:', route.query)
-  
+
   // Add popstate listener for browser navigation
   window.addEventListener('popstate', handlePopState)
-  
+
+  // Si el usuario está autenticado, actualizar su perfil para obtener la lista de precios actualizada
+  if (authStore.isAuthenticated) {
+    try {
+      await authStore.refreshUserProfile()
+      console.log('Perfil de usuario actualizado con lista de precios:', authStore.user?.lista_precio?.nombre)
+    } catch (error) {
+      console.error('Error al actualizar perfil de usuario:', error)
+    }
+  }
+
   // Initialize catalog data
   await catalogStore.initializeAll() // This will fetch categories, novedades, and ofertas
-  
+
   // Set document title
   document.title = `Catálogo - ${EMPRESA_CONFIG.nombre}`
-  
+
   // Restore state from URL query params
   await restoreFromURL()
-  
+
   // Fetch products with restored state - single call
   await catalogStore.fetchProducts()
-  
+
   // If we have filters from URL, fetch original total count in parallel (doesn't affect loading state)
   if (catalogStore.selectedCategory !== null || catalogStore.searchQuery || catalogStore.showFeaturedOnly) {
     catalogStore.fetchOriginalTotalCount() // No await - parallel execution

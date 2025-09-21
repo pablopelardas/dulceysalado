@@ -12,5 +12,9 @@ namespace DistriCatalogoAPI.Application.Interfaces
         Task NotificarNuevoPedidoAsync(Pedido pedido);
         Task NotificarRespuestaCorreccionAsync(Pedido pedido, bool aprobada, string? comentarioCliente = null);
         Task NotificarCancelacionPedidoAsync(Pedido pedido, string? motivoCancelacion = null);
+        
+        // Notificaciones de solicitudes de reventa
+        Task NotificarNuevaSolicitudReventaAsync(SolicitudReventa solicitud, Cliente cliente);
+        Task NotificarRespuestaSolicitudReventaAsync(SolicitudReventa solicitud, Cliente cliente);
     }
 }

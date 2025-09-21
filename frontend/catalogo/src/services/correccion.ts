@@ -55,7 +55,7 @@ class CorreccionService {
   async obtenerCorreccion(token: string): Promise<CorreccionData> {
     try {
       const response = await authApiService.publicFetch(`/api/public/correccion/${token}`)
-      return response
+      return response as CorreccionData
     } catch (error: any) {
       if (error.status === 404) {
         throw new Error('Token de corrección no válido o expirado')

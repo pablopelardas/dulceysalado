@@ -82,6 +82,8 @@ public partial class DistricatalogoContext : DbContext
     public virtual DbSet<DistriCatalogoAPI.Domain.Entities.DeliverySchedule> DeliverySchedules { get; set; }
     
     public virtual DbSet<DistriCatalogoAPI.Domain.Entities.DeliverySlot> DeliverySlots { get; set; }
+    
+    public virtual DbSet<DistriCatalogoAPI.Domain.Entities.SolicitudReventa> SolicitudesReventa { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -1313,6 +1315,9 @@ public partial class DistricatalogoContext : DbContext
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.DeliverySettingsConfiguration());
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.DeliveryScheduleConfiguration());
         modelBuilder.ApplyConfiguration(new Persistence.Configurations.DeliverySlotConfiguration());
+        
+        // Solicitudes Reventa Configuration
+        modelBuilder.ApplyConfiguration(new Data.Configurations.SolicitudReventaConfiguration());
 
         OnModelCreatingPartial(modelBuilder);
     }

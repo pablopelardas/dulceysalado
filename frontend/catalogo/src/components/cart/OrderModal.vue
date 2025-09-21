@@ -74,10 +74,48 @@
 
             <!-- Order Form -->
             <form @submit.prevent="handleSubmit" class="space-y-6">
-              <!-- Delivery Address -->
+              <!-- Tipo de Entrega -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Dirección de entrega (opcional)
+                  Tipo de entrega
+                </label>
+                <div class="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    @click="tipoEntrega = 'envio'"
+                    :class="[
+                      'px-4 py-3 rounded-lg border-2 transition-all font-medium cursor-pointer',
+                      tipoEntrega === 'envio'
+                        ? 'border-red-500 bg-red-50 text-red-700'
+                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                    ]"
+                  >
+                    <svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    Envío a domicilio
+                  </button>
+                  <button
+                    type="button"
+                    @click="tipoEntrega = 'retiro'"
+                    :class="[
+                      'px-4 py-3 rounded-lg border-2 transition-all font-medium cursor-pointer',
+                      tipoEntrega === 'retiro'
+                        ? 'border-red-500 bg-red-50 text-red-700'
+                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                    ]"
+                  >
+                    <svg class="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Retiro en el local
+                  </button>
+                </div>
+              </div>
+              <!-- Delivery Address -->
+              <div v-if="tipoEntrega === 'envio'">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Dirección de entrega
                 </label>
                 
                 <!-- Address Selection -->
@@ -122,10 +160,52 @@
                     </span>
                   </p>
                 </div>
+
+                <!-- Boton para ver zona de cobertura -->
+                <div class="mt-3">
+                  <button
+                    type="button"
+                    @click="showDeliveryMap = !showDeliveryMap"
+                    class="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-1 cursor-pointer"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {{ showDeliveryMap ? 'Ocultar' : 'Ver' }} zona de cobertura
+                  </button>
+
+                  <!-- Mapa de zona de entrega -->
+                  <DeliveryZoneMap v-if="showDeliveryMap" class="mt-3" />
+                </div>
               </div>
 
-              <!-- Delivery Slot Selection -->
+              <!-- Mensaje de retiro en local -->
+              <div v-else class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="flex items-start gap-3">
+                  <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <p class="text-sm font-medium text-blue-900">
+                      Retiro en el local
+                    </p>
+                    <p class="text-sm text-blue-700 mt-1">
+                      <strong>Dirección:</strong> Av. Bernardo Ader 161, Boulogne
+                    </p>
+                    <p class="text-sm text-blue-700">
+                      B1609 - San Isidro, Provincia de Buenos Aires
+                    </p>
+                    <p class="text-sm text-blue-700 mt-1">
+                      <strong>Horario:</strong> Lunes a Viernes de 9:00 a 19:00, Sábados de 9:00 a 14:00
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Delivery Slot Selection (solo para envío) -->
               <DeliverySlotSelector
+                v-if="tipoEntrega === 'envio'"
                 v-model="deliverySlotData"
                 :disabled="loading"
               />
@@ -221,6 +301,7 @@ import {
   UserIcon
 } from '@heroicons/vue/24/outline'
 import DeliverySlotSelector from '@/components/delivery/DeliverySlotSelector.vue'
+import DeliveryZoneMap from '@/components/delivery/DeliveryZoneMap.vue'
 
 interface Props {
   isOpen: boolean
@@ -248,8 +329,13 @@ const orderForm = ref<OrderData>({
   observaciones: '',
   direccion_entrega: '',
   fecha_entrega: '',
-  horario_entrega: ''
+  horario_entrega: '',
+  tipo_entrega: 'envio' // 'envio' o 'retiro'
 })
+
+// Estado del tipo de entrega
+const tipoEntrega = ref<'envio' | 'retiro'>('envio')
+const showDeliveryMap = ref(false)
 
 // Delivery slot data
 const deliverySlotData = ref({
@@ -278,8 +364,10 @@ const resetForm = () => {
     observaciones: '',
     direccion_entrega: '',
     fecha_entrega: '',
-    horario_entrega: ''
+    horario_entrega: '',
+    tipo_entrega: 'envio'
   }
+  tipoEntrega.value = 'envio'
   deliverySlotData.value = {
     fecha_entrega: '',
     horario_entrega: '',
@@ -313,6 +401,14 @@ const handleSubmit = async () => {
   success.value = null
 
   try {
+    // Si es retiro en el local, setear la dirección automáticamente
+    if (tipoEntrega.value === 'retiro') {
+      orderForm.value.direccion_entrega = 'Retiro en el local'
+      orderForm.value.tipo_entrega = 'retiro'
+    } else {
+      orderForm.value.tipo_entrega = 'envio'
+    }
+
     // Merge delivery slot data with order form
     const orderData = {
       ...orderForm.value,

@@ -241,16 +241,42 @@ namespace DistriCatalogoAPI.Infrastructure.Services
         {
             try
             {
-                // Buscar la primera lista de precios disponible
-                var listaPrecio = await _context.ListasPrecios
-                    .Where(lp => lp.Activa)
-                    .OrderBy(lp => lp.Id)
+                // Primero buscar la lista de precios predeterminada de la empresa
+                var empresa = await _context.Empresas
+                    .Include(e => e.ListaPrecioPredeterminada)
+                    .FirstOrDefaultAsync(e => e.Id == empresaId);
+                
+                if (empresa?.ListaPrecioPredeterminadaId != null && empresa.ListaPrecioPredeterminada?.Activa == true)
+                {
+                    _logger.LogInformation("Asignando lista de precios predeterminada {ListaPrecioId} ({Codigo}) de empresa {EmpresaId} a nuevo cliente Google", 
+                        empresa.ListaPrecioPredeterminadaId, empresa.ListaPrecioPredeterminada.Codigo, empresaId);
+                    return empresa.ListaPrecioPredeterminadaId;
+                }
+                
+                // Si no hay lista predeterminada configurada, buscar una lista con EsPredeterminada = true
+                var listaPredeterminada = await _context.ListasPrecios
+                    .Where(lp => lp.Activa && lp.EsPredeterminada)
                     .FirstOrDefaultAsync();
                 
-                if (listaPrecio != null)
+                if (listaPredeterminada != null)
                 {
-                    _logger.LogInformation("Asignando lista de precios {ListaPrecioId} a nuevo cliente Google", listaPrecio.Id);
-                    return listaPrecio.Id;
+                    _logger.LogInformation("Asignando lista de precios predeterminada global {ListaPrecioId} ({Codigo}) a nuevo cliente Google para empresa {EmpresaId}", 
+                        listaPredeterminada.Id, listaPredeterminada.Codigo, empresaId);
+                    return listaPredeterminada.Id;
+                }
+                
+                // Como último recurso, buscar la primera lista activa (preferiblemente con código "1")
+                var listaPorDefecto = await _context.ListasPrecios
+                    .Where(lp => lp.Activa)
+                    .OrderBy(lp => lp.Codigo == "1" ? 0 : 1) // Priorizar la lista con código "1"
+                    .ThenBy(lp => lp.Id)
+                    .FirstOrDefaultAsync();
+                
+                if (listaPorDefecto != null)
+                {
+                    _logger.LogInformation("Asignando lista de precios por defecto {ListaPrecioId} ({Codigo}) a nuevo cliente Google para empresa {EmpresaId}", 
+                        listaPorDefecto.Id, listaPorDefecto.Codigo, empresaId);
+                    return listaPorDefecto.Id;
                 }
                 
                 _logger.LogWarning("No se encontró ninguna lista de precios activa para empresa {EmpresaId}", empresaId);

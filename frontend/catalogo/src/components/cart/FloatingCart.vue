@@ -2,8 +2,8 @@
   <div class="relative">
     <!-- Floating Cart Button -->
     <Transition name="cart-float">
-      <button 
-        v-if="cartStore.itemCount > 0 || alwaysShow"
+      <button
+        v-if="shouldShowButton"
         @click="toggleCart"
         class="group cursor-pointer"
         :class="[
@@ -181,7 +181,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { 
   ShoppingCartIcon,
@@ -196,7 +197,7 @@ interface Props {
   compact?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   alwaysShow: false,
   compact: false
 })
@@ -206,8 +207,19 @@ const emit = defineEmits<{
   openExport: []
 }>()
 
-// Store
+// Store y router
 const cartStore = useCartStore()
+const route = useRoute()
+
+// Computed para determinar si mostrar el botón
+const shouldShowButton = computed(() => {
+  // Solo mostrar en rutas del catálogo
+  const catalogRoutes = ['catalogo', 'Category', 'Product']
+  const isInCatalogRoute = catalogRoutes.includes(route.name as string)
+
+  // Mostrar si: (hay items O alwaysShow) Y estamos en una ruta del catálogo
+  return (cartStore.itemCount > 0 || props.alwaysShow) && isInCatalogRoute
+})
 
 // State
 const showDropdown = ref(false)

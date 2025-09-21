@@ -6,6 +6,7 @@ using DistriCatalogoAPI.Domain.Interfaces;
 using DistriCatalogoAPI.Infrastructure.Mappings;
 using DistriCatalogoAPI.Infrastructure.Models;
 using DistriCatalogoAPI.Infrastructure.Repositories;
+using DistriCatalogoAPI.Infrastructure.Persistence.Repositories;
 using DistriCatalogoAPI.Infrastructure.Services;
 using DistriCatalogoAPI.Infrastructure.Configuration;
 using DistriCatalogoAPI.Application.Configuration;
@@ -95,6 +96,7 @@ namespace DistriCatalogoAPI.Api.Extensions
             services.AddScoped<ICorreccionTokenRepository, CorreccionTokenRepository>();
             services.AddScoped<IUserNotificationPreferencesRepository, UserNotificationPreferencesRepository>();
             services.AddScoped<IDeliveryRepository, DeliveryRepository>();
+            services.AddScoped<ISolicitudReventaRepository, SolicitudReventaRepository>();
 
             // Repositories - Módulo 04 Catalog Management 
             services.AddScoped<ICategoryEmpresaRepository, CategoryEmpresaRepository>();

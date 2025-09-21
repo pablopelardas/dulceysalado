@@ -24,13 +24,13 @@
     <!-- Contenedor de imagen -->
     <div :class="[
       'relative overflow-hidden bg-gray-50',
-      viewMode === 'grid' ? 'w-full h-64 md:h-48 rounded-t-lg' : 'w-32 h-32 flex-shrink-0 rounded-lg'
+      viewMode === 'grid' ? 'w-full aspect-square rounded-t-lg' : 'w-32 h-32 flex-shrink-0 rounded-lg'
     ]">
-      <img 
-        v-if="product.imagen_urls?.length" 
-        :src="product.imagen_urls[0]" 
+      <img
+        v-if="product.imagen_urls?.length"
+        :src="product.imagen_urls[0]"
         :alt="product.imagen_alt || product.nombre"
-        class="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
+        class="w-full h-full object-contain p-2 transition-transform duration-200 hover:scale-110"
         loading="lazy"
       />
       <div v-else class="flex items-center justify-center w-full h-full text-gray-400">
@@ -56,8 +56,8 @@
 
     <!-- Información del producto -->
     <div :class="[
-      'flex-1 flex flex-col gap-2',
-      viewMode === 'grid' ? 'p-4 text-center' : 'text-left'
+      'flex-1 flex flex-col gap-1',
+      viewMode === 'grid' ? 'p-3 text-center' : 'text-left'
     ]">
       <!-- Código del producto -->
       <div v-if="showCode" class="text-xs text-gray-500 font-medium tracking-wide">
@@ -65,25 +65,22 @@
       </div>
 
       <!-- Nombre del producto -->
-      <h3 class="font-semibold text-lg text-gray-900 leading-tight line-clamp-2">
+      <h3 class="font-semibold text-base text-gray-900 leading-tight line-clamp-2">
         {{ product.nombre }}
       </h3>
 
       <!-- Descripción corta -->
-      <p v-if="product.descripcion_corta" class="text-sm text-gray-600 leading-normal line-clamp-2">
+      <p v-if="product.descripcion_corta && viewMode === 'list'" class="text-sm text-gray-600 leading-normal line-clamp-2">
         {{ product.descripcion_corta }}
       </p>
 
-      <!-- Marca y unidad -->
-      <div :class="[
-        'flex gap-2',
+      <!-- Marca -->
+      <div v-if="product.marca" :class="[
+        'flex gap-1 flex-wrap',
         viewMode === 'grid' ? 'justify-center' : 'justify-start'
       ]">
-        <span v-if="product.marca" class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded font-medium">
+        <span class="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
           {{ product.marca }}
-        </span>
-        <span v-if="product.unidad" class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded font-medium">
-          {{ product.unidad }}
         </span>
       </div>
 
@@ -105,20 +102,17 @@
         </span>
       </div>
 
-      <!-- Precio y información de lista -->
+      <!-- Solo Precio sin información de lista -->
       <div class="mt-auto pt-2">
-        <div 
-          v-if="showPrice && product.precio" 
+        <div
+          v-if="showPrice && product.precio"
           :class="[
             'flex flex-col gap-1',
             viewMode === 'grid' ? 'items-center' : 'items-start'
           ]"
         >
-          <span class="text-xl font-bold" :style="{ color: 'var(--theme-accent)' }">
+          <span class="text-2xl font-bold" :style="{ color: 'var(--theme-accent)' }">
             ${{ formatPrice(product.precio) }}
-          </span>
-          <span v-if="product.lista_precio_nombre" class="text-xs text-gray-500 font-medium">
-            {{ product.lista_precio_nombre }}
           </span>
         </div>
 

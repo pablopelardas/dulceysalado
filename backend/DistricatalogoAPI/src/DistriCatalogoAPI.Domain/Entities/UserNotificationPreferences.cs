@@ -41,6 +41,9 @@ namespace DistriCatalogoAPI.Domain.Entities
         [Column("notificacion_pedidos_cancelados")]
         public bool NotificacionPedidosCancelados { get; set; } = true;
 
+        [Column("notificacion_solicitudes_reventa")]
+        public bool NotificacionSolicitudesReventa { get; set; } = true;
+
         // La navegación se configura en EF Core Configuration, no aquí
         // para evitar dependencias circulares entre Domain e Infrastructure
 
@@ -53,6 +56,7 @@ namespace DistriCatalogoAPI.Domain.Entities
                 TipoNotificacion.CorreccionAprobada => NotificacionCorreccionesAprobadas,
                 TipoNotificacion.CorreccionRechazada => NotificacionCorreccionesRechazadas,
                 TipoNotificacion.PedidoCancelado => NotificacionPedidosCancelados,
+                TipoNotificacion.NuevaSolicitudReventa => NotificacionSolicitudesReventa,
                 _ => false
             };
         }
@@ -73,6 +77,9 @@ namespace DistriCatalogoAPI.Domain.Entities
                 case TipoNotificacion.PedidoCancelado:
                     NotificacionPedidosCancelados = activo;
                     break;
+                case TipoNotificacion.NuevaSolicitudReventa:
+                    NotificacionSolicitudesReventa = activo;
+                    break;
             }
         }
     }
@@ -82,7 +89,8 @@ namespace DistriCatalogoAPI.Domain.Entities
         NuevoPedido,
         CorreccionAprobada,
         CorreccionRechazada,
-        PedidoCancelado
+        PedidoCancelado,
+        NuevaSolicitudReventa
         // Extensible para futuras notificaciones:
         // PedidoCompletado,
         // RecordatorioEntrega,

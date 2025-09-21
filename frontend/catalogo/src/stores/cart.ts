@@ -18,6 +18,7 @@ export interface OrderData {
   fecha_entrega?: string
   horario_entrega?: string
   delivery_slot?: string
+  tipo_entrega?: 'envio' | 'retiro'
 }
 
 export interface OrderItem {
@@ -35,6 +36,7 @@ export interface CreateOrderRequest {
   fecha_entrega?: string
   horario_entrega?: string
   delivery_slot?: string
+  tipo_entrega?: 'envio' | 'retiro'
 }
 
 export interface OrderResponse {
@@ -354,7 +356,8 @@ export const useCartStore = defineStore('cart', () => {
       direccion_entrega: orderData.direccion_entrega,
       fecha_entrega: orderData.fecha_entrega,
       horario_entrega: orderData.horario_entrega,
-      delivery_slot: orderData.delivery_slot
+      delivery_slot: orderData.delivery_slot,
+      tipo_entrega: orderData.tipo_entrega
     }
 
     try {

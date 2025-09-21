@@ -65,8 +65,7 @@
           <div class="hidden lg:flex items-start gap-4 mt-1 pointer-events-auto">
             <!-- Cart Button (solo si está habilitado) -->
             <div v-if="allowOrders">
-              <FloatingCart 
-                :always-show="true" 
+              <FloatingCart
                 :compact="true"
                 @open-summary="$emit('openCartSummary')"
                 @open-export="$emit('openExportOptions')"
@@ -162,11 +161,10 @@
             />
           </div>
           
-          <!-- Carrito compacto móvil -->
-          <div class="flex-shrink-0">
-            <FloatingCart 
-              compact 
-              alwaysShow 
+          <!-- Carrito compacto móvil (solo si se permiten pedidos y no es la vista de inicio) -->
+          <div v-if="allowOrders" class="flex-shrink-0">
+            <FloatingCart
+              compact
               @open-summary="emit('openCartSummary')"
               @open-export="emit('openExportOptions')"
             />
@@ -307,7 +305,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { useCatalogStore } from '@/stores/catalog'
 import { useAuthStore } from '@/stores/auth'
 import EMPRESA_CONFIG from '@/config/empresa.config'
@@ -321,7 +319,7 @@ const emit = defineEmits<{
 }>()
 
 // Router
-// route removed - not used currently
+const route = useRoute()
 
 // Stores
 const catalogStore = useCatalogStore()
@@ -334,7 +332,11 @@ const showUserMenu = ref(false)
 
 // showSearch computed removed - not used
 
-const allowOrders = computed(() => EMPRESA_CONFIG.permitirPedidos)
+const allowOrders = computed(() => {
+  // Solo permitir pedidos si está habilitado Y no estamos en la vista de inicio
+  const isHomeRoute = route.name === 'home'
+  return EMPRESA_CONFIG.permitirPedidos && !isHomeRoute
+})
 
 // Methods
 const handleSearch = async () => {

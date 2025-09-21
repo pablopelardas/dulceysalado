@@ -247,7 +247,7 @@ import { useToast } from '@/composables/useToast'
 
 // Props y estado
 const route = useRoute()
-const { showToast } = useToast()
+const { toast } = useToast()
 
 const token = ref(route.params.token as string)
 const loading = ref(true)
@@ -287,9 +287,9 @@ const aprobar = async () => {
     await correccionService.aprobarCorreccion(token.value, comentario.value)
     processed.value = true
     processedAction.value = 'aprobar'
-    showToast('Cambios aprobados exitosamente', 'success')
+    toast({ type: 'success', title: 'Cambios aprobados exitosamente' })
   } catch (err: any) {
-    showToast(err.message || 'Error al aprobar', 'error')
+    toast({ type: 'error', title: err.message || 'Error al aprobar' })
   } finally {
     processing.value = false
   }
@@ -304,9 +304,9 @@ const rechazar = async () => {
     await correccionService.rechazarCorreccion(token.value, comentario.value)
     processed.value = true
     processedAction.value = 'rechazar'
-    showToast('Cambios rechazados', 'success')
+    toast({ type: 'success', title: 'Cambios rechazados' })
   } catch (err: any) {
-    showToast(err.message || 'Error al rechazar', 'error')
+    toast({ type: 'error', title: err.message || 'Error al rechazar' })
   } finally {
     processing.value = false
   }
