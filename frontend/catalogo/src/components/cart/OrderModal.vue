@@ -302,6 +302,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import DeliverySlotSelector from '@/components/delivery/DeliverySlotSelector.vue'
 import DeliveryZoneMap from '@/components/delivery/DeliveryZoneMap.vue'
+import { useDelivery } from '@/composables/useDelivery'
 
 interface Props {
   isOpen: boolean
@@ -317,6 +318,9 @@ const emit = defineEmits<{
 // Stores
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+
+// Composables
+const delivery = useDelivery()
 
 // State
 const loading = ref(false)
@@ -385,6 +389,48 @@ const handleAddressChange = () => {
   }
 }
 
+const setFirstAvailableSlotForPickup = async () => {
+  if (!authStore.token) return
+
+  try {
+    // Obtener franjas disponibles si no las tenemos
+    if (delivery.slots.value.length === 0) {
+      await delivery.fetchAvailableSlots(authStore.token)
+    }
+
+    // Buscar la primera franja disponible
+    const firstAvailableSlot = delivery.availableSlotOptions.value[0]
+
+    if (firstAvailableSlot) {
+      const parsedSlot = delivery.parseSlotValue(firstAvailableSlot.value)
+      if (parsedSlot) {
+        deliverySlotData.value = {
+          fecha_entrega: parsedSlot.date,
+          horario_entrega: firstAvailableSlot.time_range,
+          delivery_slot: firstAvailableSlot.value
+        }
+      }
+    } else {
+      // Si no hay franjas disponibles, usar fecha actual con horario por defecto
+      const today = new Date().toISOString().split('T')[0]
+      deliverySlotData.value = {
+        fecha_entrega: today,
+        horario_entrega: 'Horario a coordinar',
+        delivery_slot: `${today}_morning`
+      }
+    }
+  } catch (err) {
+    console.error('Error setting first available slot:', err)
+    // Fallback: usar fecha actual
+    const today = new Date().toISOString().split('T')[0]
+    deliverySlotData.value = {
+      fecha_entrega: today,
+      horario_entrega: 'Horario a coordinar',
+      delivery_slot: `${today}_morning`
+    }
+  }
+}
+
 const handleSubmit = async () => {
   if (!authStore.isAuthenticated || !authStore.token) {
     error.value = 'Debes iniciar sesión para enviar pedidos'
@@ -401,12 +447,29 @@ const handleSubmit = async () => {
   success.value = null
 
   try {
-    // Si es retiro en el local, setear la dirección automáticamente
-    if (tipoEntrega.value === 'retiro') {
+    // Validaciones según el tipo de entrega
+    if (tipoEntrega.value === 'envio') {
+      // Para delivery: validar que haya dirección y fecha/franja
+      if (!orderForm.value.direccion_entrega?.trim()) {
+        error.value = 'La dirección de entrega es requerida'
+        loading.value = false
+        return
+      }
+
+      if (!deliverySlotData.value.fecha_entrega || !deliverySlotData.value.horario_entrega) {
+        error.value = 'Debe seleccionar una fecha y franja horaria para el delivery'
+        loading.value = false
+        return
+      }
+
+      orderForm.value.tipo_entrega = 'envio'
+    } else {
+      // Para retiro: setear dirección y obtener la primera franja disponible
       orderForm.value.direccion_entrega = 'Retiro en el local'
       orderForm.value.tipo_entrega = 'retiro'
-    } else {
-      orderForm.value.tipo_entrega = 'envio'
+
+      // Obtener la primera franja disponible para retiro
+      await setFirstAvailableSlotForPickup()
     }
 
     // Merge delivery slot data with order form

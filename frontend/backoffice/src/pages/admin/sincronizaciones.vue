@@ -6,10 +6,10 @@
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Sincronizaciones GECOM
+              Sincronizaciones SIGMA
             </h1>
             <p class="mt-2 text-gray-600 dark:text-gray-400">
-              Monitoreo y estadísticas de sincronizaciones con el sistema GECOM
+              Monitoreo y estadísticas de sincronizaciones con el sistema SIGMA
             </p>
           </div>
           <UButton
@@ -33,10 +33,10 @@
           <UIcon name="i-heroicons-exclamation-triangle" />
         </template>
         <template #title>
-          Sincronización GECOM Pendiente
+          Sincronización SIGMA Pendiente
         </template>
         <template #description>
-          No se han detectado sincronizaciones hoy. Recuerda ejecutar la sincronización diaria con GECOM para mantener actualizado el catálogo.
+          No se han detectado sincronizaciones hoy. Recuerda ejecutar la sincronización diaria con SIGMA para mantener actualizado el catálogo.
         </template>
       </UAlert>
 
@@ -63,9 +63,9 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Sincronizaciones GECOM',
+  title: 'Sincronizaciones SIGMA',
   meta: [
-    { name: 'description', content: 'Historial de sincronizaciones con GECOM' }
+    { name: 'description', content: 'Historial de sincronizaciones con SIGMA' }
   ]
 })
 

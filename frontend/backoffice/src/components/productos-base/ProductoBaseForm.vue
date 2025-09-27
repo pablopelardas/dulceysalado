@@ -38,7 +38,7 @@
           />
           <div v-if="isSyncField('descripcion')" class="flex items-center gap-2 mt-1">
             <UBadge color="orange" variant="soft" size="xs">SYNC</UBadge>
-            <span class="text-xs text-orange-600">Campo sincronizado con Gecom</span>
+            <span class="text-xs text-orange-600">Campo sincronizado con SIGMA</span>
           </div>
         </UFormField>
         
@@ -74,7 +74,7 @@
           />
           <div v-if="isSyncField('existencia')" class="flex items-center gap-2 mt-1">
             <UBadge color="orange" variant="soft" size="xs">SYNC</UBadge>
-            <span class="text-xs text-orange-600">Campo sincronizado con Gecom</span>
+            <span class="text-xs text-orange-600">Campo sincronizado con SIGMA</span>
           </div>
         </UFormField>
         

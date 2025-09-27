@@ -72,7 +72,7 @@ namespace DistriCatalogoAPI.Application.Handlers.SolicitudReventa.Commands
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al enviar notificación de nueva solicitud de reventa");
+                _logger.LogError(ex, "Error al enviar notificación de nueva solicitud de comerciante");
             }
 
             return new SolicitudReventaDto

@@ -581,22 +581,22 @@ namespace DistriCatalogoAPI.Infrastructure.Services
                 </html>";
         }
 
-        // Métodos para Solicitudes de Reventa
+        // Métodos para Solicitudes de Comerciante
         public async Task NotificarNuevaSolicitudReventaAsync(SolicitudReventa solicitud, Cliente cliente)
         {
             try
             {
-                // Obtener usuarios que tienen habilitadas las notificaciones de solicitudes de reventa
+                // Obtener usuarios que tienen habilitadas las notificaciones de solicitudes de comerciante
                 var usuariosConNotificacion = await _notificationPreferencesRepository
                     .GetUsersWithEmailForNotificationTypeAsync(solicitud.EmpresaId, TipoNotificacion.NuevaSolicitudReventa);
 
                 if (!usuariosConNotificacion.Any())
                 {
-                    _logger.LogWarning("No hay usuarios con notificaciones de solicitudes de reventa habilitadas en la empresa {EmpresaId}", solicitud.EmpresaId);
+                    _logger.LogWarning("No hay usuarios con notificaciones de solicitudes de comerciante habilitadas en la empresa {EmpresaId}", solicitud.EmpresaId);
                     return;
                 }
 
-                var asunto = $"📋 Nueva Solicitud de Cuenta de Reventa - {cliente.Nombre ?? cliente.Codigo}";
+                var asunto = $"📋 Nueva Solicitud de Cuenta de Comerciante - {cliente.Nombre ?? cliente.Codigo}";
                 var mensaje = GenerarMensajeNuevaSolicitudReventa(solicitud, cliente);
 
                 foreach (var (preferences, userEmail) in usuariosConNotificacion)
@@ -604,12 +604,12 @@ namespace DistriCatalogoAPI.Infrastructure.Services
                     await EnviarEmailAsync(userEmail, asunto, mensaje, true);
                 }
                 
-                _logger.LogInformation("Notificaciones de nueva solicitud de reventa enviadas a {UsuarioCount} usuarios para solicitud {SolicitudId}", 
+                _logger.LogInformation("Notificaciones de nueva solicitud de comerciante enviadas a {UsuarioCount} usuarios para solicitud {SolicitudId}", 
                     usuariosConNotificacion.Count(), solicitud.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error enviando notificaciones de nueva solicitud de reventa {SolicitudId}", solicitud.Id);
+                _logger.LogError(ex, "Error enviando notificaciones de nueva solicitud de comerciante {SolicitudId}", solicitud.Id);
             }
         }
 
@@ -623,8 +623,8 @@ namespace DistriCatalogoAPI.Infrastructure.Services
 
             var aprobada = solicitud.Estado == EstadoSolicitud.Aprobada;
             var asunto = aprobada 
-                ? "✅ Tu solicitud de cuenta de reventa ha sido aprobada - Dulce y Salado"
-                : "📋 Respuesta a tu solicitud de cuenta de reventa - Dulce y Salado";
+                ? "✅ Tu solicitud de cuenta de comerciante ha sido aprobada - Dulce y Salado"
+                : "📋 Respuesta a tu solicitud de cuenta de comerciante - Dulce y Salado";
             
             var mensaje = GenerarMensajeRespuestaSolicitudReventa(solicitud, cliente, aprobada);
 
@@ -658,10 +658,10 @@ namespace DistriCatalogoAPI.Infrastructure.Services
                             <div class='logo'>
                                 <img src='https://dulceysaladomax.com/assets/logo-dulceysalado.png' alt='Dulce & Salado' />
                             </div>
-                            <h1>📋 Nueva Solicitud de Cuenta de Reventa</h1>
+                            <h1>📋 Nueva Solicitud de Cuenta de Comerciante</h1>
                         </div>
                         <div class='content'>
-                            <p style='font-size: 16px; margin-bottom: 25px;'>Se ha recibido una nueva solicitud de cuenta de reventa:</p>
+                            <p style='font-size: 16px; margin-bottom: 25px;'>Se ha recibido una nueva solicitud de cuenta de comerciante:</p>
                             
                             <div class='solicitud-info'>
                                 <h2>Datos del Cliente</h2>
@@ -701,7 +701,7 @@ namespace DistriCatalogoAPI.Infrastructure.Services
             var colorEstado = aprobada ? "#28a745" : "#dc3545";
             var textoEstado = aprobada ? "APROBADA" : "RECHAZADA";
             var mensaje = aprobada 
-                ? "¡Felicitaciones! Tu solicitud de cuenta de reventa ha sido aprobada. Ya puedes acceder a los precios especiales de reventa."
+                ? "¡Felicitaciones! Tu solicitud de cuenta de comerciante ha sido aprobada. Ya puedes acceder a los precios especiales de comerciante."
                 : "Lamentablemente tu solicitud no ha sido aprobada en esta ocasión.";
 
             return $@"
@@ -726,7 +726,7 @@ namespace DistriCatalogoAPI.Infrastructure.Services
                             <div class='logo'>
                                 <img src='https://dulceysaladomax.com/assets/logo-dulceysalado.png' alt='Dulce & Salado' />
                             </div>
-                            <h1>Respuesta a tu Solicitud de Reventa</h1>
+                            <h1>Respuesta a tu Solicitud de Comerciante</h1>
                         </div>
                         <div class='content'>
                             <p style='font-size: 16px; margin-bottom: 25px;'>Hola <strong>{cliente.Nombre ?? "Cliente"}</strong>,</p>

@@ -101,9 +101,10 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <UFormField label="Estado">
-            <USelect
+            <USelectMenu
               v-model="filters.estado"
-              :options="estadoOptions"
+              :items="estadoOptions"
+              value-key="value"
               placeholder="Todos los estados"
               @change="applyFilters"
             />
@@ -456,6 +457,7 @@ const {
 const currentPage = ref(1)
 const pageSize = ref(20)
 const filters = ref<PedidoFiltros>({
+  estado: 'all',
   page: 1,
   pageSize: 20
 })
@@ -471,7 +473,7 @@ const selectedPedidoCorrection = ref<Pedido | null>(null)
 
 // Opciones para filtros
 const estadoOptions = [
-  { label: 'Todos', value: undefined },
+  { label: 'Todos los estados', value: 'all' },
   { label: 'Pendiente', value: 'Pendiente' },
   { label: 'Aceptado', value: 'Aceptado' },
   { label: 'Rechazado', value: 'Rechazado' },
@@ -480,10 +482,19 @@ const estadoOptions = [
 ]
 
 // Métodos
+// Helper para preparar filtros para el backend
+const prepareFilters = (filters: any) => {
+  const filtersToSend = { ...filters }
+  if (filtersToSend.estado === 'all') {
+    delete filtersToSend.estado
+  }
+  return filtersToSend
+}
+
 const loadData = async () => {
   try {
     await Promise.all([
-      fetchPedidos(filters.value),
+      fetchPedidos(prepareFilters(filters.value)),
       fetchEstadisticas()
     ])
   } catch (error) {
@@ -499,21 +510,22 @@ const refreshData = async () => {
 const applyFilters = async () => {
   filters.value.page = 1
   currentPage.value = 1
-  await fetchPedidos(filters.value)
+  await fetchPedidos(prepareFilters(filters.value))
 }
 
 const clearFilters = async () => {
   filters.value = {
+    estado: 'all',
     page: 1,
     pageSize: pageSize.value
   }
   currentPage.value = 1
-  await fetchPedidos(filters.value)
+  await fetchPedidos({ page: 1, pageSize: pageSize.value })
 }
 
 const handlePageChange = async (page: number) => {
   filters.value.page = page
-  await fetchPedidos(filters.value)
+  await fetchPedidos(prepareFilters(filters.value))
 }
 
 // Acciones de pedidos

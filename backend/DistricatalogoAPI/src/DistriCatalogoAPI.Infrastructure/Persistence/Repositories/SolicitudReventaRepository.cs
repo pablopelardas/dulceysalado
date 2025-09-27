@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -50,6 +51,58 @@ namespace DistriCatalogoAPI.Infrastructure.Persistence.Repositories
                 .Where(s => s.EmpresaId == empresaId && s.Estado == EstadoSolicitud.Pendiente)
                 .OrderByDescending(s => s.FechaSolicitud)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<SolicitudReventa>> GetFilteredAsync(int empresaId, string? estado = null, string? search = null, int page = 1, int limit = 20, string? sortBy = "fechaSolicitud", string? sortOrder = "desc")
+        {
+            var query = _context.Set<SolicitudReventa>()
+                .Include(s => s.Cliente)
+                .Where(s => s.EmpresaId == empresaId);
+
+            // Filtro por estado
+            if (!string.IsNullOrEmpty(estado))
+            {
+                if (Enum.TryParse<EstadoSolicitud>(estado, out var estadoEnum))
+                {
+                    query = query.Where(s => s.Estado == estadoEnum);
+                }
+            }
+
+            // Filtro por búsqueda (nombre cliente, razón social, CUIT, email)
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(s =>
+                    s.Cliente != null && s.Cliente.Nombre.Contains(search) ||
+                    s.RazonSocial.Contains(search) ||
+                    s.Cuit.Contains(search) ||
+                    s.EmailComercial.Contains(search));
+            }
+
+            // Ordenamiento
+            query = sortBy?.ToLower() switch
+            {
+                "fecha_solicitud" or "fechasolicitud" => sortOrder?.ToLower() == "asc"
+                    ? query.OrderBy(s => s.FechaSolicitud)
+                    : query.OrderByDescending(s => s.FechaSolicitud),
+                "razon_social" or "razonsocial" => sortOrder?.ToLower() == "asc"
+                    ? query.OrderBy(s => s.RazonSocial)
+                    : query.OrderByDescending(s => s.RazonSocial),
+                "estado" => sortOrder?.ToLower() == "asc"
+                    ? query.OrderBy(s => s.Estado)
+                    : query.OrderByDescending(s => s.Estado),
+                "cliente_nombre" or "clientenombre" => sortOrder?.ToLower() == "asc"
+                    ? query.OrderBy(s => s.Cliente != null ? s.Cliente.Nombre : "")
+                    : query.OrderByDescending(s => s.Cliente != null ? s.Cliente.Nombre : ""),
+                _ => sortOrder?.ToLower() == "asc"
+                    ? query.OrderBy(s => s.FechaSolicitud)
+                    : query.OrderByDescending(s => s.FechaSolicitud)
+            };
+
+            // Paginación
+            var skip = (page - 1) * limit;
+            query = query.Skip(skip).Take(limit);
+
+            return await query.ToListAsync();
         }
 
         public async Task<SolicitudReventa> AddAsync(SolicitudReventa solicitud)

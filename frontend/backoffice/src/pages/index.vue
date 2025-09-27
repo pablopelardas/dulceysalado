@@ -98,11 +98,11 @@ watchEffect(() => {
               <UIcon name="i-heroicons-exclamation-triangle" />
             </template>
             <template #title>
-              Sincronización GECOM Pendiente
+              Sincronización SIGMA Pendiente
             </template>
             <template #description>
               <div class="space-y-2">
-                <p>No se han detectado sincronizaciones hoy. Recuerda ejecutar la sincronización diaria con GECOM para mantener actualizado el catálogo.</p>
+                <p>No se han detectado sincronizaciones hoy. Recuerda ejecutar la sincronización diaria con SIGMA para mantener actualizado el catálogo.</p>
                 <UButton
                   to="/admin/sincronizaciones"
                   variant="solid"
@@ -413,8 +413,8 @@ watchEffect(() => {
 
                 <div class="flex items-center justify-between p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
                   <div>
-                    <h3 class="font-medium text-cyan-900 dark:text-cyan-100">Sincronizaciones GECOM</h3>
-                    <p class="text-sm text-cyan-700 dark:text-cyan-300">Monitorea el historial de sincronizaciones con GECOM</p>
+                    <h3 class="font-medium text-cyan-900 dark:text-cyan-100">Sincronizaciones SIGMA</h3>
+                    <p class="text-sm text-cyan-700 dark:text-cyan-300">Monitorea el historial de sincronizaciones con SIGMA</p>
                   </div>
                   <UButton color="cyan" variant="solid" to="/admin/sincronizaciones">
                     <UIcon name="i-heroicons-calendar" class="mr-2" />

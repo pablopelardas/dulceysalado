@@ -87,18 +87,6 @@
       </div>
     </div>
     
-    <!-- Scroll indicator -->
-    <div 
-      class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-white/80 cursor-pointer transition-colors duration-200 hover:text-red-500"
-      @click="scrollToCategorias"
-    >
-      <div class="text-sm font-medium">Ver categorías</div>
-      <div class="w-6 h-6 animate-bounce">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-        </svg>
-      </div>
-    </div>
   </section>
 </template>
 

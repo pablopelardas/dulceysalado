@@ -10,8 +10,8 @@
     <!-- Header Spacer -->
     <div class="h-14 lg:h-16"></div>
     
-    <!-- CTA Solicitud Reventa (solo para usuarios autenticados sin lista de precios 2) -->
-    <div v-if="shouldShowReventaCTA" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg">
+    <!-- CTA Solicitud Comerciante (solo para usuarios autenticados sin lista de precios 2) -->
+    <div v-if="shouldShowComercianteCTA" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-8">
           <div class="flex items-start gap-3 flex-1 min-w-0 ml-16 md:ml-20 lg:ml-32 xl:ml-40">
@@ -25,7 +25,7 @@
                 ¿Tenés un comercio?
               </p>
               <p class="text-yellow-100 text-base font-medium">
-                Accedé a precios especiales de reventa con descuentos exclusivos
+                Accedé a precios especiales de comerciante con descuentos exclusivos
               </p>
             </div>
           </div>
@@ -34,7 +34,7 @@
               @click="showSolicitudModal = true"
               class="w-full lg:w-auto px-8 py-3 bg-white text-orange-600 font-bold rounded-lg hover:bg-gray-50 transition-colors shadow-md hover:shadow-lg text-sm whitespace-nowrap cursor-pointer"
             >
-              Solicitar Cuenta de Reventa
+              Solicitar Cuenta de Comerciante
             </button>
           </div>
         </div>
@@ -104,7 +104,7 @@
     <!-- Scroll to Top Button -->
     <ScrollToTop />
     
-    <!-- Modal Solicitud Reventa -->
+    <!-- Modal Solicitud Comerciante -->
     <SolicitudReventaModal
       :is-open="showSolicitudModal"
       @close="showSolicitudModal = false"
@@ -148,11 +148,11 @@ const shouldShowFloatingCart = computed(() => {
   return routesWithCart.includes(route.name as string) && !isHomeRoute
 })
 
-// Mostrar CTA de reventa solo para usuarios autenticados que NO tengan lista de precios 2
-const shouldShowReventaCTA = computed(() => {
+// Mostrar CTA de comerciante solo para usuarios autenticados que NO tengan lista de precios 2
+const shouldShowComercianteCTA = computed(() => {
   return authStore.isAuthenticated && 
          authStore.user?.lista_precio && 
-         authStore.user.lista_precio.codigo !== "2"  // Solo mostrar si NO tiene la lista de código "2" (reventa)
+         authStore.user.lista_precio.codigo !== "2"  // Solo mostrar si NO tiene la lista de código "2" (comerciante)
 })
 
 // Modal state

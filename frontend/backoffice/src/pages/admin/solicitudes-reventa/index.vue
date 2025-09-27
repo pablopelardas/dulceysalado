@@ -83,7 +83,7 @@
           </div>
         </template>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Búsqueda -->
           <UFormField label="Buscar Cliente">
             <UInput
@@ -103,20 +103,6 @@
               placeholder="Todos los estados"
               @change="applyFilters"
             />
-          </UFormField>
-
-          <!-- Solo Pendientes -->
-          <UFormField label="Vista Rápida">
-            <UCheckbox
-              v-model="soloPendientesFilter"
-              label="Solo mostrar pendientes"
-              @change="applyFilters"
-            />
-            <template #help>
-              <span class="text-sm text-gray-500 dark:text-gray-400">
-                Mostrar únicamente solicitudes pendientes de revisión
-              </span>
-            </template>
           </UFormField>
         </div>
 
@@ -223,7 +209,7 @@
   </div>
 
   <!-- Modal de Respuesta -->
-  <UModal v-model:open="showResponseModal">
+  <UModal v-model:open="showResponseModal" :ui="{ width: 'sm:max-w-2xl' }">
     <template #header>
       <div class="flex items-center">
         <UIcon 
@@ -282,24 +268,41 @@
         </div>
 
         <!-- Formulario de respuesta -->
-        <UFormField 
-          :label="responseAction === 'approve' ? 'Comentario de aprobación (opcional)' : 'Motivo de rechazo'"
-          :required="responseAction === 'reject'"
-        >
-          <UTextarea
-            v-model="comentarioRespuesta"
-            :placeholder="responseAction === 'approve' ? 'Comentario adicional...' : 'Indique el motivo del rechazo...'"
-            rows="3"
-          />
-        </UFormField>
+        <div class="w-full">
+          <UFormField
+            :label="responseAction === 'approve' ? 'Comentario de aprobación (opcional)' : 'Motivo de rechazo'"
+            :required="responseAction === 'reject'"
+            class="w-full"
+          >
+            <UTextarea
+              v-model="comentarioRespuesta"
+              :placeholder="responseAction === 'approve' ? 'Comentario adicional...' : 'Indique el motivo del rechazo...'"
+              :rows="responseAction === 'reject' ? 5 : 3"
+              class="w-full"
+              :ui="{ base: 'w-full' }"
+            />
+          </UFormField>
+        </div>
 
         <div v-if="responseAction === 'approve'" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
           <div class="flex">
             <UIcon name="i-heroicons-information-circle" class="h-5 w-5 text-green-400 mr-2 mt-0.5" />
             <div>
               <p class="text-sm text-green-700 dark:text-green-300">
-                Al aprobar esta solicitud, el cliente será automáticamente asignado a la lista de precios de reventa (código "2") 
+                Al aprobar esta solicitud, el cliente será automáticamente asignado a la lista de precios de reventa (código "2")
                 y recibirá una notificación por email.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="responseAction === 'reject'" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+          <div class="flex">
+            <UIcon name="i-heroicons-exclamation-triangle" class="h-5 w-5 text-red-400 mr-2 mt-0.5" />
+            <div>
+              <p class="text-sm text-red-700 dark:text-red-300">
+                Al rechazar esta solicitud, el cliente recibirá una notificación por email con el motivo especificado.
+                Es importante proporcionar una explicación clara y profesional.
               </p>
             </div>
           </div>
@@ -322,6 +325,215 @@
           @click="confirmResponse"
         >
           {{ responseAction === 'approve' ? 'Aprobar Solicitud' : 'Rechazar Solicitud' }}
+        </UButton>
+      </div>
+    </template>
+  </UModal>
+
+  <!-- Modal de Vista Detallada -->
+  <UModal v-model:open="showViewModal" :ui="{ width: 'sm:max-w-4xl' }">
+    <template #header>
+      <div class="flex items-center">
+        <UIcon name="i-heroicons-document-text" class="h-6 w-6 text-blue-500 mr-2" />
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Detalles de Solicitud de Reventa
+        </h3>
+      </div>
+    </template>
+
+    <template #body>
+      <div v-if="selectedSolicitud" class="space-y-6">
+        <!-- Estado y fecha -->
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="flex items-center space-x-3 mb-2">
+              <UBadge
+                :color="getEstadoColor(selectedSolicitud.estado)"
+                variant="soft"
+                size="lg"
+              >
+                {{ selectedSolicitud.estado }}
+              </UBadge>
+              <span class="text-sm text-gray-500">ID: #{{ selectedSolicitud.id }}</span>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Solicitud enviada el {{ formatDate(selectedSolicitud.fecha_solicitud) }} a las {{ formatTime(selectedSolicitud.fecha_solicitud) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Información del Cliente -->
+        <UCard>
+          <template #header>
+            <div class="flex items-center justify-between">
+              <h4 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+                <UIcon name="i-heroicons-user" class="h-5 w-5 mr-2" />
+                Información del Cliente
+              </h4>
+              <!-- Enlaces de contacto rápido -->
+              <div class="flex space-x-2">
+                <UButton
+                  v-if="selectedSolicitud.cliente_email"
+                  :to="generarLinkEmail(selectedSolicitud.cliente_email, 'Solicitud de Reventa', `Estimado/a ${selectedSolicitud.cliente_nombre}, te contactamos respecto a tu solicitud de cuenta de reventa.`)"
+                  target="_blank"
+                  color="blue"
+                  variant="soft"
+                  size="xs"
+                  icon="i-heroicons-envelope"
+                  :title="`Enviar email a ${selectedSolicitud.cliente_email}`"
+                >
+                  Enviar Email
+                </UButton>
+                <UButton
+                  v-if="selectedSolicitud.telefono_comercial"
+                  :to="generarLinkWhatsApp(selectedSolicitud.telefono_comercial, `Hola ${selectedSolicitud.cliente_nombre}, te contactamos respecto a tu solicitud de cuenta de reventa. ¡Gracias por elegirnos!`)"
+                  target="_blank"
+                  color="green"
+                  variant="soft"
+                  size="xs"
+                  icon="i-simple-icons-whatsapp"
+                  :title="`Contactar por WhatsApp: ${selectedSolicitud.telefono_comercial}`"
+                >
+                  WhatsApp
+                </UButton>
+              </div>
+            </div>
+          </template>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Nombre</label>
+              <p class="text-gray-900 dark:text-gray-100">{{ selectedSolicitud.cliente_nombre || 'No especificado' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
+              <p class="text-gray-900 dark:text-gray-100">{{ selectedSolicitud.cliente_email || 'No especificado' }}</p>
+            </div>
+          </div>
+        </UCard>
+
+        <!-- Información de la Empresa -->
+        <UCard>
+          <template #header>
+            <h4 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+              <UIcon name="i-heroicons-building-office" class="h-5 w-5 mr-2" />
+              Información de la Empresa
+            </h4>
+          </template>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Razón Social</label>
+              <p class="text-gray-900 dark:text-gray-100 font-medium">{{ selectedSolicitud.razon_social || 'No especificado' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">CUIT</label>
+              <p class="text-gray-900 dark:text-gray-100 font-mono">{{ selectedSolicitud.cuit || 'No especificado' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Categoría IVA</label>
+              <p class="text-gray-900 dark:text-gray-100">{{ selectedSolicitud.categoria_iva || 'No especificado' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Email Comercial</label>
+              <p class="text-gray-900 dark:text-gray-100">{{ selectedSolicitud.email_comercial || 'No especificado' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Teléfono Comercial</label>
+              <p class="text-gray-900 dark:text-gray-100">{{ selectedSolicitud.telefono_comercial || 'No especificado' }}</p>
+            </div>
+          </div>
+        </UCard>
+
+        <!-- Dirección Comercial -->
+        <UCard>
+          <template #header>
+            <h4 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+              <UIcon name="i-heroicons-map-pin" class="h-5 w-5 mr-2" />
+              Dirección Comercial
+            </h4>
+          </template>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Dirección</label>
+              <p class="text-gray-900 dark:text-gray-100">{{ selectedSolicitud.direccion_comercial || 'No especificada' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Código Postal</label>
+              <p class="text-gray-900 dark:text-gray-100">{{ selectedSolicitud.codigo_postal || 'No especificado' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Localidad</label>
+              <p class="text-gray-900 dark:text-gray-100">{{ selectedSolicitud.localidad || 'No especificada' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Provincia</label>
+              <p class="text-gray-900 dark:text-gray-100">{{ selectedSolicitud.provincia || 'No especificada' }}</p>
+            </div>
+          </div>
+        </UCard>
+
+        <!-- Información de Respuesta (si existe) -->
+        <UCard v-if="selectedSolicitud.fecha_respuesta">
+          <template #header>
+            <h4 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+              <UIcon name="i-heroicons-chat-bubble-left-right" class="h-5 w-5 mr-2" />
+              Respuesta Administrativa
+            </h4>
+          </template>
+
+          <div class="space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Respuesta</label>
+                <p class="text-gray-900 dark:text-gray-100">{{ formatDate(selectedSolicitud.fecha_respuesta) }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Respondido por</label>
+                <p class="text-gray-900 dark:text-gray-100">{{ selectedSolicitud.respondido_por || 'Sistema' }}</p>
+              </div>
+            </div>
+            <div v-if="selectedSolicitud.comentario_respuesta">
+              <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Comentario</label>
+              <div class="mt-1 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p class="text-gray-900 dark:text-gray-100 italic">{{ selectedSolicitud.comentario_respuesta }}</p>
+              </div>
+            </div>
+          </div>
+        </UCard>
+      </div>
+    </template>
+
+    <template #footer>
+      <div class="flex justify-between items-center">
+        <!-- Acciones de respuesta (solo si está pendiente) -->
+        <div v-if="selectedSolicitud?.estado === 'Pendiente'" class="flex space-x-3">
+          <UButton
+            @click="approveFromView"
+            color="green"
+            icon="i-heroicons-check"
+          >
+            Aprobar Solicitud
+          </UButton>
+          <UButton
+            @click="rejectFromView"
+            color="red"
+            variant="outline"
+            icon="i-heroicons-x-mark"
+          >
+            Rechazar Solicitud
+          </UButton>
+        </div>
+        <div v-else></div>
+
+        <!-- Cerrar -->
+        <UButton
+          variant="ghost"
+          color="gray"
+          @click="showViewModal = false"
+        >
+          Cerrar
         </UButton>
       </div>
     </template>
@@ -362,8 +574,7 @@ const {
 
 // Estado reactivo
 const searchQuery = ref('')
-const estadoFilter = ref<string>('')
-const soloPendientesFilter = ref(false)
+const estadoFilter = ref<string>('all')
 const currentPage = ref(1)
 const initialLoading = ref(true)
 
@@ -373,9 +584,12 @@ const selectedSolicitud = ref<SolicitudReventaDto | null>(null)
 const responseAction = ref<'approve' | 'reject'>('approve')
 const comentarioRespuesta = ref('')
 
+// Modal de vista detallada
+const showViewModal = ref(false)
+
 // Opciones para filtros
 const estadoOptions = [
-  { label: 'Todos los estados', value: '' },
+  { label: 'Todos los estados', value: 'all' },
   { label: 'Pendientes', value: 'Pendiente' },
   { label: 'Aprobadas', value: 'Aprobada' },
   { label: 'Rechazadas', value: 'Rechazada' }
@@ -398,8 +612,7 @@ const refreshData = async () => {
 const applyFilters = async () => {
   await applyFiltersAction({
     search: searchQuery.value,
-    estado: estadoFilter.value,
-    soloPendientes: soloPendientesFilter.value,
+    estado: estadoFilter.value === 'all' ? '' : estadoFilter.value || '',
     page: 1
   })
   currentPage.value = 1
@@ -407,8 +620,7 @@ const applyFilters = async () => {
 
 const clearAllFilters = async () => {
   searchQuery.value = ''
-  estadoFilter.value = ''
-  soloPendientesFilter.value = false
+  estadoFilter.value = 'all'
   currentPage.value = 1
   await clearFilters()
 }
@@ -423,8 +635,8 @@ const handleSort = async (column: string, direction: 'asc' | 'desc') => {
 }
 
 const viewSolicitud = (solicitud: SolicitudReventaDto) => {
-  // TODO: Implementar vista detallada si es necesario
-  console.log('Ver solicitud:', solicitud)
+  selectedSolicitud.value = solicitud
+  showViewModal.value = true
 }
 
 const approveSolicitud = (solicitud: SolicitudReventaDto) => {
@@ -451,12 +663,12 @@ const confirmResponse = async () => {
     })
 
     showResponseModal.value = false
-    
+
     // Mostrar notificación de éxito
     const toast = useToast()
     toast.add({
       title: responseAction.value === 'approve' ? 'Solicitud aprobada' : 'Solicitud rechazada',
-      description: `La solicitud de ${selectedSolicitud.value.clienteNombre} ha sido ${responseAction.value === 'approve' ? 'aprobada' : 'rechazada'} exitosamente.`,
+      description: `La solicitud de ${selectedSolicitud.value.cliente_nombre} ha sido ${responseAction.value === 'approve' ? 'aprobada' : 'rechazada'} exitosamente.`,
       icon: responseAction.value === 'approve' ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle',
       color: responseAction.value === 'approve' ? 'green' : 'red'
     })
@@ -466,12 +678,74 @@ const confirmResponse = async () => {
   }
 }
 
+// Métodos para aprobar/rechazar desde el modal de vista
+const approveFromView = () => {
+  showViewModal.value = false
+  if (selectedSolicitud.value) {
+    approveSolicitud(selectedSolicitud.value)
+  }
+}
+
+const rejectFromView = () => {
+  showViewModal.value = false
+  if (selectedSolicitud.value) {
+    rejectSolicitud(selectedSolicitud.value)
+  }
+}
+
 // Watcher para sincronizar currentPage con pagination
 watch(() => pagination.value.page, (newPage) => {
   if (newPage !== currentPage.value) {
     currentPage.value = newPage
   }
 })
+
+// Métodos de utilidad
+const formatDate = (dateString: string) => {
+  if (!dateString) return '-'
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Fecha inválida'
+
+    return date.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+  } catch (error) {
+    console.error('Error formatting date:', error)
+    return 'Fecha inválida'
+  }
+}
+
+const formatTime = (dateString: string) => {
+  if (!dateString) return '-'
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return ''
+
+    return date.toLocaleTimeString('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  } catch (error) {
+    console.error('Error formatting time:', error)
+    return ''
+  }
+}
+
+const getEstadoColor = (estado: string) => {
+  switch (estado) {
+    case 'Pendiente':
+      return 'orange'
+    case 'Aprobada':
+      return 'green'
+    case 'Rechazada':
+      return 'red'
+    default:
+      return 'gray'
+  }
+}
 
 // Generar enlaces de contacto
 const generarLinkWhatsApp = (telefono: string, mensaje: string) => {

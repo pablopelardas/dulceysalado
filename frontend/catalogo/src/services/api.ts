@@ -782,7 +782,7 @@ class AuthApiService {
   }
 }
 
-// Solicitud de Reventa Service
+// Solicitud de Comerciante Service
 interface CreateSolicitudReventaRequest {
   cuit?: string
   razon_social?: string

@@ -4,7 +4,11 @@
     <!-- Novedades y Ofertas Section -->
     <div class="mb-8 space-y-6">
       <!-- Novedades Section -->
-      <section class="rounded-xl shadow-sm p-6" style="background-color: #1E1E1E;">
+      <section
+        v-if="catalogStore.novedades.length > 0"
+        class="rounded-xl shadow-sm p-6"
+        style="background-color: #1E1E1E;"
+      >
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
             🆕 Novedades
@@ -13,10 +17,10 @@
             Los productos más nuevos en nuestro catálogo
           </p>
         </div>
-        
+
         <ProductCarousel
           title=""
-          :products="mockNovedades"
+          :products="catalogStore.novedades"
           :icon="null"
           :modal-open="false"
           @open-cart="openAddToCartModal"
@@ -24,7 +28,11 @@
       </section>
 
       <!-- Ofertas Section -->
-      <section class="rounded-xl shadow-sm p-6" style="background-color: #2A2A2A;">
+      <section
+        v-if="catalogStore.ofertas.length > 0"
+        class="rounded-xl shadow-sm p-6"
+        style="background-color: #2A2A2A;"
+      >
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
             🔥 Ofertas Especiales
@@ -33,10 +41,10 @@
             Los mejores precios que no podés dejar pasar
           </p>
         </div>
-        
+
         <ProductCarousel
           title=""
-          :products="mockOfertas"
+          :products="catalogStore.ofertas"
           :icon="null"
           :modal-open="false"
           @open-cart="openAddToCartModal"
@@ -266,174 +274,7 @@ import type { Product } from '@/services/api'
 const catalogStore = useCatalogStore()
 // router removed - not used currently
 
-// Mock data para las secciones
-const mockNovedades = ref<Product[]>([
-  {
-    codigo: 'NOV001',
-    nombre: 'Alfajores de Maicena Premium',
-    precio: 1200,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Deliciosos alfajores artesanales de maicena con dulce de leche',
-    stock: 50,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Alfajores',
-    destacado: true,
-    novedad: true
-  },
-  {
-    codigo: 'NOV002',
-    nombre: 'Chocolates Artesanales Mix',
-    precio: 2800,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Variedad de chocolates artesanales premium',
-    stock: 25,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Chocolates',
-    destacado: true,
-    novedad: true
-  },
-  {
-    codigo: 'NOV003',
-    nombre: 'Galletitas Dulces Surtidas',
-    precio: 850,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Mezcla de galletitas dulces variadas',
-    stock: 40,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Galletitas',
-    destacado: true,
-    novedad: true
-  },
-  {
-    codigo: 'NOV004',
-    nombre: 'Snacks Salados Premium',
-    precio: 1500,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Selección de snacks salados gourmet',
-    stock: 35,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Snacks',
-    destacado: true,
-    novedad: true
-  },
-  {
-    codigo: 'NOV005',
-    nombre: 'Turrones Artesanales',
-    precio: 2200,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Turrones caseros de almendra y miel',
-    stock: 15,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Turrones',
-    destacado: true,
-    novedad: true
-  },
-  {
-    codigo: 'NOV006',
-    nombre: 'Bombones Premium',
-    precio: 3500,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Exquisitos bombones rellenos de licor',
-    stock: 20,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Bombones',
-    destacado: true,
-    novedad: true
-  }
-])
-
-const mockOfertas = ref<Product[]>([
-  {
-    codigo: 'OFF001',
-    nombre: 'Pack Golosinas x12',
-    precio: 1800,
-    precio_anterior: 2400,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Pack especial de 12 golosinas variadas - 25% OFF',
-    stock: 20,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Golosinas',
-    destacado: true,
-    oferta: true
-  },
-  {
-    codigo: 'OFF002',
-    nombre: 'Combo Dulce & Salado',
-    precio: 3200,
-    precio_anterior: 4000,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Combo especial mitad dulce, mitad salado - 20% OFF',
-    stock: 15,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Combos',
-    destacado: true,
-    oferta: true
-  },
-  {
-    codigo: 'OFF003',
-    nombre: 'Caramelos Premium x100',
-    precio: 950,
-    precio_anterior: 1200,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Bolsa de 100 caramelos premium surtidos',
-    stock: 60,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Caramelos',
-    destacado: true,
-    oferta: true
-  },
-  {
-    codigo: 'OFF004',
-    nombre: 'Frutos Secos Mix 500g',
-    precio: 2100,
-    precio_anterior: 2800,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Mezcla premium de frutos secos 500g - 25% OFF',
-    stock: 30,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Frutos Secos',
-    destacado: true,
-    oferta: true
-  },
-  {
-    codigo: 'OFF005',
-    nombre: 'Mega Pack Dulces x24',
-    precio: 2700,
-    precio_anterior: 3600,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Pack familiar de 24 dulces variados - 25% OFF',
-    stock: 12,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Packs',
-    destacado: true,
-    oferta: true
-  },
-  {
-    codigo: 'OFF006',
-    nombre: 'Chocolates Premium 1kg',
-    precio: 4500,
-    precio_anterior: 6000,
-    imagen_urls: ['/placeholder.png'],
-    descripcion: 'Caja de chocolates premium 1kg - 25% OFF',
-    stock: 8,
-    lista: 'minorista',
-    marca: 'Dulce & Salado MAX',
-    categoria: 'Chocolates',
-    destacado: true,
-    oferta: true
-  }
-])
+// Data real obtenida del backend a través del store
 
 
 // State

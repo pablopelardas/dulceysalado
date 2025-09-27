@@ -28,7 +28,6 @@ export interface ResponderSolicitudDto {
 export interface SolicitudesFilters {
   search?: string
   estado?: string
-  soloPendientes?: boolean
   page?: number
   limit?: number
   sortBy?: string
@@ -79,7 +78,6 @@ export const useSolicitudesReventa = () => {
   const filters = ref<SolicitudesFilters>({
     search: '',
     estado: '',
-    soloPendientes: false,
     page: 1,
     limit: 20,
     sortBy: 'fechaSolicitud',
@@ -111,7 +109,6 @@ export const useSolicitudesReventa = () => {
       const queryParams = new URLSearchParams()
       if (mergedParams.search) queryParams.append('search', mergedParams.search)
       if (mergedParams.estado) queryParams.append('estado', mergedParams.estado)
-      if (mergedParams.soloPendientes) queryParams.append('soloPendientes', 'true')
       if (mergedParams.page) queryParams.append('page', mergedParams.page.toString())
       if (mergedParams.limit) queryParams.append('limit', mergedParams.limit.toString())
       if (mergedParams.sortBy) queryParams.append('sortBy', mergedParams.sortBy)
@@ -187,13 +184,12 @@ export const useSolicitudesReventa = () => {
     const defaultFilters: SolicitudesFilters = {
       search: '',
       estado: '',
-      soloPendientes: false,
       page: 1,
       limit: 20,
       sortBy: 'fechaSolicitud',
       sortOrder: 'desc'
     }
-    
+
     filters.value = defaultFilters
     await fetchSolicitudes(defaultFilters)
   }
@@ -208,9 +204,9 @@ export const useSolicitudesReventa = () => {
     await fetchSolicitudes({ ...filters.value, sortBy, sortOrder, page: 1 })
   }
 
-  // Solo solicitudes pendientes
+  // Filtrar solo solicitudes pendientes
   const fetchSoloPendientes = async () => {
-    await fetchSolicitudes({ ...filters.value, soloPendientes: true, page: 1 })
+    await fetchSolicitudes({ ...filters.value, estado: 'Pendiente', page: 1 })
   }
 
   // Buscar por cliente

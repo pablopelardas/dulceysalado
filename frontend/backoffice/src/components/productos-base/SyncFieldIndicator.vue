@@ -27,6 +27,6 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  tooltipText: 'Este campo será sobrescrito automáticamente durante la sincronización con Gecom. Los cambios manuales no se conservarán.'
+  tooltipText: 'Este campo será sobrescrito automáticamente durante la sincronización con SIGMA. Los cambios manuales no se conservarán.'
 })
 </script>

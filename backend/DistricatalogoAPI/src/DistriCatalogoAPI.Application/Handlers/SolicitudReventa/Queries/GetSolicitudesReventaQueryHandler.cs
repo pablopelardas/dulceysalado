@@ -19,9 +19,14 @@ namespace DistriCatalogoAPI.Application.Handlers.SolicitudReventa.Queries
 
         public async Task<IEnumerable<SolicitudReventaDto>> Handle(GetSolicitudesReventaQuery request, CancellationToken cancellationToken)
         {
-            var solicitudes = request.SoloPendientes
-                ? await _repository.GetPendientesAsync(request.EmpresaId)
-                : await _repository.GetAllByEmpresaAsync(request.EmpresaId);
+            var solicitudes = await _repository.GetFilteredAsync(
+                request.EmpresaId,
+                request.Estado,
+                request.Search,
+                request.Page,
+                request.Limit,
+                request.SortBy,
+                request.SortOrder);
 
             return solicitudes.Select(s => new SolicitudReventaDto
             {

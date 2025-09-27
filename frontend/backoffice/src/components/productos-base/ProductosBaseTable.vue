@@ -185,7 +185,7 @@ const columns: TableColumn<ProductoBaseDto>[] = [
             color: 'orange',
             variant: 'soft',
             size: 'xs',
-            title: 'Campo sincronizado con Gecom'
+            title: 'Campo sincronizado con SIGMA'
           }, () => 'SYNC') : null
         ]),
         producto.descripcion_corta ? h('p', { class: 'text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs' }, 
@@ -207,7 +207,7 @@ const columns: TableColumn<ProductoBaseDto>[] = [
           color: 'orange',
           variant: 'soft',
           size: 'xs',
-          title: 'Campo sincronizado con Gecom'
+          title: 'Campo sincronizado con SIGMA'
         }, () => 'SYNC') : null
       ])
     }
@@ -226,7 +226,7 @@ const columns: TableColumn<ProductoBaseDto>[] = [
           color: 'orange',
           variant: 'soft',
           size: 'xs',
-          title: 'Campo sincronizado con Gecom'
+          title: 'Campo sincronizado con SIGMA'
         }, () => 'SYNC') : null
       ])
     }
@@ -246,7 +246,7 @@ const columns: TableColumn<ProductoBaseDto>[] = [
           color: 'orange',
           variant: 'soft',
           size: 'xs',
-          title: 'Campo sincronizado con Gecom'
+          title: 'Campo sincronizado con SIGMA'
         }, () => 'SYNC') : null
       ])
     }

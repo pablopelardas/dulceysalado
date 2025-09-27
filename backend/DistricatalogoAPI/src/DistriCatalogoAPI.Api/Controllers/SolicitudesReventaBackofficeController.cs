@@ -25,10 +25,16 @@ namespace DistriCatalogoAPI.Api.Controllers
         /// Listar todas las solicitudes (backoffice)
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetSolicitudes([FromQuery] bool soloPendientes = false)
+        public async Task<IActionResult> GetSolicitudes(
+            [FromQuery] string? estado = null,
+            [FromQuery] string? search = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int limit = 20,
+            [FromQuery] string? sortBy = "fechaSolicitud",
+            [FromQuery] string? sortOrder = "desc")
         {
             var empresaIdClaim = User.FindFirst("empresa_id")?.Value;
-            
+
             if (string.IsNullOrEmpty(empresaIdClaim) || !int.TryParse(empresaIdClaim, out var empresaId))
             {
                 empresaId = 1; // Default fallback
@@ -37,7 +43,12 @@ namespace DistriCatalogoAPI.Api.Controllers
             var query = new GetSolicitudesReventaQuery
             {
                 EmpresaId = empresaId,
-                SoloPendientes = soloPendientes
+                Estado = estado,
+                Search = search,
+                Page = page,
+                Limit = limit,
+                SortBy = sortBy,
+                SortOrder = sortOrder
             };
 
             var result = await _mediator.Send(query);

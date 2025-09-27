@@ -5,7 +5,7 @@
       <div class="sticky top-0 bg-white border-b px-6 py-4">
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-semibold text-gray-900">
-            Solicitud de Cuenta de Reventa
+            Solicitud de Cuenta de Comerciante
           </h2>
           <button @click="close" class="text-gray-400 hover:text-gray-500 cursor-pointer">
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -29,7 +29,7 @@
               <div class="ml-3">
                 <h3 class="text-sm font-medium text-yellow-800">Solicitud en revisión</h3>
                 <div class="mt-2 text-sm text-yellow-700">
-                  <p>Tu solicitud de cuenta de reventa está siendo revisada. Te notificaremos por email cuando tengamos una respuesta.</p>
+                  <p>Tu solicitud de cuenta de comerciante está siendo revisada. Te notificaremos por email cuando tengamos una respuesta.</p>
                   <p class="mt-1">Fecha de solicitud: {{ formatDate(solicitudExistente.fecha_solicitud) }}</p>
                 </div>
               </div>
@@ -46,7 +46,7 @@
               <div class="ml-3">
                 <h3 class="text-sm font-medium text-green-800">Solicitud aprobada</h3>
                 <div class="mt-2 text-sm text-green-700">
-                  <p>¡Felicitaciones! Tu cuenta ya tiene acceso a los precios de reventa.</p>
+                  <p>¡Felicitaciones! Tu cuenta ya tiene acceso a los precios de comerciante.</p>
                   <p class="mt-1">Fecha de aprobación: {{ formatDate(solicitudExistente.fecha_respuesta) }}</p>
                 </div>
               </div>
@@ -79,7 +79,7 @@
           <div class="space-y-6">
             <div>
               <p class="text-sm text-gray-600 mb-4">
-                Completa este formulario para solicitar acceso a precios especiales de reventa. 
+                Completa este formulario para solicitar acceso a precios especiales de comerciante. 
                 Revisaremos tu solicitud y te contactaremos pronto.
               </p>
             </div>

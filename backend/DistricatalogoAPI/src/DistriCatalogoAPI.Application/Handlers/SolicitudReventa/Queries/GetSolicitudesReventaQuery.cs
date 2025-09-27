@@ -7,6 +7,11 @@ namespace DistriCatalogoAPI.Application.Handlers.SolicitudReventa.Queries
     public class GetSolicitudesReventaQuery : IRequest<IEnumerable<SolicitudReventaDto>>
     {
         public int EmpresaId { get; set; }
-        public bool SoloPendientes { get; set; } = false;
+        public string? Estado { get; set; }
+        public string? Search { get; set; }
+        public int Page { get; set; } = 1;
+        public int Limit { get; set; } = 20;
+        public string? SortBy { get; set; } = "fechaSolicitud";
+        public string? SortOrder { get; set; } = "desc";
     }
 }

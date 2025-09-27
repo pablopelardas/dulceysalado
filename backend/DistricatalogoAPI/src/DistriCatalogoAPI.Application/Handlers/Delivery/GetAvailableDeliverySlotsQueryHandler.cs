@@ -28,41 +28,28 @@ namespace DistriCatalogoAPI.Application.Handlers.Delivery
                 return new List<AvailableDeliverySlotDto>();
             }
 
-            // Siempre calcular la fecha/franja mínima basada en la anticipación
-            var (minDate, minSlotType) = CalculateEarliestAvailableSlot(DateTime.Now, settings.MinSlotsAhead);
-            
-            // Usar la fecha solicitada o la mínima calculada (la que sea mayor)
-            var startDate = request.StartDate.HasValue 
-                ? (request.StartDate.Value >= minDate ? request.StartDate.Value : minDate)
-                : minDate;
-                
-            // Si usamos la fecha mínima calculada, también usar su franja mínima
-            var startSlotType = startDate == minDate ? minSlotType : (SlotType?)null;
+            // Usar la fecha solicitada o desde hoy
+            var startDate = request.StartDate ?? DateOnly.FromDateTime(DateTime.Now);
             var endDate = request.EndDate ?? startDate.AddDays(30); // Por defecto próximos 30 días
 
             var availableSlots = new List<AvailableDeliverySlotDto>();
 
+            // Obtener todas las franjas disponibles sin filtro de anticipación
             for (var currentDate = startDate; currentDate <= endDate; currentDate = currentDate.AddDays(1))
             {
                 if (!IsValidDeliveryDay(currentDate, settings))
                     continue;
 
-                // Determinar si necesitamos filtrar franjas en esta fecha específica
-                SlotType? minSlotTypeForDate = null;
-                if (currentDate == startDate && startSlotType.HasValue)
-                {
-                    minSlotTypeForDate = startSlotType.Value;
-                }
+                var dailySlots = await GetDailySlotsAsync(currentDate, request.EmpresaId, settings, request.OnlyAvailable);
 
-                var dailySlots = await GetDailySlotsAsync(currentDate, request.EmpresaId, settings, request.OnlyAvailable, minSlotTypeForDate);
-                
                 if (dailySlots.MorningSlots.Any() || dailySlots.AfternoonSlots.Any())
                 {
                     availableSlots.Add(dailySlots);
                 }
             }
 
-            return availableSlots;
+            // Aplicar filtro de franjas mínimas de anticipación
+            return ApplyMinimumSlotsFilter(availableSlots, settings.MinSlotsAhead, DateTime.Now);
         }
 
         private bool IsValidDeliveryDay(DateOnly date, Domain.Entities.DeliverySettings settings)
@@ -81,11 +68,10 @@ namespace DistriCatalogoAPI.Application.Handlers.Delivery
         }
 
         private async Task<AvailableDeliverySlotDto> GetDailySlotsAsync(
-            DateOnly date, 
-            int empresaId, 
-            Domain.Entities.DeliverySettings settings, 
-            bool onlyAvailable,
-            SlotType? minSlotType = null)
+            DateOnly date,
+            int empresaId,
+            Domain.Entities.DeliverySettings settings,
+            bool onlyAvailable)
         {
             var schedule = await _deliveryRepository.GetDeliveryScheduleAsync(settings.Id, date);
             var slots = await _deliveryRepository.GetDeliverySlotsAsync(settings.Id, date);
@@ -98,9 +84,8 @@ namespace DistriCatalogoAPI.Application.Handlers.Delivery
 
             // Slots de mañana
             bool morningEnabled = schedule?.MorningEnabled ?? true; // Habilitado por defecto si no hay schedule específico
-            bool morningAllowedByMinSlot = !minSlotType.HasValue || SlotType.Morning >= minSlotType.Value;
-            
-            if (morningEnabled && morningStart.HasValue && morningEnd.HasValue && morningAllowedByMinSlot)
+
+            if (morningEnabled && morningStart.HasValue && morningEnd.HasValue)
             {
                 var morningSlot = slots.FirstOrDefault(s => s.SlotType == SlotType.Morning);
                 var currentCapacity = morningSlot?.CurrentCapacity ?? 0;
@@ -123,9 +108,8 @@ namespace DistriCatalogoAPI.Application.Handlers.Delivery
 
             // Slots de tarde
             bool afternoonEnabled = schedule?.AfternoonEnabled ?? true; // Habilitado por defecto si no hay schedule específico
-            bool afternoonAllowedByMinSlot = !minSlotType.HasValue || SlotType.Afternoon >= minSlotType.Value;
-            
-            if (afternoonEnabled && afternoonStart.HasValue && afternoonEnd.HasValue && afternoonAllowedByMinSlot)
+
+            if (afternoonEnabled && afternoonStart.HasValue && afternoonEnd.HasValue)
             {
                 var afternoonSlot = slots.FirstOrDefault(s => s.SlotType == SlotType.Afternoon);
                 var currentCapacity = afternoonSlot?.CurrentCapacity ?? 0;
@@ -232,35 +216,69 @@ namespace DistriCatalogoAPI.Application.Handlers.Delivery
             _ => null
         };
 
-        private (DateOnly startDate, SlotType? earliestSlotType) CalculateEarliestAvailableSlot(DateTime now, int minSlotsAhead)
+        private List<AvailableDeliverySlotDto> ApplyMinimumSlotsFilter(List<AvailableDeliverySlotDto> allSlots, int minSlotsAhead, DateTime now)
         {
-            var currentTime = TimeOnly.FromDateTime(now);
-            var currentDate = DateOnly.FromDateTime(now);
-            
-            // Determinar la franja actual basada en la hora
-            // Asumimos: Mañana hasta 13:00, Tarde después de 13:00
-            var currentSlotType = currentTime < TimeOnly.Parse("13:00") ? SlotType.Morning : SlotType.Afternoon;
-            
-            // Simular el conteo de franjas empezando desde la siguiente
-            var testDate = currentDate;
-            var testSlotType = currentSlotType;
-            
-            for (int i = 0; i < minSlotsAhead; i++)
+            if (minSlotsAhead <= 0)
+                return allSlots;
+
+            // Crear una lista plana de todas las franjas disponibles ordenadas cronológicamente
+            var flatSlots = new List<(DateOnly Date, SlotType SlotType, SlotAvailabilityDto Slot)>();
+
+            foreach (var daySlots in allSlots.OrderBy(d => d.Date))
             {
-                // Avanzar a la siguiente franja
-                if (testSlotType == SlotType.Morning)
+                // Agregar slots de mañana
+                foreach (var morningSlot in daySlots.MorningSlots)
                 {
-                    testSlotType = SlotType.Afternoon;
-                    // Misma fecha
+                    flatSlots.Add((daySlots.Date, SlotType.Morning, morningSlot));
                 }
-                else
+
+                // Agregar slots de tarde
+                foreach (var afternoonSlot in daySlots.AfternoonSlots)
                 {
-                    testSlotType = SlotType.Morning;
-                    testDate = testDate.AddDays(1);
+                    flatSlots.Add((daySlots.Date, SlotType.Afternoon, afternoonSlot));
                 }
             }
-            
-            return (testDate, testSlotType);
+
+            // Ordenar cronológicamente
+            flatSlots = flatSlots.OrderBy(s => s.Date).ThenBy(s => (int)s.SlotType).ToList();
+
+            // Encontrar el índice de la franja actual
+            var currentTime = TimeOnly.FromDateTime(now);
+            var currentDate = DateOnly.FromDateTime(now);
+            var currentSlotType = currentTime < TimeOnly.Parse("13:00") ? SlotType.Morning : SlotType.Afternoon;
+
+            var currentIndex = flatSlots.FindIndex(s => s.Date == currentDate && s.SlotType == currentSlotType);
+
+            // Si no encontramos la franja actual, usar la primera disponible
+            if (currentIndex == -1)
+                currentIndex = 0;
+
+            // Saltar las franjas mínimas requeridas
+            var availableFromIndex = currentIndex + minSlotsAhead;
+
+            if (availableFromIndex >= flatSlots.Count)
+                return new List<AvailableDeliverySlotDto>(); // No hay franjas disponibles
+
+            // Crear la respuesta con las franjas filtradas
+            var filteredSlots = flatSlots.Skip(availableFromIndex).ToList();
+            var result = new List<AvailableDeliverySlotDto>();
+
+            foreach (var dateGroup in filteredSlots.GroupBy(s => s.Date))
+            {
+                var daySlot = new AvailableDeliverySlotDto { Date = dateGroup.Key };
+
+                foreach (var slot in dateGroup)
+                {
+                    if (slot.SlotType == SlotType.Morning)
+                        daySlot.MorningSlots.Add(slot.Slot);
+                    else
+                        daySlot.AfternoonSlots.Add(slot.Slot);
+                }
+
+                result.Add(daySlot);
+            }
+
+            return result;
         }
     }
 }

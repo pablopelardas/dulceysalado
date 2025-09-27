@@ -84,7 +84,7 @@ namespace DistriCatalogoAPI.Application.Handlers.SolicitudReventa.Commands
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al enviar notificación de respuesta de solicitud de reventa");
+                _logger.LogError(ex, "Error al enviar notificación de respuesta de solicitud de comerciante");
             }
 
             var clienteData = solicitud.Cliente ?? await _clienteRepository.GetByIdAsync(solicitud.ClienteId);

@@ -176,6 +176,7 @@
                   
                   <div class="flex space-x-4">
                     <button
+                      v-if="hasChanges"
                       type="button"
                       @click="resetForm"
                       :disabled="loading"
